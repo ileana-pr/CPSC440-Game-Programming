@@ -28,4 +28,11 @@ bld/
 [Ll]ogs/
 
 # Visual Studio cache/options directory
-.vs/ 
+.vs/
+
+# NuGet Packages
+*.nupkg
+packages/
+**/packages/
+**/AllegroDeps*/
+**/Allegro*/ 
