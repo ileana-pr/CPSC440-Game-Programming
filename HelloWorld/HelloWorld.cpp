@@ -83,4 +83,17 @@ ALLEGRO_COLOR makeColor() {
 	return al_map_rgb(red, green, blue);
 }
 
-void draw_shape(ALLEGRO_COLOR color, const int SCREEN_W, const int SCREEN_H)
+void draw_shape(ALLEGRO_COLOR color, const int SCREEN_W, const int SCREEN_H) {
+	// Main floor location and size for the house
+	int baseX = 300;
+	int baseY = 400;
+	int width = 200;
+	int height = 150;
+	float thickness = 2.0;
+
+	// Draw base using lines  
+	al_draw_line(baseX, baseY, baseX + width, baseY, color, thickness); // bottom
+	al_draw_line(baseX, baseY - height, baseX + width, baseY - height, color, thickness); // top
+	al_draw_line(baseX, baseY, baseX, baseY - height, color, thickness); // left
+	al_draw_line(baseX + width, baseY, baseX + width, baseY - height, color, thickness); // right
+}
