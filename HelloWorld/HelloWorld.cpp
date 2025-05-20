@@ -96,4 +96,10 @@ void draw_shape(ALLEGRO_COLOR color, const int SCREEN_W, const int SCREEN_H) {
 	al_draw_line(baseX, baseY - height, baseX + width, baseY - height, color, thickness); // top
 	al_draw_line(baseX, baseY, baseX, baseY - height, color, thickness); // left
 	al_draw_line(baseX + width, baseY, baseX + width, baseY - height, color, thickness); // right
+
+	// Roof 
+	int roofPeakY = baseY - height - 80;
+	al_draw_line(baseX - 20, baseY - height, baseX + width + 20, baseY - height, color, thickness); // base
+	al_draw_line(baseX - 20, baseY - height, baseX + width / 2, roofPeakY, color, thickness);         // left side
+	al_draw_line(baseX + width + 20, baseY - height, baseX + width / 2, roofPeakY, color, thickness); // right side
 }
