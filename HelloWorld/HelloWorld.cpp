@@ -110,6 +110,42 @@ void draw_shape(ALLEGRO_COLOR color, const int SCREEN_W, const int SCREEN_H) {
 	int doorY = baseY - doorHeight;
 	al_draw_filled_rectangle(doorX, doorY, doorX + doorWidth, doorY + doorHeight, color);
 
+	// Door handle
+	ALLEGRO_COLOR handleColor = makeColor();
+	int handleX = doorX + doorWidth - 10;
+	int handleY = doorY + doorHeight - 40;
+	al_draw_filled_circle(handleX, handleY, 5, handleColor);
+
+	// Left tree
+	ALLEGRO_COLOR trunk = makeColor();
+	ALLEGRO_COLOR leaves = makeColor();
+	int trunkX = baseX - 70;
+	int trunkY = baseY - 40;
+	int trunkW = 20;
+	int trunkH = 40;
+	al_draw_filled_rectangle(trunkX, trunkY, trunkX + trunkW, trunkY + trunkH, trunk);
+	
+	// Leaves
+	al_draw_filled_triangle(
+		trunkX - 20, trunkY,
+		trunkX + trunkW + 20, trunkY,
+		trunkX + trunkW / 2, trunkY - 50,
+		leaves);
+
+	// Right tree
+	trunk = makeColor();
+	leaves = makeColor();
+	int trunk2X = baseX + width + 50;
+	int trunk2Y = baseY - 40;
+	al_draw_filled_rectangle(trunk2X, trunk2Y, trunk2X + trunkW, trunk2Y + trunkH, trunk);
+
+	// Leaves 
+	al_draw_filled_triangle(
+		trunk2X - 20, trunk2Y,
+		trunk2X + trunkW + 20, trunk2Y,
+		trunk2X + trunkW / 2, trunk2Y - 50,
+		leaves);
+
 }
 
 
