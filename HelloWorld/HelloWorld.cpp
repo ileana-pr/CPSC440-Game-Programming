@@ -102,4 +102,14 @@ void draw_shape(ALLEGRO_COLOR color, const int SCREEN_W, const int SCREEN_H) {
 	al_draw_line(baseX - 20, baseY - height, baseX + width + 20, baseY - height, color, thickness); // base
 	al_draw_line(baseX - 20, baseY - height, baseX + width / 2, roofPeakY, color, thickness);         // left side
 	al_draw_line(baseX + width + 20, baseY - height, baseX + width / 2, roofPeakY, color, thickness); // right side
+
+	// Draw door
+	int doorWidth = 40;
+	int doorHeight = 70;
+	int doorX = baseX + width / 2 - doorWidth / 2;
+	int doorY = baseY - doorHeight;
+	al_draw_filled_rectangle(doorX, doorY, doorX + doorWidth, doorY + doorHeight, color);
+
 }
+
+
