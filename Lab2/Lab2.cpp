@@ -55,6 +55,22 @@ int main(void)
 			case ALLEGRO_KEY_LEFT:
 				pos_x -= 30;
 				break;
+			case ALLEGRO_KEY_U: // upper left
+				pos_x -= 30; 
+				pos_y -= 30;
+				break;
+			case ALLEGRO_KEY_D: // lower right 
+				pos_x += 30; 
+				pos_y += 30;
+				break;
+			case ALLEGRO_KEY_R: // upper right
+				pos_x += 30;
+				pos_y -= 30;
+				break;
+			case ALLEGRO_KEY_L: // lower left
+				pos_x -= 30;
+				pos_y += 30;
+				break;
 			}
 		}
 		else if (ev.type == ALLEGRO_EVENT_KEY_UP)
