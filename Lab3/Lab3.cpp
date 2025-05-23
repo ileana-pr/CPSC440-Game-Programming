@@ -5,6 +5,16 @@
 #include <allegro5/allegro_ttf.h>
 #include <stdio.h>
 
+void drawShape(float center_x, float center_y, float radius) {
+	// circle
+	al_draw_filled_circle(center_x, center_y, radius, al_map_rgb(255, 255, 0));
+	// eyes
+	al_draw_line(center_x - 25, center_y - 25, center_x - 10, center_y - 10, al_map_rgb(0, 0, 0), 10);
+	al_draw_line(center_x + 10, center_y - 10, center_x + 25, center_y - 25, al_map_rgb(0, 0, 0), 10);
+	// mouth
+	al_draw_line(center_x - 25, center_y + 25, center_x + 25, center_y + 25, al_map_rgb(0, 0, 0), 10);
+}
+
 int main(void)
 {
 	ALLEGRO_DISPLAY* Screen = NULL;
@@ -60,6 +70,7 @@ int main(void)
 
 
 	bool done = false;
+	bool draw = false;
 	int pos_x = width / 2;
 	int pos_y = height / 2;
 
@@ -75,6 +86,7 @@ int main(void)
 		{
 			if (ev.mouse.button & 1)  // Left mouse button
 			{
+				draw = true;
 				pos_x = ev.mouse.x;
 				pos_y = ev.mouse.y;
 			}
@@ -117,28 +129,24 @@ int main(void)
 			}
 		}
 
-		// Smiley face
-		float center_x = pos_x;
-		float center_y = pos_y;
-		float radius = 75.0;
-
-		// circle
-		al_draw_filled_circle(center_x, center_y, radius, al_map_rgb(255, 255, 0));
-
-		// eyes
-		al_draw_line(center_x - 25, center_y - 25, center_x - 10, center_y - 10, al_map_rgb(0, 0, 0), 10);
-		al_draw_line(center_x + 10, center_y - 10, center_x + 25, center_y - 25, al_map_rgb(0, 0, 0), 10);
-
-		// mouth 
-		al_draw_line(center_x - 25, center_y + 25, center_x + 25, center_y + 25, al_map_rgb(0, 0, 0), 10);
-
-		// Display mouse coordinates
-		char coords[50];
-		sprintf_s(coords, "Mouse is at (%d, %d)", pos_x, pos_y);
-		al_draw_text(font24, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, coords);
-
-		al_flip_display();
-		al_clear_to_color(al_map_rgb(0, 0, 0));
+		if (draw) {
+			// Set background and text color based on upper left quadrant
+			ALLEGRO_COLOR bg_color, text_color;
+			if (pos_x < width / 2 && pos_y < height / 2) {
+				bg_color = al_map_rgb(255, 255, 255);
+				text_color = al_map_rgb(0, 0, 0);
+			} else {
+				bg_color = al_map_rgb(0, 0, 0);
+				text_color = al_map_rgb(255, 255, 255);
+			}
+			al_clear_to_color(bg_color);
+			drawShape(pos_x, pos_y, 75.0);
+			char coords[50];
+			sprintf_s(coords, "Mouse is at (%d, %d)", pos_x, pos_y);
+			al_draw_text(font24, text_color, 10, 10, ALLEGRO_ALIGN_LEFT, coords);
+			al_flip_display();
+			draw = false;
+		}
 	}
 
 	al_destroy_event_queue(event_queue);
