@@ -1,6 +1,8 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>			
 #include <allegro5/allegro_native_dialog.h> 
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 
 int main(void)
 {
@@ -29,6 +31,13 @@ int main(void)
 
 	al_init_primitives_addon();
 	al_install_keyboard();
+	al_init_font_addon(); 
+	al_init_ttf_addon();
+
+	ALLEGRO_FONT *font24 = al_load_font("AppleGaramond.tft", 24, 0);
+	ALLEGRO_FONT *font63 = al_load_font("Bombing.tff", 63, 0); 
+	ALLEGRO_FONT *font18 = al_load_font("ab.tff", 18, 0); 
+
 
 	event_queue = al_create_event_queue();
 
