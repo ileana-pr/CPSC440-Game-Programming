@@ -43,31 +43,19 @@ int main(void)
 		return -1;
 	}
 
-	if (!al_install_keyboard())
-	{
-		al_show_native_message_box(Screen, "Error!", "Failed to install the keyboard.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
-		return -1;
-	}
-
 	if (!al_install_mouse()) {
 		al_show_native_message_box(Screen, "Error!", "Failed to install the mouse.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
 		return -1;
 	}
 
 	al_register_event_source(event_queue, al_get_mouse_event_source());
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_display_event_source(Screen));
 	al_init_primitives_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();
 
-	//al_hide_mouse_cursor(Screen); 
-
 	ALLEGRO_FONT* font24 = al_load_font("AppleGaramond.ttf", 24, 0);
 	ALLEGRO_FONT* font63 = al_load_font("Bombing.ttf", 63, 0);
-	
-
-
 
 	bool done = false;
 	bool draw = false;
@@ -91,53 +79,26 @@ int main(void)
 				pos_y = ev.mouse.y;
 			}
 		}
-		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
-		{
-			switch (ev.keyboard.keycode)
-			{
-			case ALLEGRO_KEY_ESCAPE:
-				done = true;
-				break;
-			case ALLEGRO_KEY_UP:
-				pos_y -= 30;
-				break;
-			case ALLEGRO_KEY_DOWN:
-				pos_y += 30;
-				break;
-			case ALLEGRO_KEY_RIGHT:
-				pos_x += 30;
-				break;
-			case ALLEGRO_KEY_LEFT:
-				pos_x -= 30;
-				break;
-			case ALLEGRO_KEY_U: // upper left
-				pos_x -= 30;
-				pos_y -= 30;
-				break;
-			case ALLEGRO_KEY_D: // lower right 
-				pos_x += 30;
-				pos_y += 30;
-				break;
-			case ALLEGRO_KEY_R: // upper right
-				pos_x += 30;
-				pos_y -= 30;
-				break;
-			case ALLEGRO_KEY_L: // lower left
-				pos_x -= 30;
-				pos_y += 30;
-				break;
-			}
-		}
 
 		if (draw) {
-			// Set background and text color based on upper left quadrant
+			// Set background and text color based on quadrant
 			ALLEGRO_COLOR bg_color, text_color;
 			if (pos_x < width / 2 && pos_y < height / 2) {
-				bg_color = al_map_rgb(255, 255, 255);
-				text_color = al_map_rgb(0, 0, 0);
+				// upper left
+				bg_color = al_map_rgb(255, 255, 255); // white
+				text_color = al_map_rgb(0, 0, 0);     // black
+			} else if (pos_x >= width / 2 && pos_y < height / 2) {
+				// upper right
+				bg_color = al_map_rgb(0, 0, 0);       // black
+				text_color = al_map_rgb(255, 255, 255); // white
+			} else if (pos_x < width / 2 && pos_y >= height / 2) {
+				// lower left
+				bg_color = al_map_rgb(0, 0, 255);     // blue
+				text_color = al_map_rgb(255, 255, 0); // yellow
 			} else {
-				bg_color = al_map_rgb(0, 0, 0);
-				text_color = al_map_rgb(255, 255, 255);
+				// lower right
+				bg_color = al_map_rgb(255, 255, 0);   // yellow
+				text_color = al_map_rgb(0, 0, 255);   // blue
 			}
 			al_clear_to_color(bg_color);
 			drawShape(pos_x, pos_y, 75.0);
@@ -151,6 +112,5 @@ int main(void)
 
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(Screen);
-	system("pause");
 	return 0;
 }
