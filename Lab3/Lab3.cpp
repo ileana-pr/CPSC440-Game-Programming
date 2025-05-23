@@ -3,6 +3,7 @@
 #include <allegro5/allegro_native_dialog.h> 
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <stdio.h>
 
 int main(void)
 {
@@ -32,32 +33,32 @@ int main(void)
 		return -1;
 	}
 
-	if (!al_install_keyboard())	
+	if (!al_install_keyboard())
 	{
 		al_show_native_message_box(Screen, "Error!", "Failed to install the keyboard.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
 		return -1;
 	}
 
-	if(!al_install_mouse()) { 
+	if (!al_install_mouse()) {
 		al_show_native_message_box(Screen, "Error!", "Failed to install the mouse.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
-		return -1;	
+		return -1;
 	}
 
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_display_event_source(Screen));
 	al_init_primitives_addon();
-	al_init_font_addon(); 
+	al_init_font_addon();
 	al_init_ttf_addon();
 
 	//al_hide_mouse_cursor(Screen); 
 
-	ALLEGRO_FONT *font24 = al_load_font("AppleGaramond.tft", 24, 0);
-	ALLEGRO_FONT *font63 = al_load_font("Bombing.tff", 63, 0); 
-	ALLEGRO_FONT *font18 = al_load_font("ab.tff", 18, 0); 
+	ALLEGRO_FONT* font24 = al_load_font("AppleGaramond.ttf", 24, 0);
+	ALLEGRO_FONT* font63 = al_load_font("Bombing.ttf", 63, 0);
+	
 
-	
-	
+
+
 	bool done = false;
 	int pos_x = width / 2;
 	int pos_y = height / 2;
@@ -130,6 +131,11 @@ int main(void)
 
 		// mouth 
 		al_draw_line(center_x - 25, center_y + 25, center_x + 25, center_y + 25, al_map_rgb(0, 0, 0), 10);
+
+		// Display mouse coordinates
+		char coords[50];
+		sprintf_s(coords, "Mouse is at (%d, %d)", pos_x, pos_y);
+		al_draw_text(font24, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, coords);
 
 		al_flip_display();
 		al_clear_to_color(al_map_rgb(0, 0, 0));
