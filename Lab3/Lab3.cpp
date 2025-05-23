@@ -38,18 +38,25 @@ int main(void)
 		return -1;
 	}
 
+	if(!al_install_mouse()) { 
+		al_show_native_message_box(Screen, "Error!", "Failed to install the mouse.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
+		return -1;	
+	}
+
+	al_register_event_source(event_queue, al_get_mouse_event_source());
+	al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_register_event_source(event_queue, al_get_display_event_source(Screen));
 	al_init_primitives_addon();
 	al_init_font_addon(); 
 	al_init_ttf_addon();
+
+	//al_hide_mouse_cursor(Screen); 
 
 	ALLEGRO_FONT *font24 = al_load_font("AppleGaramond.tft", 24, 0);
 	ALLEGRO_FONT *font63 = al_load_font("Bombing.tff", 63, 0); 
 	ALLEGRO_FONT *font18 = al_load_font("ab.tff", 18, 0); 
 
 	
-
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
-
 	
 	bool done = false;
 	int pos_x = width / 2;
@@ -57,13 +64,27 @@ int main(void)
 
 	while (!done)
 	{
-
 		al_wait_for_event(event_queue, &ev);
 
-		if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+		{
+			done = true;
+		}
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+		{
+			if (ev.mouse.button & 1)  // Left mouse button
+			{
+				pos_x = ev.mouse.x;
+				pos_y = ev.mouse.y;
+			}
+		}
+		else if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
 			switch (ev.keyboard.keycode)
 			{
+			case ALLEGRO_KEY_ESCAPE:
+				done = true;
+				break;
 			case ALLEGRO_KEY_UP:
 				pos_y -= 30;
 				break;
@@ -93,11 +114,6 @@ int main(void)
 				pos_y += 30;
 				break;
 			}
-		}
-		else if (ev.type == ALLEGRO_EVENT_KEY_UP)
-		{
-			if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-				done = true;
 		}
 
 		// Smiley face
