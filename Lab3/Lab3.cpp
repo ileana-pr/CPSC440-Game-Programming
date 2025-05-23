@@ -22,15 +22,23 @@ int main(void)
 		return -1;
 	}
 
-	bool done = false;
-	int pos_x = width / 2;
-	int pos_y = height / 2;
-
 	ALLEGRO_EVENT_QUEUE* event_queue = NULL;
 	ALLEGRO_EVENT ev;
 
+	event_queue = al_create_event_queue();
+	if (event_queue == NULL)
+	{
+		al_show_native_message_box(Screen, "Error!", "Failed to create the event queue.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
+		return -1;
+	}
+
+	if (!al_install_keyboard())	
+	{
+		al_show_native_message_box(Screen, "Error!", "Failed to install the keyboard.", 0, 0, ALLEGRO_MESSAGEBOX_ERROR);
+		return -1;
+	}
+
 	al_init_primitives_addon();
-	al_install_keyboard();
 	al_init_font_addon(); 
 	al_init_ttf_addon();
 
@@ -38,10 +46,14 @@ int main(void)
 	ALLEGRO_FONT *font63 = al_load_font("Bombing.tff", 63, 0); 
 	ALLEGRO_FONT *font18 = al_load_font("ab.tff", 18, 0); 
 
-
-	event_queue = al_create_event_queue();
+	
 
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
+
+	
+	bool done = false;
+	int pos_x = width / 2;
+	int pos_y = height / 2;
 
 	while (!done)
 	{
