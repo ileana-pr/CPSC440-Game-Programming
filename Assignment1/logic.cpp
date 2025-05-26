@@ -1,3 +1,6 @@
+#include <fstream>
+#include <iostream>
+using namespace std;
 #include "logic.h"
 
 logic::logic()
@@ -19,4 +22,24 @@ void logic::setWord(string newWord) {
 
 string logic::getWord() {
     return word; 
+}
+
+void logic::readFile(string fileName) {
+    ifstream file(fileName);
+    if (!file.is_open()) {
+        cerr << "Error opening file: " << fileName << endl;
+        return;
+    }
+    string temp;
+    while (file >> temp) {
+        int len = temp.length();
+        if ((len == 4 || len == 5) && count_four_five < 100) {
+            four_five[count_four_five++] = temp;
+        } else if ((len == 6 || len == 7) && count_six_seven < 100) {
+            six_seven[count_six_seven++] = temp;
+        } else if (len >= 8 && count_eight_plus < 100) {
+            eight_plus[count_eight_plus++] = temp;
+        }
+    }
+    file.close();
 }

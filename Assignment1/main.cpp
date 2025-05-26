@@ -45,7 +45,7 @@ int main() {
 void * input(ALLEGRO_THREAD *ptr, void *arg) {
     finished - false; 
     // While the finished is equal to false 
-        scrambleWord - game.getFirstWord()
+        string scrambleWord = game.getFirstScrambledWord();  
         //print this out 
         //get a word from the user
         //check the word from the user to the correct word  
