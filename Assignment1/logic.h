@@ -11,7 +11,7 @@ class logic{
         //provides user with basic introduction 
         void readFile(string fileName); 
         //reads file and saves words to array lists 
-        bool playGame(); 
+        string playGame(); 
         //carries out the actual word scrambling
         //returns: true if user wins and false if not
         string scrambler(string word); 
