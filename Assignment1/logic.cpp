@@ -12,6 +12,7 @@ logic::logic()
     scramble = "";
 }
 
+// prints an introduction and instructions for the game
 void logic::introduction() {
     cout << "\nWelcome to the Word Scramble Game!" << endl;
     cout << "You will be given 5 scrambled words to solve." << endl;
@@ -23,6 +24,7 @@ void logic::introduction() {
     cout << "Good luck!\n" << endl;
 }
 
+// reads words from file and sorts into arrays by length
 void logic::readFile(string fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -43,6 +45,7 @@ void logic::readFile(string fileName) {
     file.close();
 }
 
+// Scrambles the letters of a word and returns the scrambled version
 string logic::scrambler(string word) {
     random_device rd;
     mt19937 g(rd());
@@ -50,16 +53,19 @@ string logic::scrambler(string word) {
     return word;
 }
 
+// main game logic: presents 5 scrambled words, checks answers, and returns a message
 string logic::playGame() { 
     int correct = 0;
     string guess;
+    // shuffle the arrays so the words are different each game
     random_device rd;
     mt19937 g(rd());
     shuffle(four_five, four_five + count_four_five, g);
     shuffle(six_seven, six_seven + count_six_seven, g);
     shuffle(eight_plus, eight_plus + count_eight_plus, g);
+    // two words from four_five
     for (int i = 0; i < 2 && i < count_four_five; ++i) {
-        if (timeOut) break;
+        if (timeOut) break; // Stop if time runs out
         string original = four_five[i];
         string scrambled = scrambler(original);
         cout << "Unscramble this word: " << scrambled << endl;
@@ -71,6 +77,7 @@ string logic::playGame() {
             cout << "WRONG\n";
         }
     }
+    // two words from six_seven
     for (int i = 0; i < 2 && i < count_six_seven; ++i) {
         if (timeOut) break;
         string original = six_seven[i];
@@ -84,6 +91,7 @@ string logic::playGame() {
             cout << "WRONG\n";
         }
     }
+    // one word from eight_plus
     if (count_eight_plus > 0 && !timeOut) {
         string original = eight_plus[0];
         string scrambled = scrambler(original);
@@ -96,6 +104,7 @@ string logic::playGame() {
             cout << "WRONG\n";
         }
     }
+    // message based on the number of correct answers
     string message;
     switch (correct) {
         case 5:
@@ -115,4 +124,4 @@ string logic::playGame() {
             break;
     }
     return message;
-}
+} 

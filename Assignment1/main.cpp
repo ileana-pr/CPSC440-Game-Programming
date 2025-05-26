@@ -45,9 +45,9 @@ void * input(ALLEGRO_THREAD *ptr, void *arg) {
     finished = true;
     return NULL;
 }
-// A pointer to a function that starts time rand checks the change in finished, which is in the input thread. 
+
 void * timer(ALLEGRO_THREAD *ptr, void *arg) {
-    time_t startTime, currentTime; //times used to measure elapsed time
+    time_t startTime, currentTime; 
     startTime = time (NULL); 
     currentTime = time (NULL); 
     while (currentTime - startTime < 60 && !finished) { 

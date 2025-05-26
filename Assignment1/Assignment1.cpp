@@ -25,18 +25,17 @@ int main() {
     al_start_thread(create2);
 
     while (!finished && !timeOut) {
-        // Just wait for either flag to become true
-        // Optionally, you can add a small sleep here to avoid busy waiting
+   
     }
 
     al_destroy_thread(create1);
     al_destroy_thread(create2);
 
     if (finished) {
-        cout << "\n\tCongratulations, Word Master! You completed the challenge before time ran out! 🏆\n";
+        cout << "\n\tCongratulations, Word Master! You completed the challenge before time ran out!\n";
         cout << result << endl;
     } else {
-        cout << "\n\tThe sands of time have run out...⏳\n";
+        cout << "\n\tThe sands of time have run out...\n";
         cout << result << endl;
     }
 
