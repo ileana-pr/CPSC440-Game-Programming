@@ -2,8 +2,6 @@
 #include<allegro5/allegro.h> 
 #include "logic.cpp"
 
-using namespace std; 
-
 void *input(ALLEGRO_THREAD *ptr, void *arg); 
 void *input(ALLEGRO_THREAD *ptr, void *arg); 
 
@@ -15,7 +13,7 @@ int main() {
 
     // Read file into game.readFile() 
     game.readFile("dictionary.txt"); 
-    game.setWord("Frank");  
+    
     cout<<game.getWord()<<endl; 
 
     ALLEGRO_THREAD *create1 = NULL, *create2 = NULL; 

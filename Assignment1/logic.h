@@ -1,5 +1,4 @@
 #include <string>
-#include <fstream>
 using std::string; 
 
 
@@ -8,18 +7,35 @@ class logic{
         logic(); 
         //setWord will update the private variable word with an input from main program
         //return nothing 
+        void introduction(); 
+        //provides user with basic introduction 
+        void readFile(string fileName); 
+        //reads file and saves words to array lists 
+        bool playGame(); 
+        //carries out the actual word scrambling
+        //returns: true if user wins and false if not
+        string scrambler(string word); 
+        //takes in a word and scrambles it
+        //returns a scrambled version of the parameter
+        void end(); 
+        //displays the endgame information 
+
         void setWord(string newWord);
         //getWord takes the word from  private variable and returns to main program
         //returns a string  
         string getWord(); 
 
-        void readFile(string fileName); 
+      
         
 
 
         string getFirstScrambledWord(); //get from words array and then scramble the word and return the scrambled word 
 
 private: 
+    int numCorrect;
+    int smallWordLength;
+    int mediumWordLength;
+    int largeWordLength;
     string word;
     string scramble; 
     string words[100]; 
