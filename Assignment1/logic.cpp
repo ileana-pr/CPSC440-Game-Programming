@@ -99,19 +99,19 @@ string logic::playGame() {
     string message;
     switch (correct) {
         case 5:
-            message = "Genius! You have the mind of a word wizard! 🧙‍♂️";
+            message = "Genius! You have the mind of a word wizard!";
             break;
         case 4:
-            message = "Impressive! Your intellect is top-tier! 🧠";
+            message = "Impressive! Your intellect is top-tier!";
             break;
         case 3:
-            message = "Not bad! You have a sharp mind! 🧐";
+            message = "Not bad! You have a sharp mind!";
             break;
         case 2:
-            message = "Keep practicing! Your mind is warming up! 🔥";
+            message = "Keep practicing! Your mind is warming up!";
             break;
         default:
-            message = "Try again! The word scramble got the best of you this time! 😅";
+            message = "Try again! The word scramble got the best of you this time!";
             break;
     }
     return message;
