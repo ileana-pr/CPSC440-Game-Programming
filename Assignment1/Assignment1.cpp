@@ -3,7 +3,7 @@
 #include "logic.cpp"
 
 void *input(ALLEGRO_THREAD *ptr, void *arg); 
-void *input(ALLEGRO_THREAD *ptr, void *arg); 
+void *timer(ALLEGRO_THREAD *ptr, void *arg); 
 
 logic game; //instance of logic 
 bool finished = false; 

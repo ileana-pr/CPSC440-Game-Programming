@@ -4,26 +4,12 @@ using namespace std;
 #include "logic.h"
 #include <algorithm>
 #include <random>
+extern bool timeOut;
 
 logic::logic()
-{   
-    //open the file 
-    //use a loop to read one line at a time 
-    //store the line you read inside word[i]
-    //take the word that you read in and scramble it and store in scrambleWord[i] 
-    word = ""; 
-    scramble = ""; 
-    for (int i=0; i<100; i++)
-        words[i] = ""; 
-        //no deconstructor is needed because no dynamic memory has been created 
-}
-//return type className:: class Function name(parameters) 
-void logic::setWord(string newWord) {
-    word = newWord; 
-}
-
-string logic::getWord() {
-    return word; 
+{
+    word = "";
+    scramble = "";
 }
 
 void logic::introduction() {
@@ -60,16 +46,13 @@ void logic::readFile(string fileName) {
 string logic::playGame() {
     int correct = 0;
     string guess;
-
-    // shuffle arrays so the first two words are random each time
     random_device rd;
     mt19937 g(rd());
     shuffle(four_five, four_five + count_four_five, g);
     shuffle(six_seven, six_seven + count_six_seven, g);
     shuffle(eight_plus, eight_plus + count_eight_plus, g);
-
-    // four_five
     for (int i = 0; i < 2 && i < count_four_five; ++i) {
+        if (timeOut) break;
         string original = four_five[i];
         string scrambled = scrambler(original);
         cout << "Unscramble this word: " << scrambled << endl;
@@ -81,9 +64,8 @@ string logic::playGame() {
             cout << "WRONG\n";
         }
     }
-
-    //six_seven
     for (int i = 0; i < 2 && i < count_six_seven; ++i) {
+        if (timeOut) break;
         string original = six_seven[i];
         string scrambled = scrambler(original);
         cout << "Unscramble this word: " << scrambled << endl;
@@ -95,9 +77,7 @@ string logic::playGame() {
             cout << "WRONG\n";
         }
     }
-
-    // eight_plus
-    if (count_eight_plus > 0) {
+    if (count_eight_plus > 0 && !timeOut) {
         string original = eight_plus[0];
         string scrambled = scrambler(original);
         cout << "Unscramble this word: " << scrambled << endl;
@@ -109,5 +89,23 @@ string logic::playGame() {
             cout << "WRONG\n";
         }
     }
-
+    string message;
+    switch (correct) {
+        case 5:
+            message = "Genius! You have the mind of a word wizard! 🧙‍♂️";
+            break;
+        case 4:
+            message = "Impressive! Your intellect is top-tier! 🧠";
+            break;
+        case 3:
+            message = "Not bad! You have a sharp mind! 🧐";
+            break;
+        case 2:
+            message = "Keep practicing! Your mind is warming up! 🔥";
+            break;
+        default:
+            message = "Try again! The word scramble got the best of you this time! 😅";
+            break;
+    }
+    return message;
 }
