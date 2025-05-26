@@ -43,7 +43,14 @@ void logic::readFile(string fileName) {
     file.close();
 }
 
-string logic::playGame() {
+string logic::scrambler(string word) {
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(word.begin(), word.end(), g);
+    return word;
+}
+
+string logic::playGame() { 
     int correct = 0;
     string guess;
     random_device rd;
