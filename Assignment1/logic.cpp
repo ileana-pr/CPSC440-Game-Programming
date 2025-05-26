@@ -8,8 +8,7 @@ extern bool timeOut;
 
 logic::logic()
 {
-    word = "";
-    scramble = "";
+   
 }
 
 // prints an introduction and instructions for the game
@@ -36,9 +35,11 @@ void logic::readFile(string fileName) {
         int len = temp.length();
         if ((len == 4 || len == 5) && count_four_five < 100) {
             four_five[count_four_five++] = temp;
-        } else if ((len == 6 || len == 7) && count_six_seven < 100) {
+        }
+        else if ((len == 6 || len == 7) && count_six_seven < 100) {
             six_seven[count_six_seven++] = temp;
-        } else if (len >= 8 && count_eight_plus < 100) {
+        }
+        else if (len >= 8 && count_eight_plus < 100) {
             eight_plus[count_eight_plus++] = temp;
         }
     }
@@ -54,7 +55,7 @@ string logic::scrambler(string word) {
 }
 
 // main game logic: presents 5 scrambled words, checks answers, and returns a message
-string logic::playGame() { 
+string logic::playGame() {
     int correct = 0;
     string guess;
     // shuffle the arrays so the words are different each game
@@ -73,7 +74,8 @@ string logic::playGame() {
         if (guess == original) {
             cout << "Correct!\n";
             correct++;
-        } else {
+        }
+        else {
             cout << "WRONG\n";
         }
     }
@@ -87,7 +89,8 @@ string logic::playGame() {
         if (guess == original) {
             cout << "Correct!\n";
             correct++;
-        } else {
+        }
+        else {
             cout << "WRONG\n";
         }
     }
@@ -100,28 +103,29 @@ string logic::playGame() {
         if (guess == original) {
             cout << "Correct!\n";
             correct++;
-        } else {
+        }
+        else {
             cout << "WRONG\n";
         }
     }
     // message based on the number of correct answers
     string message;
     switch (correct) {
-        case 5:
-            message = "Genius! You have the mind of a word wizard!";
-            break;
-        case 4:
-            message = "Impressive! Your intellect is top-tier!";
-            break;
-        case 3:
-            message = "Not bad! You have a sharp mind!";
-            break;
-        case 2:
-            message = "Keep practicing! Your mind is warming up!";
-            break;
-        default:
-            message = "Try again! The word scramble got the best of you this time!";
-            break;
+    case 5:
+        message = "Genius! You have the mind of a word wizard!";
+        break;
+    case 4:
+        message = "Impressive! Your intellect is top-tier!";
+        break;
+    case 3:
+        message = "Not bad! You have a sharp mind!";
+        break;
+    case 2:
+        message = "Keep practicing! Your mind is warming up!";
+        break;
+    default:
+        message = "Try again! The word scramble got the best of you this time!";
+        break;
     }
     return message;
-} 
+}
