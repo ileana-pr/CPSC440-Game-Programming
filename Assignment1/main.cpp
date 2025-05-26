@@ -11,6 +11,7 @@ bool timeOut = false;
 
 int main() {
 
+    game.introduction(); 
     // Read file into game.readFile() 
     game.readFile("dictionary.txt"); 
     
@@ -62,7 +63,7 @@ void * timer(ALLEGRO_THREAD *ptr, void *arg) {
     time_t startTime, currentTime; //times used to measure elapsed time
     startTime = time (NULL); 
     currentTime = time (NULL); 
-    while (currentTime - startTime < 10 && !finished) { 
+    while (currentTime - startTime < 60 && !finished) { 
         currentTime = time (NULL); 
     }
     timeOut = true; 

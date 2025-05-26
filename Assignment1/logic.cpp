@@ -24,6 +24,17 @@ string logic::getWord() {
     return word; 
 }
 
+void logic::introduction() {
+    std::cout << "\nWelcome to the Word Scramble Game!" << std::endl;
+    std::cout << "You will be given 5 scrambled words to solve." << std::endl;
+    std::cout << "- The first two words are 4 or 5 letters long." << std::endl;
+    std::cout << "- The next two words are 6 or 7 letters long." << std::endl;
+    std::cout << "- The last word is 8 or more letters long." << std::endl;
+    std::cout << "You have 60 seconds to solve all 5 words!" << std::endl;
+    std::cout << "Type your guess and press Enter for each word." << std::endl;
+    std::cout << "Good luck!\n" << std::endl;
+}
+
 void logic::readFile(string fileName) {
     ifstream file(fileName);
     if (!file.is_open()) {
