@@ -101,10 +101,10 @@ void create_spaceship_bitmap(ALLEGRO_BITMAP * spaceship_bmp[], ALLEGRO_DISPLAY *
 		al_clear_to_color(al_map_rgb(0, 0, 0)); 
 
 		int x = 32, y = 32;
-		int width = 12, height = 36; 
-		int wing_width = 10, wing_height = 20; 
-		int cockpit_width = 6, cockpit_height = 12; 
-		int antenna_length = 4; 
+		int width = 18, height = 40;
+		int wing_width = 16, wing_height = 32; 
+		int cockpit_width = 8, cockpit_height = 18; 
+		int antenna_length = 15; 
 
 		// body - white
 		al_draw_filled_rectangle(
@@ -119,7 +119,7 @@ void create_spaceship_bitmap(ALLEGRO_BITMAP * spaceship_bmp[], ALLEGRO_DISPLAY *
 		al_draw_filled_triangle(
 			x - width / 2, y - height / 2, 
 			x + width / 2, y - height / 2, 
-			x, y - height / 2 - 10, 
+			x, y - height / 2 - 8,
 			al_map_rgb(255,255,255)
 		);
 
@@ -142,10 +142,30 @@ void create_spaceship_bitmap(ALLEGRO_BITMAP * spaceship_bmp[], ALLEGRO_DISPLAY *
 		// blue cockpit 
 		al_draw_filled_rectangle(
 			x - cockpit_width / 2, 
-			y - height / 2 + 6, 
+			y - height / 2 + 8, 
 			x + cockpit_width / 2, 
-			y - height / 2 + 6 + cockpit_height, 
+			y - height / 2 + 8 + cockpit_height, 
 			al_map_rgb(0,120,255)
+		); 
+
+		// yellow lights 
+		al_draw_filled_rectangle(
+			x - 2, y + height / 4, x + 2, y + height / 4 + 6, 
+			al_map_rgb(255,255,0)
+		);
+		al_draw_filled_rectangle(
+			x - width / 2 - 6, y + 10, x - width / 2 - 2, y + 16, 
+			al_map_rgb(255,255,0)
+		);
+		al_draw_filled_rectangle(
+			x + width / 2 + 2, y + 10, x + width / 2 + 6, y + 16, 
+			al_map_rgb(255,255,0)
+		);
+
+		// small white dot at the tip for the gun
+		al_draw_filled_circle(
+			x, y - height / 2 - 8, 4,
+			al_map_rgb(255,0,0)
 		);
 	}
 }
