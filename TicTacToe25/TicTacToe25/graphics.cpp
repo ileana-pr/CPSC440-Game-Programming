@@ -86,7 +86,7 @@ int main(void)
 			draw = false;
 		}
 
-		// computer move
+		// computer move only if not game over 
 		if (turn == 1 && !gameover)
 		{
 			bool moved = false;
@@ -104,7 +104,7 @@ int main(void)
 			}
 		}
 
-		// check game state after both moves
+		// check game state once after both moves
 		game_message(gameover, game_logic);
 
 		al_flip_display();
