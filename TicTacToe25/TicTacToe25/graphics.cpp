@@ -6,7 +6,7 @@
 #include "logic.h"
 
 
-void set_graphics_x_o(int x, int y, logic &game_logic);
+void set_graphics_x_o(int x, int y, logic &game_logic, int &turn);
 void draw_board();
 void draw_x(int x, int y);
 void draw_o(int x, int y);
@@ -18,6 +18,7 @@ int main(void)
 	logic  game_logic;
 	int posX = 0, posY = 0;
 	bool gameover = false;
+	int turn = 0; 
 	ALLEGRO_DISPLAY *Screen = NULL;
 	int width = 640, height = 480;
 
@@ -74,19 +75,38 @@ int main(void)
 			{
 				posX = ev.mouse.x;
 				posY = ev.mouse.y;
-
 				draw = true;
 			}
 		}
 		draw_board();
-		game_message(gameover, game_logic);
-		if (draw)
+
+		if (draw && turn == 0)
 		{
-
-			set_graphics_x_o(posX, posY, game_logic);
-
+			set_graphics_x_o(posX, posY, game_logic, turn);
 			draw = false;
 		}
+
+		// computer move
+		if (turn == 1 && !gameover)
+		{
+			bool moved = false;
+			while (!moved && !gameover)
+			{
+				// random x in board
+				int rand_x = rand() % 640;
+				// random y in board
+				int rand_y = rand() % 375;
+				int prev_turn = turn;
+				set_graphics_x_o(rand_x, rand_y, game_logic, turn);
+				// check if move worked
+				if (turn != prev_turn)
+					moved = true;
+			}
+		}
+
+		// check game state after both moves
+		game_message(gameover, game_logic);
+
 		al_flip_display();
 	}
 	al_rest(5.0);
@@ -139,9 +159,8 @@ void turn_xo(int x, int y, int &turn, int boardx, int boardy, logic  &game_logic
 		}
 	}
 }
-void set_graphics_x_o(int x, int y, logic &game_logic)
+void set_graphics_x_o(int x, int y, logic &game_logic, int &turn)
 {
-	static int turn = 0;
 	if ((x<213) && (y<125))
 	{
 		turn_xo(106, 62, turn, 0, 0, game_logic);
