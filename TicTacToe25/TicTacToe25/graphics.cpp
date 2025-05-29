@@ -79,11 +79,13 @@ int main(void)
 			}
 		}
 		draw_board();
+		game_message(gameover, game_logic);
 
 		if (draw && turn == 0)
 		{
 			set_graphics_x_o(posX, posY, game_logic, turn);
 			draw = false;
+			al_flip_display(); // show the move and message
 		}
 
 		// computer move only if not game over 
@@ -102,12 +104,17 @@ int main(void)
 				if (turn != prev_turn)
 					moved = true;
 			}
+			// check if computer won or caused tie
+			game_message(gameover, game_logic);
+			al_flip_display(); // show computer move and message
+		}
+		else if (gameover)
+		{
+			// game ended after human move, just show the message
+			game_message(gameover, game_logic);
+			al_flip_display();
 		}
 
-		// check game state once after both moves
-		game_message(gameover, game_logic);
-
-		al_flip_display();
 	}
 	al_rest(5.0);
 	al_destroy_event_queue(event_queue);
