@@ -1,3 +1,7 @@
+// Name: Ileana Perez 
+// Lab 6 - Moving Custom Sprite with Collision
+// CPSC 440 - Game Programming
+
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_font.h>
@@ -9,6 +13,7 @@ bool finished = false;
 bool timeOut = false;
 int time_left = 30;
 
+// declare the countdown timer
 void* countdown_timer(ALLEGRO_THREAD* ptr, void* arg);
 
 int main(void)
@@ -21,12 +26,10 @@ int main(void)
 	bool redraw=true;
 	const int FPS = 60;
 
-	//variables
 	int width = 640;
 	int height = 520;
 	bool done = false;
 
-	//allegro variable
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
@@ -57,15 +60,23 @@ int main(void)
 	al_draw_filled_rectangle(4, 4, 12, 12, al_map_rgb(0, 255, 255)); // cyan square
 	al_set_target_bitmap(al_get_backbuffer(display));
 	for (int i = 0; i < 10; i++) mybullet[i].set_bitmap(bullet_bmp);
-	event_queue = al_create_event_queue();
+
+	// create timer
 	timer = al_create_timer(1.0 / FPS);
+
+	event_queue = al_create_event_queue();
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_clear_to_color(al_map_rgb(0,0,0));
+
+	// draw the arrow
 	arrow.drawArrow();
 	al_flip_display();
+
+	// start the timer
 	al_start_timer(timer);
 
+	// thread to run the countdown timer
 	ALLEGRO_THREAD* timer_thread = al_create_thread(countdown_timer, NULL);
 	al_start_thread(timer_thread);
 
@@ -118,9 +129,11 @@ int main(void)
 				arrow.move_arrow(width,480);
 			}
 			arrow.drawArrow();
+			// move the bullets
 			for(int i=0;i<10;i++)
 			{
 				mybullet[i].erase_bullet();
+				// increase the score if the bullet hits the arrow
 				score+=mybullet[i].move_bullet(arrow.getX(),arrow.getY(),32,32,480);
 			}
 			// info area
