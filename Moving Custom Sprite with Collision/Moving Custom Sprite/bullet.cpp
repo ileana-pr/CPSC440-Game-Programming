@@ -1,41 +1,41 @@
 #include "bullet.h"
 bullet::bullet()
 {
-	alive = false;;
+	alive = false;
+	bmp = NULL;
 	srand(time(0));
 }
 bool bullet::getStatus()
 {
 	return alive;
 }
-
+void bullet::set_bitmap(ALLEGRO_BITMAP* b)
+{
+	bmp = b;
+}
 void bullet::fire()
 {
-	x=rand()%615+10;
+	x = rand() % 625 + 10; // 640 - 16 - some margin
 	y = 10;
-	alive=true;
-
+	alive = true;
 }
 void bullet::erase_bullet()
 {
-	al_draw_filled_rectangle(x,y,x+5,y+5,al_map_rgb(0,0,0)); //black color
+	al_draw_filled_rectangle(x, y, x + 16, y + 16, al_map_rgb(0, 0, 0)); // erase area matches bitmap
 }
-int bullet::move_bullet (int arrowX, int arrowY, int width, int length, int height)
+int bullet::move_bullet(int arrowX, int arrowY, int width, int length, int height)
 {
 	y++;
-	al_draw_filled_rectangle(x,y,x+5,y+5,al_map_rgb(255,255,0));//yellow color
+	
+	al_draw_bitmap(bmp, x, y, 0);
 
-
-	if (x > arrowX && x < arrowX+width && y > arrowY && y < arrowY+length) {
-		al_draw_filled_rectangle(x,y,x+5,y+5,al_map_rgb(0,0,0)); //BLACK
-		alive=false;
+	// collision for 16x16 bullet
+	if (x + 16 > arrowX && x < arrowX + width && y + 16 > arrowY && y < arrowY + length) {
+		al_draw_filled_rectangle(x, y, x + 16, y + 16, al_map_rgb(0, 0, 0));
+		alive = false;
 		return 1;
 	}
-	if (y> height)
+	if (y > height)
 		alive = false;
 	return 0;
-
-
-} 
-
-
+}

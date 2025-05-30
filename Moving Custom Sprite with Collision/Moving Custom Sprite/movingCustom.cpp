@@ -33,11 +33,19 @@ int main(void)
 	//addon init
 	al_install_keyboard();
 	al_init_primitives_addon();
+	
 	//create arrow 
 	arrow.create_arrow_bitmap(display);
 
-
+	// create bullet bitmap 
+	ALLEGRO_BITMAP* bullet_bmp = al_create_bitmap(16, 16);
+	al_set_target_bitmap(bullet_bmp);
+	al_clear_to_color(al_map_rgba(0, 0, 0, 0));
+	al_draw_filled_circle(8, 8, 7, al_map_rgb(255, 0, 0)); // red circle
+	al_draw_filled_rectangle(4, 4, 12, 12, al_map_rgb(0, 255, 255)); // cyan square
 	al_set_target_bitmap(al_get_backbuffer(display));
+	for (int i = 0; i < 10; i++) mybullet[i].set_bitmap(bullet_bmp);
+
 	event_queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
