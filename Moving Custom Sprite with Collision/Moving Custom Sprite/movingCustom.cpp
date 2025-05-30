@@ -13,6 +13,8 @@ void* countdown_timer(ALLEGRO_THREAD* ptr, void* arg);
 
 int main(void)
 {
+	if(!al_init()) return -1;
+
 	arrowClass arrow;
 	bullet mybullet[10];
 	int score=0;
@@ -35,9 +37,6 @@ int main(void)
     if (!font) return -1;
 
 	//program init
-	if(!al_init())										//initialize Allegro
-		return -1;
-
 	display = al_create_display(width, height);			//create our display object
 
 	if(!display)										//test display object
