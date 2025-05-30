@@ -9,6 +9,7 @@ bool finished = false;
 bool timeOut = false;
 int time_left = 30;
 
+void* countdown_timer(ALLEGRO_THREAD* ptr, void* arg);
 
 int main(void)
 {
@@ -20,7 +21,7 @@ int main(void)
 
 	//variables
 	int width = 640;
-	int height = 480;
+	int height = 520;
 	bool done = false;
 
 	//allegro variable
@@ -65,7 +66,11 @@ int main(void)
 	arrow.drawArrow();
 	al_flip_display();
 	al_start_timer(timer);
-	while(!done)
+
+	ALLEGRO_THREAD* timer_thread = al_create_thread(countdown_timer, NULL);
+	al_start_thread(timer_thread);
+
+	while(!done && !timeOut)
 	{
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
@@ -107,37 +112,39 @@ int main(void)
 		}
 		if(redraw && al_is_event_queue_empty(event_queue))
 		{
-			redraw = false; 
-
+			redraw = false;
+			al_clear_to_color(al_map_rgb(0,0,0));
 			if (arrow.getSpeed()!=0){
 				arrow.erase_arrow();
-				arrow.move_arrow(width,height);
+				arrow.move_arrow(width,480);
 			}
 			arrow.drawArrow();
 			for(int i=0;i<10;i++)
 			{
 				mybullet[i].erase_bullet();
-				score+=mybullet[i].move_bullet(arrow.getX(),arrow.getY(),32,32,height);
+				score+=mybullet[i].move_bullet(arrow.getX(),arrow.getY(),32,32,480);
 			}
-			// info area background
+			// info area
 			al_draw_filled_rectangle(0, 480, width, 520, al_map_rgb(30,30,30));
-			// print timer and score
 			al_draw_textf(font, al_map_rgb(255,255,255), 10, 490, 0, "time: %d", time_left);
 			al_draw_textf(font, al_map_rgb(255,255,255), 200, 490, 0, "score: %d", score);
+			al_flip_display();
 		}
-		al_flip_display();
 	}
+
+	al_destroy_thread(timer_thread);
 	al_destroy_event_queue(event_queue);
 	al_destroy_timer(timer);
-	al_destroy_display(display);						//destroy our display object
+	al_destroy_display(display);
+	al_destroy_font(font);
 	system("pause");
 	return 0;
 }
 
-void* timer(ALLEGRO_THREAD* ptr, void* arg) {
-	time_t startTime, currentTime; //times used to measure elapsed time
-	startTime = time(NULL);
-	currentTime = time(NULL);
+void* countdown_timer(ALLEGRO_THREAD* ptr, void* arg) {
+	long startTime, currentTime;
+	startTime = al_get_time();
+	currentTime = al_get_time();
 	while (currentTime - startTime < 30 && !finished) {
 		currentTime = al_get_time();
 		time_left = 30 - (int)(currentTime - startTime);
