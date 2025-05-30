@@ -20,25 +20,37 @@ arrowClass::~arrowClass()
 }
 void arrowClass::drawArrow()
 {
-	al_draw_bitmap(arrow_bmp[getDirection()], getX(), getY(), 0);
+	switch (dir) {
+		case 0: // up
+			al_draw_bitmap(arrow_bmp[dir], x, y, 0);
+			break;
+		case 1: // right
+			al_draw_rotated_bitmap(arrow_bmp[dir], 32, 32, x + 32, y + 32, ALLEGRO_PI / 2, 0);
+			break;
+		case 2: // down
+			al_draw_rotated_bitmap(arrow_bmp[dir], 32, 32, x + 32, y + 32, ALLEGRO_PI, 0);
+			break;
+		case 3: // left
+			al_draw_rotated_bitmap(arrow_bmp[dir], 32, 32, x + 32, y + 32, 3 * ALLEGRO_PI / 2, 0);
+			break;
+	}
 }
 void arrowClass::create_arrow_bitmap(ALLEGRO_DISPLAY *display)
 {
-	for(int i=0;i<4; i++)
-	{
-		arrow_bmp[i]=al_create_bitmap(64,64);   
-		if(!arrow_bmp[i]) {
-			exit(1);
-			al_destroy_display(display);
-		}
+	arrow_bmp = al_create_bitmap(64, 64);
+	if (!arrow_bmp) {
+		exit(1);
+		al_destroy_display(display);
+	}
 
-		al_set_target_bitmap(arrow_bmp[i]);
-		al_clear_to_color(al_map_rgb(0, 0, 0)); 
+	al_set_target_bitmap(arrow_bmp);
+	al_clear_to_color(al_map_rgb(0, 0, 0));
 
-		int x = 32, y = 32;
+	int x = 32, y = 32;
 		int width = 18, height = 40;
 		int wing_width = 16, wing_height = 32; 
 		int cockpit_width = 8, cockpit_height = 18; 
+		int antenna_length = 15; 
 
 		// body - white
 		al_draw_filled_rectangle(
@@ -96,29 +108,13 @@ void arrowClass::create_arrow_bitmap(ALLEGRO_DISPLAY *display)
 			al_map_rgb(255,255,0)
 		);
 
-		// small red dot at the tip for the gun
+		// small white dot at the tip for the gun
 		al_draw_filled_circle(
 			x, y - height / 2 - 8, 4,
 			al_map_rgb(255,0,0)
 		);
-	}
 
-		switch(i)
-		{
-		case 0: //Up
-			al_draw_filled_triangle(x-10,y-10,x+11,y-10,x,y-15,al_map_rgb(255, 0, 0));
-			break;
-		case 1://Right
-			al_draw_filled_triangle(x+11,y-11,x+11,y+11,x+15,y,al_map_rgb(255, 0, 0));
-			break;
-		case 2://Down
-			al_draw_filled_triangle(x-11,y+11,x+11,y+11,x,y+15,al_map_rgb(255, 0, 0));
-			break;
-		case 3: //Left
-			al_draw_filled_triangle(x-11,y-11,x-11,y+11,x-15,y,al_map_rgb(255, 0, 0));
-			break;
-		}
-	}
+	al_set_target_bitmap(al_get_backbuffer(display));
 }
 void arrowClass::erase_arrow()
 {

@@ -33,6 +33,7 @@ int main(void)
 	//addon init
 	al_install_keyboard();
 	al_init_primitives_addon();
+	//create arrow 
 	arrow.create_arrow_bitmap(display);
 
 
