@@ -3,6 +3,22 @@
 #include "arrow.h";
 #include "bullet.h"
 
+bool finished = false;
+bool timeOut = false;
+int time_left = 30;
+
+void* timer(ALLEGRO_THREAD* ptr, void* arg) {
+	long startTime, currentTime;
+	startTime = al_get_time();
+	currentTime = al_get_time();
+	while (currentTime - startTime < 30 && !finished) {
+		currentTime = al_get_time();
+		time_left = 30 - (int)(currentTime - startTime);
+	}
+	timeOut = true;
+	return NULL;
+}
+
 int main(void)
 {
 	arrowClass arrow;
