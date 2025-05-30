@@ -26,19 +26,82 @@ void arrowClass::create_arrow_bitmap(ALLEGRO_DISPLAY *display)
 {
 	for(int i=0;i<4; i++)
 	{
-		arrow_bmp[i]=al_create_bitmap(32,32);   
+		arrow_bmp[i]=al_create_bitmap(64,64);   
 		if(!arrow_bmp[i]) {
 			exit(1);
 			al_destroy_display(display);
-
 		}
 
 		al_set_target_bitmap(arrow_bmp[i]);
-		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_clear_to_color(al_map_rgb(0, 0, 0)); 
 
-		int x = 15;
-		int y = 15;
-		al_draw_filled_rectangle(x-10, y-10, x+10, y+10, al_map_rgb(255, 255, 255));
+		int x = 32, y = 32;
+		int width = 18, height = 40;
+		int wing_width = 16, wing_height = 32; 
+		int cockpit_width = 8, cockpit_height = 18; 
+
+		// body - white
+		al_draw_filled_rectangle(
+			x - width / 2, 
+			y - height / 2, 
+			x + width / 2, 
+			y + height / 2, 
+			al_map_rgb(255,255,255)
+		);
+
+		// nose - white 
+		al_draw_filled_triangle(
+			x - width / 2, y - height / 2, 
+			x + width / 2, y - height / 2, 
+			x, y - height / 2 - 8,
+			al_map_rgb(255,255,255)
+		);
+
+		// left wing - red
+		al_draw_filled_triangle(
+			x - width / 2, y - height / 6, 
+			x - width / 2 - wing_width, y + wing_height / 2, 
+			x - width / 2, y + height / 2, 
+			al_map_rgb(255,0,0)
+		);
+
+		// right wing - red
+		al_draw_filled_triangle(
+			x + width / 2, y - height / 6, 
+			x + width / 2 + wing_width, y + wing_height / 2, 
+			x + width / 2, y + height / 2, 
+			al_map_rgb(255,0,0)
+		);
+
+		// blue cockpit 
+		al_draw_filled_rectangle(
+			x - cockpit_width / 2, 
+			y - height / 2 + 8, 
+			x + cockpit_width / 2, 
+			y - height / 2 + 8 + cockpit_height, 
+			al_map_rgb(0,120,255)
+		); 
+
+		// yellow lights 
+		al_draw_filled_rectangle(
+			x - 2, y + height / 4, x + 2, y + height / 4 + 6, 
+			al_map_rgb(255,255,0)
+		);
+		al_draw_filled_rectangle(
+			x - width / 2 - 6, y + 10, x - width / 2 - 2, y + 16, 
+			al_map_rgb(255,255,0)
+		);
+		al_draw_filled_rectangle(
+			x + width / 2 + 2, y + 10, x + width / 2 + 6, y + 16, 
+			al_map_rgb(255,255,0)
+		);
+
+		// small red dot at the tip for the gun
+		al_draw_filled_circle(
+			x, y - height / 2 - 8, 4,
+			al_map_rgb(255,0,0)
+		);
+	}
 
 		switch(i)
 		{
