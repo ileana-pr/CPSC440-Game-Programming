@@ -1,23 +1,14 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>
-#include "arrow.h";
+#include <allegro5\allegro_font.h>
+#include <allegro5\allegro_ttf.h>
+#include "arrow.h"
 #include "bullet.h"
 
 bool finished = false;
 bool timeOut = false;
 int time_left = 30;
 
-void* timer(ALLEGRO_THREAD* ptr, void* arg) {
-	long startTime, currentTime;
-	startTime = al_get_time();
-	currentTime = al_get_time();
-	while (currentTime - startTime < 30 && !finished) {
-		currentTime = al_get_time();
-		time_left = 30 - (int)(currentTime - startTime);
-	}
-	timeOut = true;
-	return NULL;
-}
 
 int main(void)
 {
@@ -36,6 +27,11 @@ int main(void)
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
+	ALLEGRO_FONT *font = NULL;
+    al_init_font_addon();
+    al_init_ttf_addon();
+    font = al_load_font("GROBOLD.TTF", 16, 0);
+    if (!font) return -1;
 
 	//program init
 	if(!al_init())										//initialize Allegro
@@ -61,7 +57,6 @@ int main(void)
 	al_draw_filled_rectangle(4, 4, 12, 12, al_map_rgb(0, 255, 255)); // cyan square
 	al_set_target_bitmap(al_get_backbuffer(display));
 	for (int i = 0; i < 10; i++) mybullet[i].set_bitmap(bullet_bmp);
-
 	event_queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -124,6 +119,11 @@ int main(void)
 				mybullet[i].erase_bullet();
 				score+=mybullet[i].move_bullet(arrow.getX(),arrow.getY(),32,32,height);
 			}
+			// info area background
+			al_draw_filled_rectangle(0, 480, width, 520, al_map_rgb(30,30,30));
+			// print timer and score
+			al_draw_textf(font, al_map_rgb(255,255,255), 10, 490, 0, "time: %d", time_left);
+			al_draw_textf(font, al_map_rgb(255,255,255), 200, 490, 0, "score: %d", score);
 		}
 		al_flip_display();
 	}
@@ -132,4 +132,16 @@ int main(void)
 	al_destroy_display(display);						//destroy our display object
 	system("pause");
 	return 0;
+}
+
+void* timer(ALLEGRO_THREAD* ptr, void* arg) {
+	time_t startTime, currentTime; //times used to measure elapsed time
+	startTime = time(NULL);
+	currentTime = time(NULL);
+	while (currentTime - startTime < 30 && !finished) {
+		currentTime = al_get_time();
+		time_left = 30 - (int)(currentTime - startTime);
+	}
+	timeOut = true;
+	return NULL;
 }
