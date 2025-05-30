@@ -6,32 +6,27 @@ arrowClass::arrowClass()
 	y=100;
 	dir=1;
 	score = 0;
-	for(int i=0; i<4; i++)
-	{
-		arrow_bmp[i]=NULL;
-	}
+	arrow_bmp = NULL;
 }
 arrowClass::~arrowClass()
 {
-	for(int i=0; i<4; i++)
-	{
-		al_destroy_bitmap(arrow_bmp[i]);
-	}
+	if (arrow_bmp)
+		al_destroy_bitmap(arrow_bmp);
 }
 void arrowClass::drawArrow()
 {
 	switch (dir) {
 		case 0: // up
-			al_draw_bitmap(arrow_bmp[dir], x, y, 0);
+			al_draw_bitmap(arrow_bmp, x, y, 0);
 			break;
 		case 1: // right
-			al_draw_rotated_bitmap(arrow_bmp[dir], 32, 32, x + 32, y + 32, ALLEGRO_PI / 2, 0);
+			al_draw_rotated_bitmap(arrow_bmp, 32, 32, x + 32, y + 32, ALLEGRO_PI / 2, 0);
 			break;
 		case 2: // down
-			al_draw_rotated_bitmap(arrow_bmp[dir], 32, 32, x + 32, y + 32, ALLEGRO_PI, 0);
+			al_draw_rotated_bitmap(arrow_bmp, 32, 32, x + 32, y + 32, ALLEGRO_PI, 0);
 			break;
 		case 3: // left
-			al_draw_rotated_bitmap(arrow_bmp[dir], 32, 32, x + 32, y + 32, 3 * ALLEGRO_PI / 2, 0);
+			al_draw_rotated_bitmap(arrow_bmp, 32, 32, x + 32, y + 32, 3 * ALLEGRO_PI / 2, 0);
 			break;
 	}
 }
@@ -136,7 +131,7 @@ void arrowClass::up()
 }
 
 void arrowClass::down()
-{
+{ 
 	dir=2;
 	speed++;
 	if (speed > MAXSPEED)
