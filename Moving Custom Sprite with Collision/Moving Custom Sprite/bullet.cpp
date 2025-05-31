@@ -15,13 +15,13 @@ void bullet::set_bitmap(ALLEGRO_BITMAP* b)
 }
 void bullet::fire()
 {
-	x = rand() % 625 + 10; // 640 - 16 - some margin
+	x = rand() % 625 + 10; 
 	y = 10;
 	alive = true;
 }
 void bullet::erase_bullet()
 {
-	al_draw_filled_rectangle(x, y, x + 16, y + 16, al_map_rgb(0, 0, 0)); // erase area matches bitmap
+	al_draw_filled_rectangle(x, y, x + 16, y + 16, al_map_rgb(0, 0, 0)); 
 }
 int bullet::move_bullet(int arrowX, int arrowY, int width, int length, int height)
 {
