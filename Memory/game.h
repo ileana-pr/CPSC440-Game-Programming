@@ -11,4 +11,5 @@ public:
     game();
     ~game();
     void setup();
+    bool done();
 };
