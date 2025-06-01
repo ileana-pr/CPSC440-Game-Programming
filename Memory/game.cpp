@@ -52,7 +52,14 @@ int set_shape(int x, int y);
 int compare_shapes(int x, int y);
 
 // reset_game: given an x and y location, it will reset the game. 
-void reset_game();
+void game::reset_game() {
+    // reset game state
+    number_of_moves = 0;
+    pairs_found = 0;
+    pairs_remaining = 12;
+    // reinitialize the game board
+    setup();
+}
 
 // clear_game: given an x and y location, it will clear the game. 
 void clear_game();
