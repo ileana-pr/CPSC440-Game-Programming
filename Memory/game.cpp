@@ -64,9 +64,7 @@ void game::setup()
 // get_shape: given an x and y location, it will return the shape that is supposed to be drawn. 
 int get_shape(int x, int y);
 
-// set_shape: given an x and y location, it will set the shape that is supposed to be drawn. 
-int set_shape(int x, int y);
-
+ 
 // compare two cards to see if they match
 bool game::compare_shapes(int row1, int col1, int row2, int col2) {
     // check if positions are valid
@@ -80,7 +78,7 @@ bool game::compare_shapes(int row1, int col1, int row2, int col2) {
 }
 
 
-// reset_game: given an x and y location, it will reset the game. 
+// reset_game: resets the game variables and restarts the game board
 void game::reset_game() {
     // reset game state
     number_of_moves = 0;
@@ -90,8 +88,8 @@ void game::reset_game() {
     setup();
 }
 
-// random_create: given the number of cards, it will create the   
-bool game::done()
+//game_over: checks if the game is over 
+bool game::game_over(int pairs_remaining)
 {
     if (pairs_remaining == 0)
     {
@@ -100,11 +98,28 @@ bool game::done()
     return false;
 }
 
-// placeholder for handle_card_click - testing grid display
-void game::handle_card_click(int row, int col)
-{
-   
+bool game::is_card_revealed(int row, int col) {
+    return revealed[row][col];
 }
+
+bool game::is_card_matched(int row, int col) {
+    return matched[row][col];
+}
+
+int game::get_card_shape(int row, int col) {
+    return game_board[row][col];
+}
+
+bool game::is_first_card_flipped() {
+    return first_card_flipped;
+}
+
+int game::get_pairs_remaining() {
+    return pairs_remaining;
+}
+
+
+
 
 
 

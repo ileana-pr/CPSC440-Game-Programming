@@ -20,12 +20,14 @@ using namespace std;
 // get mouse input: wait for user to click on the game board and make a selection 
 void get_mouse_input(int &x, int &y);
 
-// draw_objects: given an x and y location, it will draw the appropriate object x and y are the center of the box that was selected; you can draw any object. will call get_shape to figure out which shape is supposed to be drawn. 
-void draw_objects(int x, int y);
+// handle card click with graphics logic
+void handle_card_click(int row, int col, game &memory);
+
+// helper function to draw shapes
+void draw_shape(int x, int y, int shape_type);
 
 // when the user clicks on the game board get the shape that is being clicked on  
 int get_shape(int x, int y);
-
 
 // draw_octagon: draw the octagon shape
 void draw_octagon(int x, int y);
@@ -62,7 +64,7 @@ void draw_square(int x, int y);
 
 int main(void)
 {
-    game memory_game;
+    game memory;
     bool done = false;
     
     ALLEGRO_DISPLAY *display = NULL;
@@ -143,60 +145,55 @@ int main(void)
     // fill the game board with 25 cards 
 
     // initialize game and draw initial grid
-    memory_game.setup();
+    memory.setup();
     draw_grid();
     al_flip_display();
 
     while (!done) 
     {
-
         ALLEGRO_EVENT ev;
         al_wait_for_event(event_queue, &ev);
 
-        if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+        if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+        {
+            done = true;
+        }
+        else if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+        {
+            if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                done = true;
+            }
+        }
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
         {
             int mouse_x = ev.mouse.x;
             int mouse_y = ev.mouse.y;
             get_mouse_input(mouse_x, mouse_y);
             
-            // if valid grid position clicked
+            // check valid grid position 
             if (mouse_x >= 0 && mouse_y >= 0) {
-                memory_game.handle_card_click(mouse_y, mouse_x); // row, col
+                // handle the card click first
+                handle_card_click(mouse_y, mouse_x, memory);
                 
-                // redraw the grid after click
-                al_clear_to_color(al_map_rgb(0,0,0));
-                draw_grid();
-                al_flip_display();
+                // then check if game is over after this move
+                if (memory.game_over(memory.get_pairs_remaining())) {
+                    // show win message
+                    al_clear_to_color(al_map_rgb(0,0,0));
+                    draw_grid();
+                    
+                   
+                    al_flip_display();
+                }
             }
         }
-
-        // if first click flip card 
-        // if second click: flip card, IF the shape is valid, X out both cards, and reset the click pattern,increase the number of pairs found, decrease number of pairs remaining, if not valid, reset the click pattern 
-
-        // if the number of pairs remaining is 0, end the game 
-
-
-
-
-
-
-
-
-
-
-
-
-        al_flip_display();
-        al_rest(5.0); 
-        al_destroy_display(display);
-        al_destroy_event_queue(event_queue);
-        al_destroy_timer(timer);
-        al_destroy_font(font);
-        
-        
-        
-        
     }
+
+    al_destroy_display(display);
+    al_destroy_event_queue(event_queue);
+    al_destroy_timer(timer);
+    al_destroy_font(font);
+    
+    return 0;
 }
 
 
@@ -273,4 +270,31 @@ void draw_octagon(int x, int y)
     al_draw_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(150, 255, 150), 3);
 }
 
+
+// draw shapes based on type
+void draw_shape(int x, int y, int shape_type) {
+    switch(shape_type) {
+        case 1: case 7:  // circle pairs
+            draw_circle(x, y);
+            break;
+        case 2: case 8:  // triangle pairs  
+            draw_triangle(x, y);
+            break;
+        case 3: case 9:  // rectangle pairs
+            draw_rectangle(x, y);
+            break;
+        case 4: case 10: // diamond pairs
+            draw_diamond(x, y);
+            break;
+        case 5: case 11: // oval pairs
+            draw_oval(x, y);
+            break;
+        case 6: case 12: // octagon pairs
+            draw_octagon(x, y);
+            break;
+        default:
+            // empty space - do nothing
+            break;
+    }
+}
 
