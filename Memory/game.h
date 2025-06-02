@@ -21,7 +21,7 @@ public:
     void reset_game();
     bool is_card_revealed(int row, int col);   // checks if card is flipped
     bool is_card_matched(int row, int col);    // checks if card is matched
-    int get_card_shape(int row, int col);      // gets the shape at position
+    int get_shape(int row, int col);      // gets the shape at position
     bool is_first_card_flipped();              // checks if first card is flipped
     bool flip_first_card(int row, int col);    // flips first card
     bool flip_second_card(int row, int col);   // flips second card and checks match

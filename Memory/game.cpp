@@ -124,6 +124,36 @@ bool game::flip_first_card(int row, int col) {
     return true;
 }
 
+bool game::flip_second_card(int row, int col) {
+    if (game_board[row][col] == 0 || matched[row][col] || revealed[row][col]) {
+        return false; // invalid click
+    }
+    if (row == first_card_row && col == first_card_col) {
+        return false; // same card clicked
+    }
+    
+    revealed[row][col] = true;
+    
+    // check match
+    if (compare_shapes(first_card_row, first_card_col, row, col)) {
+        // match!
+        matched[first_card_row][first_card_col] = true;
+        matched[row][col] = true;
+        revealed[first_card_row][first_card_col] = false;
+        revealed[row][col] = false;
+        pairs_found++;
+        pairs_remaining--;
+        number_of_moves++;
+        first_card_flipped = false;
+        return true; // match found
+    } else {
+        // no match
+        showing_mismatch = true;
+        number_of_moves++;
+        return false; // no match
+    }
+}
+
 
 
 

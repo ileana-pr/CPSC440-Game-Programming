@@ -287,13 +287,57 @@ void handle_card_click(int row, int col, game &memory)
             // draw the revealed shape
             int center_x = col * 128 + 64;  // cell center x
             int center_y = row * 104 + 52;  // cell center y
-            int shape = memory.get_card_shape(row, col);
+            int shape = memory.get_shape(row, col);
             draw_shape(center_x, center_y, shape);
             al_flip_display();
         }
     } else {
         // second card click
+        bool match_found = memory.flip_second_card(row, col);
         
+        // redraw grid with both cards visible
+        al_clear_to_color(al_map_rgb(0,0,0));
+        draw_grid();
+        
+        // draw all revealed and matched cards
+        for (int r = 0; r < 5; r++) {
+            for (int c = 0; c < 5; c++) {
+                int center_x = c * 128 + 64;
+                int center_y = r * 104 + 52;
+                
+                if (memory.is_card_matched(r, c)) {
+                    // draw x for matched cards
+                    al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
+                    al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
+                } else if (memory.is_card_revealed(r, c)) {
+                    // draw revealed shape
+                    int shape = memory.get_shape(r, c);
+                    draw_shape(center_x, center_y, shape);
+                }
+            }
+        }
+        al_flip_display();
+        
+        if (!match_found) {
+            // cards don't match - show for 5 seconds then hide
+            al_rest(5.0);
+            // redraw without mismatched cards
+            al_clear_to_color(al_map_rgb(0,0,0));
+            draw_grid();
+            // only show matched cards
+            for (int r = 0; r < 5; r++) {
+                for (int c = 0; c < 5; c++) {
+                    if (memory.is_card_matched(r, c)) {
+                        int center_x = c * 128 + 64;
+                        int center_y = r * 104 + 52;
+                        al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
+                        al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
+                    }
+                }
+            }
+            al_flip_display();
+        }
+    }
 }
 
 // draw shapes based on type
