@@ -23,4 +23,5 @@ public:
     bool is_card_revealed(int row, int col);   // checks if card is flipped
     bool is_card_matched(int row, int col);    // checks if card is matched
     void hide_mismatched_cards();              // hides cards after mismatch
+    bool compare_shapes(int row1, int col1, int row2, int col2);  // compares two cards
 };

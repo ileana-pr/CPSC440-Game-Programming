@@ -2,6 +2,25 @@
 #include <cstdlib>
 #include <ctime>
 
+game::game()
+{
+    // constructor
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            game_board[i][j] = 0;
+            revealed[i][j] = false;
+            matched[i][j] = false;
+        }
+    }
+    first_card_flipped = false;
+    showing_mismatch = false;
+}
+
+game::~game()
+{
+    // destructor 
+}
+
 void game::setup()
 {
     //initialize game
@@ -23,7 +42,7 @@ void game::setup()
     cards[24] = 0;
     
     // shuffle the cards
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
     for (int i = 24; i > 0; i--) {
         int j = rand() % (i + 1);
         int temp = cards[i];
@@ -48,8 +67,18 @@ int get_shape(int x, int y);
 // set_shape: given an x and y location, it will set the shape that is supposed to be drawn. 
 int set_shape(int x, int y);
 
-// compare_shapes: given an x and y location, it will compare the shape that is supposed to be drawn. 
-int compare_shapes(int x, int y);
+// compare two cards to see if they match
+bool game::compare_shapes(int row1, int col1, int row2, int col2) {
+    // check if positions are valid
+    if (row1 < 0 || row1 >= 5 || col1 < 0 || col1 >= 5 ||
+        row2 < 0 || row2 >= 5 || col2 < 0 || col2 >= 5) {
+        return false;
+    }
+    
+    // compare the shape values
+    return game_board[row1][col1] == game_board[row2][col2];
+}
+
 
 // reset_game: given an x and y location, it will reset the game. 
 void game::reset_game() {
@@ -61,9 +90,6 @@ void game::reset_game() {
     setup();
 }
 
-// clear_game: given an x and y location, it will clear the game. 
-void clear_game();
-
 // random_create: given the number of cards, it will create the   
 bool game::done()
 {
@@ -72,6 +98,12 @@ bool game::done()
         return true;
     }
     return false;
+}
+
+// placeholder for handle_card_click - testing grid display
+void game::handle_card_click(int row, int col)
+{
+   
 }
 
 
