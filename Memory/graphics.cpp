@@ -181,7 +181,17 @@ int main(void)
                     al_clear_to_color(al_map_rgb(0,0,0));
                     draw_grid();
                     
-                   
+                    // draw X on all matched cards 
+                    for (int r = 0; r < 5; r++) {
+                        for (int c = 0; c < 5; c++) {
+                            if (memory.is_card_matched(r, c)) {
+                                int center_x = c * 128 + 64;
+                                int center_y = r * 104 + 52;
+                                al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
+                                al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
+                            }
+                        }
+                    }
                     al_flip_display();
                 }
             }
@@ -213,14 +223,9 @@ void get_mouse_input(int &x, int &y)
     }
 }
 
-
-// get_shape: given an x and y location, it will return the shape that is supposed to be drawn. 
-// draw_objects: given an x and y location, it will draw the appropriate object x and y are the center of the box that was selected; you can draw any object. will call get_shape to figure out which shape is supposed to be drawn. 
-void draw_objects(int x, int y);
-
 void draw_grid()
 {
-    // full screen grid - 640x520 divided into 5x5 = 128x104 cells
+    // full screen grid -
     // vertical lines
     al_draw_line(0, 0, 0, 520, al_map_rgb(255, 255, 255), 2);     // left edge
     al_draw_line(128, 0, 128, 520, al_map_rgb(255, 255, 255), 2); // column 1
@@ -270,6 +275,26 @@ void draw_octagon(int x, int y)
     al_draw_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(150, 255, 150), 3);
 }
 
+void handle_card_click(int row, int col, game &memory)
+{
+    // graphics logic for handling card clicks
+    if (!memory.is_first_card_flipped()) {
+        // first card click
+        if (memory.flip_first_card(row, col)) {
+            // redraw to show flipped card
+            al_clear_to_color(al_map_rgb(0,0,0));
+            draw_grid();
+            // draw the revealed shape
+            int center_x = col * 128 + 64;  // cell center x
+            int center_y = row * 104 + 52;  // cell center y
+            int shape = memory.get_card_shape(row, col);
+            draw_shape(center_x, center_y, shape);
+            al_flip_display();
+        }
+    } else {
+        // second card click
+        
+}
 
 // draw shapes based on type
 void draw_shape(int x, int y, int shape_type) {

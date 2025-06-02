@@ -59,11 +59,6 @@ void game::setup()
     }
 }
 
-
-
-// get_shape: given an x and y location, it will return the shape that is supposed to be drawn. 
-int get_shape(int x, int y);
-
  
 // compare two cards to see if they match
 bool game::compare_shapes(int row1, int col1, int row2, int col2) {
@@ -106,7 +101,7 @@ bool game::is_card_matched(int row, int col) {
     return matched[row][col];
 }
 
-int game::get_card_shape(int row, int col) {
+int game::get_shape(int row, int col) {
     return game_board[row][col];
 }
 
@@ -118,6 +113,16 @@ int game::get_pairs_remaining() {
     return pairs_remaining;
 }
 
+bool game::flip_first_card(int row, int col) {
+    if (game_board[row][col] == 0 || matched[row][col] || revealed[row][col]) {
+        return false; // invalid click
+    }
+    revealed[row][col] = true;
+    first_card_row = row;
+    first_card_col = col;
+    first_card_flipped = true;
+    return true;
+}
 
 
 
