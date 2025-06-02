@@ -155,7 +155,19 @@ int main(void)
 
         if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
         {
-            get_mouse_input(ev.mouse.x, ev.mouse.y);
+            int mouse_x = ev.mouse.x;
+            int mouse_y = ev.mouse.y;
+            get_mouse_input(mouse_x, mouse_y);
+            
+            // if valid grid position clicked
+            if (mouse_x >= 0 && mouse_y >= 0) {
+                memory_game.handle_card_click(mouse_y, mouse_x); // row, col
+                
+                // redraw the grid after click
+                al_clear_to_color(al_map_rgb(0,0,0));
+                draw_grid();
+                al_flip_display();
+            }
         }
 
         // if first click flip card 
@@ -189,11 +201,19 @@ int main(void)
 
 
 
-// get_mouse_input: use an if else statement to figure out wat box is being selected  
+// get_mouse_input 
 void get_mouse_input(int &x, int &y)
 {
-    // placeholder implementation - just store the coordinates
-    // will implement grid mapping later
+    // convert mouse coordinates to grid position
+    if (x >= 0 && x < 640 && y >= 0 && y < 520) {
+        // convert to grid coordinates (0-4)
+        int col = x / 128;  // 640 / 5 = 128 
+        int row = y / 104;  // 520 / 5 = 104 
+        
+        // return grid coordinates
+        x = col;
+        y = row;
+    }
 }
 
 
@@ -203,21 +223,54 @@ void draw_objects(int x, int y);
 
 void draw_grid()
 {
+    // full screen grid - 640x520 divided into 5x5 = 128x104 cells
     // vertical lines
-    al_draw_line(50, 50, 50, 450, al_map_rgb(255, 255, 255), 2);   // left edge
-    al_draw_line(130, 50, 130, 450, al_map_rgb(255, 255, 255), 2); // column 1
-    al_draw_line(210, 50, 210, 450, al_map_rgb(255, 255, 255), 2); // column 2  
-    al_draw_line(290, 50, 290, 450, al_map_rgb(255, 255, 255), 2); // column 3
-    al_draw_line(370, 50, 370, 450, al_map_rgb(255, 255, 255), 2); // column 4
-    al_draw_line(450, 50, 450, 450, al_map_rgb(255, 255, 255), 2); // right edge
+    al_draw_line(0, 0, 0, 520, al_map_rgb(255, 255, 255), 2);     // left edge
+    al_draw_line(128, 0, 128, 520, al_map_rgb(255, 255, 255), 2); // column 1
+    al_draw_line(256, 0, 256, 520, al_map_rgb(255, 255, 255), 2); // column 2  
+    al_draw_line(384, 0, 384, 520, al_map_rgb(255, 255, 255), 2); // column 3
+    al_draw_line(512, 0, 512, 520, al_map_rgb(255, 255, 255), 2); // column 4
+    al_draw_line(640, 0, 640, 520, al_map_rgb(255, 255, 255), 2); // right edge
     
     // horizontal lines
-    al_draw_line(50, 50, 450, 50, al_map_rgb(255, 255, 255), 2);   // top edge
-    al_draw_line(50, 130, 450, 130, al_map_rgb(255, 255, 255), 2); // row 1
-    al_draw_line(50, 210, 450, 210, al_map_rgb(255, 255, 255), 2); // row 2
-    al_draw_line(50, 290, 450, 290, al_map_rgb(255, 255, 255), 2); // row 3
-    al_draw_line(50, 370, 450, 370, al_map_rgb(255, 255, 255), 2); // row 4
-    al_draw_line(50, 450, 450, 450, al_map_rgb(255, 255, 255), 2); // bottom edge
+    al_draw_line(0, 0, 640, 0, al_map_rgb(255, 255, 255), 2);     // top edge
+    al_draw_line(0, 104, 640, 104, al_map_rgb(255, 255, 255), 2); // row 1
+    al_draw_line(0, 208, 640, 208, al_map_rgb(255, 255, 255), 2); // row 2
+    al_draw_line(0, 312, 640, 312, al_map_rgb(255, 255, 255), 2); // row 3
+    al_draw_line(0, 416, 640, 416, al_map_rgb(255, 255, 255), 2); // row 4
+    al_draw_line(0, 520, 640, 520, al_map_rgb(255, 255, 255), 2); // bottom edge
+}
+
+void draw_circle(int x, int y)
+{
+    al_draw_filled_circle(x, y, 25, al_map_rgb(255, 100, 100));
+}
+
+void draw_triangle(int x, int y)
+{
+    al_draw_triangle(x, y - 25, x - 25, y + 20, x + 25, y + 20, al_map_rgb(100, 255, 100), 3);
+}
+
+void draw_rectangle(int x, int y)
+{
+    al_draw_filled_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(100, 100, 255));
+}
+
+void draw_diamond(int x, int y)
+{
+    al_draw_triangle(x, y - 25, x - 25, y, x, y + 25, al_map_rgb(255, 255, 100), 3);
+    al_draw_triangle(x, y - 25, x + 25, y, x, y + 25, al_map_rgb(255, 255, 100), 3);
+}
+
+void draw_oval(int x, int y)
+{
+    al_draw_filled_ellipse(x, y, 30, 20, al_map_rgb(255, 150, 255));
+}
+
+void draw_octagon(int x, int y)
+{
+    al_draw_rectangle(x - 20, y - 25, x + 20, y + 25, al_map_rgb(150, 255, 150), 3);
+    al_draw_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(150, 255, 150), 3);
 }
 
 
