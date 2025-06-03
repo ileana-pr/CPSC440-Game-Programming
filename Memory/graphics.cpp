@@ -275,6 +275,38 @@ void draw_octagon(int x, int y)
     al_draw_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(150, 255, 150), 3);
 }
 
+void draw_filled_triangle(int x, int y)
+{
+    al_draw_filled_triangle(x, y - 25, x - 25, y + 20, x + 25, y + 20, al_map_rgb(100, 255, 100));
+}
+
+void draw_outlined_rectangle(int x, int y)
+{
+    al_draw_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(100, 100, 255), 3);
+}
+
+void draw_outlined_circle(int x, int y)
+{
+    al_draw_circle(x, y, 25, al_map_rgb(255, 100, 100), 3);
+}
+
+void draw_filled_diamond(int x, int y)
+{
+    al_draw_filled_triangle(x, y - 25, x - 25, y, x, y + 25, al_map_rgb(255, 255, 100));
+    al_draw_filled_triangle(x, y - 25, x + 25, y, x, y + 25, al_map_rgb(255, 255, 100));
+}
+
+void draw_outlined_oval(int x, int y)
+{
+    al_draw_ellipse(x, y, 30, 20, al_map_rgb(255, 150, 255), 3);
+}
+
+void draw_filled_octagon(int x, int y)
+{
+    al_draw_filled_rectangle(x - 20, y - 25, x + 20, y + 25, al_map_rgb(150, 255, 150));
+    al_draw_filled_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(150, 255, 150));
+}
+
 void handle_card_click(int row, int col, game &memory)
 {
     // graphics logic for handling card clicks
@@ -284,11 +316,24 @@ void handle_card_click(int row, int col, game &memory)
             // redraw to show flipped card
             al_clear_to_color(al_map_rgb(0,0,0));
             draw_grid();
-            // draw the revealed shape
-            int center_x = col * 128 + 64;  // cell center x
-            int center_y = row * 104 + 52;  // cell center y
-            int shape = memory.get_shape(row, col);
-            draw_shape(center_x, center_y, shape);
+            
+            // draw all matched cards with X marks
+            for (int r = 0; r < 5; r++) {
+                for (int c = 0; c < 5; c++) {
+                    int center_x = c * 128 + 64;
+                    int center_y = r * 104 + 52;
+                    
+                    if (memory.is_card_matched(r, c)) {
+                        // draw x for matched cards
+                        al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
+                        al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
+                    } else if (memory.is_card_revealed(r, c)) {
+                        // draw revealed shape (the first card just clicked)
+                        int shape = memory.get_shape(r, c);
+                        draw_shape(center_x, center_y, shape);
+                    }
+                }
+            }
             al_flip_display();
         }
     } else {
@@ -320,7 +365,9 @@ void handle_card_click(int row, int col, game &memory)
         
         if (!match_found) {
             // cards don't match - show for 5 seconds then hide
-            al_rest(5.0);
+            al_rest(2.0);
+            // hide the mismatched cards in game logic
+            memory.hide_mismatched_cards();
             // redraw without mismatched cards
             al_clear_to_color(al_map_rgb(0,0,0));
             draw_grid();
@@ -343,23 +390,41 @@ void handle_card_click(int row, int col, game &memory)
 // draw shapes based on type
 void draw_shape(int x, int y, int shape_type) {
     switch(shape_type) {
-        case 1: case 7:  // circle pairs
+        case 1:  // filled circle
             draw_circle(x, y);
             break;
-        case 2: case 8:  // triangle pairs  
+        case 2:  // outlined triangle  
             draw_triangle(x, y);
             break;
-        case 3: case 9:  // rectangle pairs
+        case 3:  // filled rectangle
             draw_rectangle(x, y);
             break;
-        case 4: case 10: // diamond pairs
+        case 4:  // outlined diamond
             draw_diamond(x, y);
             break;
-        case 5: case 11: // oval pairs
+        case 5:  // filled oval
             draw_oval(x, y);
             break;
-        case 6: case 12: // octagon pairs
+        case 6:  // outlined octagon
             draw_octagon(x, y);
+            break;
+        case 7:  // outlined circle (pair of 1)
+            draw_outlined_circle(x, y);
+            break;
+        case 8:  // filled triangle (pair of 2)
+            draw_filled_triangle(x, y);
+            break;
+        case 9:  // outlined rectangle (pair of 3)
+            draw_outlined_rectangle(x, y);
+            break;
+        case 10: // filled diamond (pair of 4)
+            draw_filled_diamond(x, y);
+            break;
+        case 11: // outlined oval (pair of 5)
+            draw_outlined_oval(x, y);
+            break;
+        case 12: // filled octagon (pair of 6)
+            draw_filled_octagon(x, y);
             break;
         default:
             // empty space - do nothing

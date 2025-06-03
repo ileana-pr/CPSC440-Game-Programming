@@ -1,6 +1,7 @@
 #include "game.h"
 #include <cstdlib>
 #include <ctime>
+#include <cstdio>
 
 game::game()
 {
@@ -27,16 +28,16 @@ void game::setup()
     number_of_moves = 0;
     pairs_found = 0;
     // 12 pairs to find
-    pairs_remaining = 12; 
+    pairs_remaining = 12;
 
     // create array with 12 pairs + 1 empty space
     int cards[25];
     int index = 0;
     
-    // add 12 pairs 
+    // add 12 pairs
     for (int shape = 1; shape <= 12; shape++) {
-        cards[index++] = shape;
-        cards[index++] = shape;
+        cards[index++] = shape;        // first card
+        cards[index++] = shape;        // second card
     }
     // add 1 empty space
     cards[24] = 0;
@@ -150,8 +151,22 @@ bool game::flip_second_card(int row, int col) {
         // no match
         showing_mismatch = true;
         number_of_moves++;
+        first_card_flipped = false;
         return false; // no match
     }
+}
+
+// hide mismatched cards after short delay 
+void game::hide_mismatched_cards() {
+    // hide all revealed cards that aren't matched
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (revealed[i][j] && !matched[i][j]) {
+                revealed[i][j] = false;
+            }
+        }
+    }
+    showing_mismatch = false;
 }
 
 

@@ -29,4 +29,5 @@ public:
     void hide_mismatched_cards();              // hides cards after mismatch
     bool compare_shapes(int row1, int col1, int row2, int col2);  // compares two cards
     void update_game(double delta_time);       // updates game timing
+    void debug_print_board();                  // debug method to print board state
 };
