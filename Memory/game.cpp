@@ -30,8 +30,8 @@ void game::setup()
     // 12 pairs to find
     pairs_remaining = 12;
 
-    // create array with 12 pairs + 1 empty space
-    int cards[25];
+    // create array with 12 pairs (24 cards total)
+    int cards[24];
     int index = 0;
     
     // add 12 pairs
@@ -39,23 +39,27 @@ void game::setup()
         cards[index++] = shape;        // first card
         cards[index++] = shape;        // second card
     }
-    // add 1 empty space
-    cards[24] = 0;
     
     // shuffle the cards
     srand((unsigned int)time(nullptr));
-    for (int i = 24; i > 0; i--) {
+    for (int i = 23; i > 0; i--) {
         int j = rand() % (i + 1);
         int temp = cards[i];
         cards[i] = cards[j];
         cards[j] = temp;
     }
     
-    // place shuffled cards in grid
+    // place shuffled cards in grid 
     index = 0;
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
-            game_board[i][j] = cards[index++];
+            if (i == 4 && j == 4) {
+                // bottom right corner saved for status display
+                game_board[i][j] = -1; 
+            } else {
+                // place shuffled cards in all other positions
+                game_board[i][j] = cards[index++];
+            }
         }
     }
 }
@@ -114,9 +118,17 @@ int game::get_pairs_remaining() {
     return pairs_remaining;
 }
 
+int game::get_number_of_moves() {
+    return number_of_moves;
+}
+
+int game::get_pairs_found() {
+    return pairs_found;
+}
+
 bool game::flip_first_card(int row, int col) {
-    if (game_board[row][col] == 0 || matched[row][col] || revealed[row][col]) {
-        return false; // invalid click
+    if (game_board[row][col] <= 0 || matched[row][col] || revealed[row][col]) {
+        return false; // invalid click (empty space, status area, or already processed)
     }
     revealed[row][col] = true;
     first_card_row = row;
@@ -126,8 +138,8 @@ bool game::flip_first_card(int row, int col) {
 }
 
 bool game::flip_second_card(int row, int col) {
-    if (game_board[row][col] == 0 || matched[row][col] || revealed[row][col]) {
-        return false; // invalid click
+    if (game_board[row][col] <= 0 || matched[row][col] || revealed[row][col]) {
+        return false; // invalid click (empty space, status area, or already processed)
     }
     if (row == first_card_row && col == first_card_col) {
         return false; // same card clicked

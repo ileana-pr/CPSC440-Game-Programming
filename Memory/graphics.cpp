@@ -16,50 +16,21 @@
 
 using namespace std;
 
-
-// get mouse input: wait for user to click on the game board and make a selection 
 void get_mouse_input(int &x, int &y);
-
-// handle card click with graphics logic
-void handle_card_click(int row, int col, game &memory);
-
-// helper function to draw shapes
+void handle_card_click(int row, int col, game &memory, ALLEGRO_FONT *font);
 void draw_shape(int x, int y, int shape_type);
-
-// when the user clicks on the game board get the shape that is being clicked on  
+void draw_x_marks(game &memory);
 int get_shape(int x, int y);
-
-// draw_octagon: draw the octagon shape
 void draw_octagon(int x, int y);
-
-// draw_triangle: draw the triangle shape
 void draw_triangle(int x, int y);
-
-// draw_diamond: draw the diamond shape
 void draw_diamond(int x, int y);
-
-// draw_rectangle: draw the rectangle shape
 void draw_rectangle(int x, int y);
-
-// Draw_Oval: draw the oval shape
 void draw_oval(int x, int y);
-
-// Draw_Circle: draw the circle shape
 void draw_circle(int x, int y);
-
-// Draw_Grid: draws the 5*5 grid, 
 void draw_grid();
-
-// Draw_Status: draws the bottom right hand square that shows the number of pairs remaining and the number of moves made
-void draw_status();
-
-// draw_selection_bar: draws the selection bar
-
-// draw_circle: draw the circle shape
-void draw_circle(int x, int y);
-
-// draw_square: draw the square shape
 void draw_square(int x, int y);
+
+void draw_status(game &memory, ALLEGRO_FONT *font);
 
 
 int main(void)
@@ -74,28 +45,24 @@ int main(void)
     int width = 640;
 	int height = 520;
 
-    //init allegro
     if(!al_init()) 
     {
         printf("Error initializing allegro\n");
         return -1;
     }
 
-    //create display
-    display = al_create_display(width, height);			//create our display object
+    display = al_create_display(width, height);		
     if(!display)		
     {
-        printf("Error creating display\n");								//test display object
+        printf("Error creating display\n");								
         return -1;
     }
 
-    //init primitives
     if (!al_init_primitives_addon()) {
         printf("Error initializing primitives\n");
         return -1;
     }
 
-    //init font
     if (!al_init_font_addon()) {
         printf("Error initializing font addon\n");
         return -1;
@@ -107,46 +74,32 @@ int main(void)
     
     font = al_load_font("GROBOLD.ttf", 16, 0);
     if (!font) {
-        printf("Error loading font - trying built-in font\n");
-        font = al_create_builtin_font();
-        if (!font) {
-            printf("Error creating built-in font\n");
-            return -1;
-        }
+        printf("Error loading font\n");
+        return -1;
     }
 
-    //init keyboard
     if (!al_install_keyboard()) {
         printf("Error installing keyboard\n");
         return -1;
     }
 
-    //init mouse
     if (!al_install_mouse()) {
         printf("Error installing mouse\n");
         return -1;
     }
 
-    //create event queue
     ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	event_queue = al_create_event_queue();
 
-     //clear to color
     al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_clear_to_color(al_map_rgb(0,0,0));
 
-    //register event source
-	al_register_event_source(event_queue, al_get_keyboard_event_source());
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 
-
-    //create the game board
-
-    // fill the game board with 25 cards 
-
-    // initialize game and draw initial grid
     memory.setup();
     draw_grid();
+    draw_status(memory, font);
     al_flip_display();
 
     while (!done) 
@@ -173,25 +126,22 @@ int main(void)
             // check valid grid position 
             if (mouse_x >= 0 && mouse_y >= 0) {
                 // handle the card click first
-                handle_card_click(mouse_y, mouse_x, memory);
+                handle_card_click(mouse_y, mouse_x, memory, font);
                 
-                // then check if game is over after this move
+                // check if game over 
                 if (memory.game_over(memory.get_pairs_remaining())) {
-                    // show win message
                     al_clear_to_color(al_map_rgb(0,0,0));
                     draw_grid();
                     
                     // draw X on all matched cards 
-                    for (int r = 0; r < 5; r++) {
-                        for (int c = 0; c < 5; c++) {
-                            if (memory.is_card_matched(r, c)) {
-                                int center_x = c * 128 + 64;
-                                int center_y = r * 104 + 52;
-                                al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
-                                al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
-                            }
-                        }
+                    draw_x_marks(memory);
+                    
+                    // display win message
+                    if (font) {
+                        al_draw_text(font, al_map_rgb(255, 255, 255), 320, 250, ALLEGRO_ALIGN_CENTER, "congratulations! you won!");
+                        al_draw_text(font, al_map_rgb(255, 255, 255), 320, 270, ALLEGRO_ALIGN_CENTER, "press escape to exit");
                     }
+                    draw_status(memory, font);
                     al_flip_display();
                 }
             }
@@ -206,27 +156,24 @@ int main(void)
     return 0;
 }
 
-
-
-// get_mouse_input 
+// get mouse input: wait for user to click on the game board and make a selection 
+// @param x: the x coordinate of the mouse
+// @param y: the y coordinate of the mouse
+// @return: the grid coordinates of the mouse
 void get_mouse_input(int &x, int &y)
 {
-    // convert mouse coordinates to grid position
     if (x >= 0 && x < 640 && y >= 0 && y < 520) {
-        // convert to grid coordinates (0-4)
-        int col = x / 128;  // 640 / 5 = 128 
-        int row = y / 104;  // 520 / 5 = 104 
+        int col = x / 128; 
+        int row = y / 104;   
         
-        // return grid coordinates
         x = col;
         y = row;
     }
 }
 
+// draw the 5*5 grid 
 void draw_grid()
 {
-    // full screen grid -
-    // vertical lines
     al_draw_line(0, 0, 0, 520, al_map_rgb(255, 255, 255), 2);     // left edge
     al_draw_line(128, 0, 128, 520, al_map_rgb(255, 255, 255), 2); // column 1
     al_draw_line(256, 0, 256, 520, al_map_rgb(255, 255, 255), 2); // column 2  
@@ -234,7 +181,6 @@ void draw_grid()
     al_draw_line(512, 0, 512, 520, al_map_rgb(255, 255, 255), 2); // column 4
     al_draw_line(640, 0, 640, 520, al_map_rgb(255, 255, 255), 2); // right edge
     
-    // horizontal lines
     al_draw_line(0, 0, 640, 0, al_map_rgb(255, 255, 255), 2);     // top edge
     al_draw_line(0, 104, 640, 104, al_map_rgb(255, 255, 255), 2); // row 1
     al_draw_line(0, 208, 640, 208, al_map_rgb(255, 255, 255), 2); // row 2
@@ -307,87 +253,86 @@ void draw_filled_octagon(int x, int y)
     al_draw_filled_rectangle(x - 25, y - 20, x + 25, y + 20, al_map_rgb(150, 255, 150));
 }
 
-void handle_card_click(int row, int col, game &memory)
+// draw X marks on all matched cards
+// @param memory: the game object
+void draw_x_marks(game &memory)
 {
-    // graphics logic for handling card clicks
+    for (int r = 0; r < 5; r++) {
+        for (int c = 0; c < 5; c++) {
+            if (memory.is_card_matched(r, c)) {
+                int center_x = c * 128 + 64;
+                int center_y = r * 104 + 52;
+                al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
+                al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
+            }
+        }
+    }
+}
+
+// handle card click: handle the card click 
+// @param row: the row of the card
+// @param col: the column of the card
+// @param memory: the game object
+// @param font: the font object
+void handle_card_click(int row, int col, game &memory, ALLEGRO_FONT *font)
+{
     if (!memory.is_first_card_flipped()) {
-        // first card click
         if (memory.flip_first_card(row, col)) {
-            // redraw to show flipped card
             al_clear_to_color(al_map_rgb(0,0,0));
             draw_grid();
             
-            // draw all matched cards with X marks
+            draw_x_marks(memory);
+            // draw the cards that are not matched
             for (int r = 0; r < 5; r++) {
                 for (int c = 0; c < 5; c++) {
-                    int center_x = c * 128 + 64;
-                    int center_y = r * 104 + 52;
-                    
-                    if (memory.is_card_matched(r, c)) {
-                        // draw x for matched cards
-                        al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
-                        al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
-                    } else if (memory.is_card_revealed(r, c)) {
-                        // draw revealed shape (the first card just clicked)
+                    if (memory.is_card_revealed(r, c) && !memory.is_card_matched(r, c)) {
+                        int center_x = c * 128 + 64;
+                        int center_y = r * 104 + 52;
                         int shape = memory.get_shape(r, c);
                         draw_shape(center_x, center_y, shape);
                     }
                 }
             }
+            draw_status(memory, font);
             al_flip_display();
         }
     } else {
-        // second card click
         bool match_found = memory.flip_second_card(row, col);
         
-        // redraw grid with both cards visible
         al_clear_to_color(al_map_rgb(0,0,0));
         draw_grid();
         
-        // draw all revealed and matched cards
+        draw_x_marks(memory);
+        // draw the cards that are not matched
         for (int r = 0; r < 5; r++) {
             for (int c = 0; c < 5; c++) {
-                int center_x = c * 128 + 64;
-                int center_y = r * 104 + 52;
-                
-                if (memory.is_card_matched(r, c)) {
-                    // draw x for matched cards
-                    al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
-                    al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
-                } else if (memory.is_card_revealed(r, c)) {
-                    // draw revealed shape
+                if (memory.is_card_revealed(r, c) && !memory.is_card_matched(r, c)) {
+                    int center_x = c * 128 + 64;
+                    int center_y = r * 104 + 52;
                     int shape = memory.get_shape(r, c);
                     draw_shape(center_x, center_y, shape);
                 }
             }
         }
+        draw_status(memory, font);
         al_flip_display();
         
         if (!match_found) {
-            // cards don't match - show for 5 seconds then hide
             al_rest(2.0);
-            // hide the mismatched cards in game logic
             memory.hide_mismatched_cards();
-            // redraw without mismatched cards
             al_clear_to_color(al_map_rgb(0,0,0));
             draw_grid();
-            // only show matched cards
-            for (int r = 0; r < 5; r++) {
-                for (int c = 0; c < 5; c++) {
-                    if (memory.is_card_matched(r, c)) {
-                        int center_x = c * 128 + 64;
-                        int center_y = r * 104 + 52;
-                        al_draw_line(center_x - 30, center_y - 30, center_x + 30, center_y + 30, al_map_rgb(255, 0, 0), 4);
-                        al_draw_line(center_x - 30, center_y + 30, center_x + 30, center_y - 30, al_map_rgb(255, 0, 0), 4);
-                    }
-                }
-            }
+            draw_x_marks(memory);
+            draw_status(memory, font);
             al_flip_display();
         }
     }
 }
 
 // draw shapes based on type
+// @param x: the x coordinate of the shape
+// @param y: the y coordinate of the shape
+// @param shape_type: the type of shape to draw
 void draw_shape(int x, int y, int shape_type) {
     switch(shape_type) {
         case 1:  // filled circle
@@ -427,8 +372,36 @@ void draw_shape(int x, int y, int shape_type) {
             draw_filled_octagon(x, y);
             break;
         default:
-            // empty space - do nothing
             break;
+    }
+}
+
+// bottom right hand square that shows the number of pairs remaining and the number of moves made
+// @param memory: the game object
+// @param font: the font object
+void draw_status(game &memory, ALLEGRO_FONT *font)
+{
+    int status_x = 512;
+    int status_y = 416;
+    int status_width = 128;
+    int status_height = 104;
+    
+    al_draw_filled_rectangle(status_x, status_y, status_x + status_width, status_y + status_height, al_map_rgb(40, 40, 40));
+    
+    if (font) {
+        al_draw_text(font, al_map_rgb(255, 255, 255), status_x + 5, status_y + 5, 0, "MEMORY GAME");
+        
+        char moves_text[32];
+        sprintf_s(moves_text, sizeof(moves_text), "moves: %d", memory.get_number_of_moves());
+        al_draw_text(font, al_map_rgb(255, 255, 255), status_x + 5, status_y + 25, 0, moves_text);
+        
+        char pairs_found_text[32];
+        sprintf_s(pairs_found_text, sizeof(pairs_found_text), "found: %d", memory.get_pairs_found());
+        al_draw_text(font, al_map_rgb(255, 255, 255), status_x + 5, status_y + 45, 0, pairs_found_text);
+        
+        char pairs_left_text[32];
+        sprintf_s(pairs_left_text, sizeof(pairs_left_text), "left: %d", memory.get_pairs_remaining());
+        al_draw_text(font, al_map_rgb(255, 255, 255), status_x + 5, status_y + 65, 0, pairs_left_text);
     }
 }
 

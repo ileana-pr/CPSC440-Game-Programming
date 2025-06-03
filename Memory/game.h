@@ -26,8 +26,9 @@ public:
     bool flip_first_card(int row, int col);    // flips first card
     bool flip_second_card(int row, int col);   // flips second card and checks match
     int get_pairs_remaining();                 // gets number of pairs remaining
+    int get_number_of_moves();                 // gets number of moves made
+    int get_pairs_found();                     // gets number of pairs found
     void hide_mismatched_cards();              // hides cards after mismatch
     bool compare_shapes(int row1, int col1, int row2, int col2);  // compares two cards
     void update_game(double delta_time);       // updates game timing
-    void debug_print_board();                  // debug method to print board state
 };
