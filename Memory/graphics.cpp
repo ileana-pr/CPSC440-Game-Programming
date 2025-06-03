@@ -389,7 +389,7 @@ void draw_status(game &memory, ALLEGRO_FONT *font)
     al_draw_filled_rectangle(status_x, status_y, status_x + status_width, status_y + status_height, al_map_rgb(40, 40, 40));
     
     if (font) {
-        al_draw_text(font, al_map_rgb(255, 255, 255), status_x + 5, status_y + 5, 0, "MEMORY GAME");
+        al_draw_text(font, al_map_rgb(255, 255, 255), status_x + 3, status_y + 5, 0, "MEMORY");
         
         char moves_text[32];
         sprintf_s(moves_text, sizeof(moves_text), "moves: %d", memory.get_number_of_moves());
