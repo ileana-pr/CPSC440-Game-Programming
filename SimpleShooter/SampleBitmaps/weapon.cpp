@@ -3,7 +3,6 @@
 #include <allegro5\allegro_image.h>
 #include "weapon.h"
 
-int dir; // 0=up, 1=right, 2=down, 3=left
 
 weapon::~weapon()
 {
@@ -50,7 +49,7 @@ void weapon::Fireweapon(player &Player)
 {
 	if(!live)
 	{
-		dir = Player.dir; // set weapon direction to player's direction
+		dir = Player.getDir(); // set weapon direction to player's direction
 		switch(dir) {
 			case 0: // up
 				x = Player.getX() + Player.getBoundX()/2;

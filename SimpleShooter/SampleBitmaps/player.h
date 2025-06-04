@@ -19,6 +19,7 @@ public:
 	int getBoundY(){return boundy;}
 	int getX(){return x;}
 	int getY(){return y;}
+	int getDir() { return dir; }
 private:
 	int x;
 	int y;

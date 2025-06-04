@@ -112,3 +112,4 @@ void player::MoveRight(int WIDTH, BadGuy BadGuys[], int cSize)
 		x = new_x;
 }
 
+

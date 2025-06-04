@@ -24,7 +24,7 @@ BadGuy::BadGuy()
 	boundx = al_get_bitmap_width(image)*.75;
 	boundy = al_get_bitmap_height(image)*.75;
 	live = false;
-
+	speed = 0;
 }
 void BadGuy::DrawBadGuy()
 {
@@ -46,10 +46,10 @@ void BadGuy::StartBadGuy(int WIDTH, int HEIGHT, BadGuy BadGuys[], int cSize)
 			live = true;
 			do{
 				x =  rand() % (WIDTH - boundx); 
-			}while (x <100 & !CheckCollision(BadGuys, cSize));
+			}while (x <100 && !CheckCollision(BadGuys, cSize));
 			do{
 				y =  rand() % (HEIGHT - boundy);
-			}while (y<100 & !CheckCollision(BadGuys, cSize));
+			}while (y<100 && !CheckCollision(BadGuys, cSize));
 
 		}
 	}
