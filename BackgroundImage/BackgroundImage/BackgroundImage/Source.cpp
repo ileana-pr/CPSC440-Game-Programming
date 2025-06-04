@@ -15,17 +15,17 @@ int main(int argc, char **argv){
 	const float FPS = 60;
 	const int SCREEN_W = 640;
 	const int SCREEN_H = 480;
-	const int duck_SIZE = 32;
+	const int bee_SIZE = 128;
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
 
-	float duck_x = SCREEN_W / 2.0 - duck_SIZE / 2.0;
-	float duck_y = SCREEN_H / 2.0 - duck_SIZE / 2.0;
-	float duck_dx = -4.0, duck_dy = 4.0;
+	float bee_x = SCREEN_W / 2.0 - bee_SIZE / 2.0;
+	float bee_y = SCREEN_H / 2.0 - bee_SIZE / 2.0;
+	float bee_dx = -4.0, bee_dy = 4.0;
 	bool redraw = true;
 	ALLEGRO_BITMAP *image=NULL;
-	ALLEGRO_BITMAP *duck = NULL;
+	ALLEGRO_BITMAP *bee = NULL;
 
 	if(!al_init()) {
 		return -1;
@@ -46,11 +46,11 @@ int main(int argc, char **argv){
 
 	al_init_image_addon();
 	image = al_load_bitmap("cool.png");
-	duck = al_load_bitmap("duck.png");
-	al_convert_mask_to_alpha(duck, al_map_rgb(255, 0, 255));
+	bee = al_load_bitmap("bee.png");
+	al_convert_mask_to_alpha(bee, al_map_rgb(255, 0, 255));
 	event_queue = al_create_event_queue();
 	if(!event_queue) {
-		al_destroy_bitmap(duck);
+		al_destroy_bitmap(bee);
 		al_destroy_display(display);
 		al_destroy_timer(timer);
 		return -1;
@@ -72,16 +72,16 @@ int main(int argc, char **argv){
 		al_wait_for_event(event_queue, &ev);
 
 		if(ev.type == ALLEGRO_EVENT_TIMER) {
-			if(duck_x < 0 || duck_x > SCREEN_W - duck_SIZE) {
-				duck_dx = -duck_dx;
+			if(bee_x < 0 || bee_x > SCREEN_W - bee_SIZE) {
+				bee_dx = -bee_dx;
 			}
 
-			if(duck_y < 0 || duck_y > SCREEN_H - duck_SIZE) {
-				duck_dy = -duck_dy;
+			if(bee_y < 0 || bee_y > SCREEN_H - bee_SIZE) {
+				bee_dy = -bee_dy;
 			}
 
-			duck_x += duck_dx;
-			duck_y += duck_dy;
+			bee_x += bee_dx;
+			bee_y += bee_dy;
 
 			redraw = true;
 		}
@@ -94,13 +94,17 @@ int main(int argc, char **argv){
 
 			al_clear_to_color(al_map_rgb(0,0,0));
 			al_draw_bitmap(image,0,0,0);
-			al_draw_bitmap(duck, duck_x, duck_y, 0);
-
+			al_draw_scaled_bitmap(
+				bee, 
+				0, 0, al_get_bitmap_width(bee), al_get_bitmap_height(bee), 
+				bee_x, bee_y, bee_SIZE, bee_SIZE, 
+				0
+			);
 			al_flip_display();
 		}
 	}
 
-	al_destroy_bitmap(duck);
+	al_destroy_bitmap(bee);
 	al_destroy_bitmap(image);
 	al_destroy_timer(timer);
 	al_destroy_display(display);
