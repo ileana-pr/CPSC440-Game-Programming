@@ -26,7 +26,8 @@ player::player(int HEIGHT)
 	al_draw_line(32,0,32,64,al_map_rgb(255, 100, 255),2);
 	al_draw_circle(32,32,16,al_map_rgb(200, 200, 200),5);
 
-
+	// add yellow triangle 
+	al_draw_filled_triangle(32, 2, 26, 14, 38, 14, al_map_rgb(255,255,0));
 
 	x = 20;
 	y = HEIGHT / 2;
@@ -35,6 +36,7 @@ player::player(int HEIGHT)
 	boundx = al_get_bitmap_width(image);
 	boundy = al_get_bitmap_height(image);
 
+	dir = 0; // set direction to up 
 }
 
 // collision detection 
@@ -59,10 +61,18 @@ bool player::playerCollision(int new_x, int new_y, BadGuy BadGuys[], int cSize)
 
 void player::DrawPlayer()
 {
-	al_draw_bitmap(image, x,y, 0);
+	float angle = 0;
+	switch(dir) {
+		case 0: angle = 0; break; // up
+		case 1: angle = ALLEGRO_PI / 2; break; // right
+		case 2: angle = ALLEGRO_PI; break; // down
+		case 3: angle = 3 * ALLEGRO_PI / 2; break; // left
+	}
+	al_draw_rotated_bitmap(image, boundx/2, boundy/2, x + boundx/2, y + boundy/2, angle, 0);
 }
 void player::MoveUp(BadGuy BadGuys[], int cSize)
 {
+	dir = 0;
 	int new_y = y - speed;
 	if(new_y < 0)
 		new_y = 0;
@@ -72,6 +82,7 @@ void player::MoveUp(BadGuy BadGuys[], int cSize)
 }
 void player::MoveDown(int HEIGHT, BadGuy BadGuys[], int cSize)
 {
+	dir = 2;
 	int new_y = y + speed;
 	if(new_y > HEIGHT-boundy)
 		new_y = HEIGHT-boundy;
@@ -81,6 +92,7 @@ void player::MoveDown(int HEIGHT, BadGuy BadGuys[], int cSize)
 }
 void player::MoveLeft(BadGuy BadGuys[], int cSize)
 {
+	dir = 3;
 	int new_x = x - speed;
 	if(new_x < 0)
 		new_x = 0;
@@ -90,6 +102,7 @@ void player::MoveLeft(BadGuy BadGuys[], int cSize)
 }
 void player::MoveRight(int WIDTH, BadGuy BadGuys[], int cSize)
 {
+	dir = 1;
 	int new_x = x + speed;
 	if(new_x > WIDTH-boundx)
 		new_x = WIDTH-boundx;

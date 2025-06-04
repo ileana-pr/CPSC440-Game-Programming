@@ -23,6 +23,7 @@ private:
 	int x;
 	int y;
 	int speed;
+	int dir;
 	int boundx;
 	int boundy;
 	ALLEGRO_BITMAP *image;
