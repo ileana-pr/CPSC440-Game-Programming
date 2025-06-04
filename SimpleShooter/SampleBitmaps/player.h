@@ -26,9 +26,6 @@ private:
 	int boundx;
 	int boundy;
 	ALLEGRO_BITMAP *image;
-	
-	// helper function to check collision with badguys
-	bool playerCollision(int new_x, int new_y, BadGuy BadGuys[], int cSize);
 };
 #endif
 

@@ -9,7 +9,8 @@ public:
 	BadGuy();
 	~BadGuy();
 	void DrawBadGuy();
-	void StartBadGuy(int WIDTH, int HEIGHT );
+	void StartBadGuy(int WIDTH, int HEIGHT, BadGuy BadGuys[], int cSize);
+	bool CheckCollision(BadGuy BadGuys[], int cSize);
 	int getBoundX(){return boundx;}
 	int getBoundY(){return boundy;}
 	int getX(){return x;}

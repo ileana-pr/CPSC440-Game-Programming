@@ -38,7 +38,7 @@ player::player(int HEIGHT)
 }
 
 // collision detection 
-bool player::playerCollision(int new_x, int new_y, BadGuy *BadGuys, int cSize)
+bool player::playerCollision(int new_x, int new_y, BadGuy BadGuys[], int cSize)
 {
 	for(int i = 0; i < cSize; i++)
 	{

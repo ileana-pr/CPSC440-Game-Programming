@@ -36,22 +36,40 @@ void BadGuy::DrawBadGuy()
 	}
 
 }
-void BadGuy::StartBadGuy(int WIDTH, int HEIGHT )
+void BadGuy::StartBadGuy(int WIDTH, int HEIGHT, BadGuy BadGuys[], int cSize)
 {
 
-	if(!live)
+	if(!live) 
 	{
 		if(rand() % 500 == 0)
 		{
 			live = true;
 			do{
 				x =  rand() % (WIDTH - boundx); 
-			}while (x <100);
+			}while (x <100 & !CheckCollision(BadGuys, cSize));
 			do{
 				y =  rand() % (HEIGHT - boundy);
-			}while (y<100);
+			}while (y<100 & !CheckCollision(BadGuys, cSize));
 
 		}
 	}
+}
+
+bool BadGuy::CheckCollision(BadGuy BadGuys[], int cSize)
+{
+	for(int i = 0; i < cSize; i++)
+	{
+		if(BadGuys[i].getLive())
+		{
+			if(x > (BadGuys[i].getX() - BadGuys[i].getBoundX()) &&
+				x < (BadGuys[i].getX() + BadGuys[i].getBoundX()) &&
+				y > (BadGuys[i].getY() - BadGuys[i].getBoundY()) &&
+				y < (BadGuys[i].getY() + BadGuys[i].getBoundY()))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
