@@ -69,13 +69,13 @@ int main(void)
 		{
 			redraw = true;
 			if(keys[UP])
-				myPlayer.MoveUp();
+				myPlayer.MoveUp(BadGuys, NUM_BadGuyS);
 			if(keys[DOWN])
-				myPlayer.MoveDown(HEIGHT);
+				myPlayer.MoveDown(HEIGHT, BadGuys, NUM_BadGuyS);
 			if(keys[LEFT])
-				myPlayer.MoveLeft();
+				myPlayer.MoveLeft(BadGuys, NUM_BadGuyS);
 			if(keys[RIGHT])
-				myPlayer.MoveRight(WIDTH);
+				myPlayer.MoveRight(WIDTH, BadGuys, NUM_BadGuyS);
 
 			for(int i=0;i<NUM_weapons;i++)
 				weapons[i].Updateweapon(WIDTH);
