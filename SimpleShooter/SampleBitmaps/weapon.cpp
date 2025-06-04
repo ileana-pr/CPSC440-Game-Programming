@@ -3,6 +3,7 @@
 #include <allegro5\allegro_image.h>
 #include "weapon.h"
 
+int dir; // 0=up, 1=right, 2=down, 3=left
 
 weapon::~weapon()
 {
@@ -45,22 +46,42 @@ void weapon::Drawweapon()
 		angle+=.1;
 	}
 }
-void weapon::Fireweapon( player &Player)
+void weapon::Fireweapon(player &Player)
 {
 	if(!live)
 	{
-		x = Player.getX() + Player.getBoundX();
-		y = Player.getY() + Player.getBoundY()/2;
+		dir = Player.dir; // set weapon direction to player's direction
+		switch(dir) {
+			case 0: // up
+				x = Player.getX() + Player.getBoundX()/2;
+				y = Player.getY();
+				break;
+			case 1: // right
+				x = Player.getX() + Player.getBoundX();
+				y = Player.getY() + Player.getBoundY()/2;
+				break;
+			case 2: // down
+				x = Player.getX() + Player.getBoundX()/2;
+				y = Player.getY() + Player.getBoundY();
+				break;
+			case 3: // left
+				x = Player.getX();
+				y = Player.getY() + Player.getBoundY()/2;
+				break;
+		}
 		live = true;
 	}
 }
-void weapon::Updateweapon(int WIDTH)
+void weapon::Updateweapon(int WIDTH, int HEIGHT)
 {
 	if(live)
 	{
-		x += speed;
-		if(x > WIDTH)
-			live = false;
+		switch(dir) {
+			case 0: y -= speed; if(y < 0) live = false; break; // up
+			case 1: x += speed; if(x > WIDTH) live = false; break; // right
+			case 2: y += speed; if(y > HEIGHT) live = false; break; // down
+			case 3: x -= speed; if(x < 0) live = false; break; // left
+		}
 	}
 }
 void weapon::Collideweapon(BadGuy BadGuys[], int cSize)
