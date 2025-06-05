@@ -1,11 +1,5 @@
-/* you may get a warning
-* Libpng-1.6 is more stringent about checking ICC profiles than previous versions. You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
-
-Some applications treat warnings as errors; if you are using such an application you do have to remove the chunk. You can do that with any of a variety of PNG editors such as ImageMagick's convert in.png out.png.
-
-To remove the invalid iCCP chunk from all of the PNG files in a folder (directory), you can use ImageMagick's mogrify *.png, provided that your ImageMagick was built with libpng16 (run convert -list format | grep PNG to be sure of that).
-*/
-
+//Name: Ileana Perez 
+// CPSC 440: Lab 8
 
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_image.h>
@@ -15,7 +9,8 @@ int main(int argc, char **argv){
 	const float FPS = 60;
 	const int SCREEN_W = 900;
 	const int SCREEN_H = 800;
-	const int bee_SIZE = 128;
+	const int bee_SIZE = 64;
+	const int bee_draw_size = 128;
 	int bee_flip = 0;
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
@@ -23,11 +18,14 @@ int main(int argc, char **argv){
 
 	float bee_x = SCREEN_W / 2.0 - bee_SIZE / 2.0;
 	float bee_y = SCREEN_H / 2.0 - bee_SIZE / 2.0;
-	float bee_dx = -4.0, bee_dy = 4.0;
+	float bee_dx = 0, bee_dy = -4.0;
 	bool redraw = true;
 	bool bee_moving = true;
 	ALLEGRO_BITMAP *image=NULL;
 	ALLEGRO_BITMAP *bee = NULL;
+	float angle = 0; 
+	float target_angle = 0;
+	bool rotating = false;
 
 	if(!al_init()) {
 		return -1;
@@ -77,16 +75,55 @@ int main(int argc, char **argv){
 
 		if(ev.type == ALLEGRO_EVENT_TIMER) {
 			if(bee_moving) {
-				if(bee_x < 0 || bee_x > SCREEN_W - bee_SIZE) {
-				bee_dx = -bee_dx;
-				}
+				bee_x += bee_dx;
+				bee_y += bee_dy;
 
-				if(bee_y < 0 || bee_y > SCREEN_H - bee_SIZE) {
-				bee_dy = -bee_dy;
+				// left edge
+				if(bee_x < 0) {
+					bee_x = 0;
+					bee_dx = -bee_dx;
+					target_angle = angle + 3.14f;
+					rotating = true;
 				}
+				// right edge
+				if(bee_x > SCREEN_W - bee_draw_size) {
+					bee_x = SCREEN_W - bee_draw_size;
+					bee_dx = -bee_dx;
+					target_angle = angle + 3.14f;
+					rotating = true;
+				}
+				// top edge
+				if(bee_y < 0) {
+					bee_y = 0;
+					bee_dy = -bee_dy;
+					target_angle = angle + 3.14f;
+					rotating = true;
+				}
+				// bottom edge
+				if(bee_y > SCREEN_H - bee_draw_size) {
+					bee_y = SCREEN_H - bee_draw_size;
+					bee_dy = -bee_dy;
+					target_angle = angle + 3.14f;
+					rotating = true;
+				}
+			}
 
-			bee_x += bee_dx;
-			bee_y += bee_dy;
+			// rotate towards target_angle
+			if(rotating) {
+				float rotation_speed = 0.1f; // adjust for smoothness
+				if(angle < target_angle) {
+					angle += rotation_speed;
+					if(angle >= target_angle) {
+						angle = target_angle;
+						rotating = false;
+					}
+				} else if(angle > target_angle) {
+					angle -= rotation_speed;
+					if(angle <= target_angle) {
+						angle = target_angle;
+						rotating = false;
+					}
+				}
 			}
 
 			redraw = true;
@@ -122,10 +159,13 @@ int main(int argc, char **argv){
 				0, 0, SCREEN_W, SCREEN_H, 
 				0
 			);
-			al_draw_scaled_bitmap(
-				bee, 
-				0, 0, al_get_bitmap_width(bee), al_get_bitmap_height(bee), 
-				bee_x, bee_y, bee_SIZE, bee_SIZE, 
+			float scale = (float)bee_draw_size / (float)al_get_bitmap_width(bee);
+			al_draw_scaled_rotated_bitmap(
+				bee,
+				al_get_bitmap_width(bee)/2, al_get_bitmap_height(bee)/2,
+				bee_x + bee_draw_size/2, bee_y + bee_draw_size/2,
+				scale, scale,
+				angle,
 				bee_flip
 			);
 			al_flip_display();
