@@ -13,8 +13,8 @@ To remove the invalid iCCP chunk from all of the PNG files in a folder (director
 int main(int argc, char **argv){
 
 	const float FPS = 60;
-	const int SCREEN_W = 640;
-	const int SCREEN_H = 480;
+	const int SCREEN_W = 900;
+	const int SCREEN_H = 800;
 	const int bee_SIZE = 128;
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
@@ -45,7 +45,7 @@ int main(int argc, char **argv){
 
 
 	al_init_image_addon();
-	image = al_load_bitmap("cool.png");
+	image = al_load_bitmap("flowers.png");
 	bee = al_load_bitmap("bee.png");
 	al_convert_mask_to_alpha(bee, al_map_rgb(255, 0, 255));
 	event_queue = al_create_event_queue();
@@ -93,7 +93,12 @@ int main(int argc, char **argv){
 			redraw = false;
 
 			al_clear_to_color(al_map_rgb(0,0,0));
-			al_draw_bitmap(image,0,0,0);
+			al_draw_scaled_bitmap(
+				image, 
+				0, 0, al_get_bitmap_width(image), al_get_bitmap_height(image), 
+				0, 0, SCREEN_W, SCREEN_H, 
+				0
+			);
 			al_draw_scaled_bitmap(
 				bee, 
 				0, 0, al_get_bitmap_width(bee), al_get_bitmap_height(bee), 
