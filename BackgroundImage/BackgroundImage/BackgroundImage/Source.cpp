@@ -91,25 +91,25 @@ int main(int argc, char **argv){
 
 			redraw = true;
 		}
-		else if(ev.type == ALLEGRO_EVENT_KEY_DOWN) {
-			if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
-				bee_moving = !bee_moving;
-			}
-			else if(ev.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-				bee_flip = ALLEGRO_FLIP_HORIZONTAL;
-			}
-			else if(ev.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-				bee_flip = 0;
-			}
-			else if(ev.keyboard.keycode == ALLEGRO_KEY_UP) {
-				bee_flip = ALLEGRO_FLIP_VERTICAL;
-			}
-			else if(ev.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-				bee_flip = ALLEGRO_FLIP_HORIZONTAL | ALLEGRO_FLIP_VERTICAL;
-			}
+		
+		else if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
+			bee_moving = !bee_moving;
 		}
+		else if(ev.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+			bee_flip = ALLEGRO_FLIP_HORIZONTAL;
+		}
+		else if(ev.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+			bee_flip = 0;
+		}
+		else if(ev.keyboard.keycode == ALLEGRO_KEY_UP) {
+			bee_flip = 0;
+		}
+		else if(ev.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+			bee_flip = ALLEGRO_FLIP_VERTICAL;
+		}
+	
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-			break;
+		break;
 		}
 
 		if(redraw && al_is_event_queue_empty(event_queue)) {
