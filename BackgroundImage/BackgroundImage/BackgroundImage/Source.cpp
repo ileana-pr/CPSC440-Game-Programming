@@ -24,12 +24,15 @@ int main(int argc, char **argv){
 	float bee_y = SCREEN_H / 2.0 - bee_SIZE / 2.0;
 	float bee_dx = -4.0, bee_dy = 4.0;
 	bool redraw = true;
+	bool bee_moving = true;
 	ALLEGRO_BITMAP *image=NULL;
 	ALLEGRO_BITMAP *bee = NULL;
 
 	if(!al_init()) {
 		return -1;
 	}
+
+	al_install_keyboard();
 
 	timer = al_create_timer(1.0 / FPS);
 	if(!timer) {
@@ -57,8 +60,8 @@ int main(int argc, char **argv){
 	}
 
 	al_register_event_source(event_queue, al_get_display_event_source(display));
-
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
+	al_register_event_source(event_queue, al_get_keyboard_event_source());
 
 	al_clear_to_color(al_map_rgb(0,0,0));
 
@@ -72,18 +75,25 @@ int main(int argc, char **argv){
 		al_wait_for_event(event_queue, &ev);
 
 		if(ev.type == ALLEGRO_EVENT_TIMER) {
-			if(bee_x < 0 || bee_x > SCREEN_W - bee_SIZE) {
+			if(bee_moving) {
+				if(bee_x < 0 || bee_x > SCREEN_W - bee_SIZE) {
 				bee_dx = -bee_dx;
-			}
+				}
 
-			if(bee_y < 0 || bee_y > SCREEN_H - bee_SIZE) {
+				if(bee_y < 0 || bee_y > SCREEN_H - bee_SIZE) {
 				bee_dy = -bee_dy;
-			}
+				}
 
 			bee_x += bee_dx;
 			bee_y += bee_dy;
+			}
 
 			redraw = true;
+		}
+		else if(ev.type == ALLEGRO_EVENT_KEY_DOWN) {
+			if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
+				bee_moving = !bee_moving;
+			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 			break;
