@@ -16,6 +16,7 @@ int main(int argc, char **argv){
 	const int SCREEN_W = 900;
 	const int SCREEN_H = 800;
 	const int bee_SIZE = 128;
+	int bee_flip = 0;
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
@@ -94,6 +95,18 @@ int main(int argc, char **argv){
 			if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
 				bee_moving = !bee_moving;
 			}
+			else if(ev.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+				bee_flip = ALLEGRO_FLIP_HORIZONTAL;
+			}
+			else if(ev.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+				bee_flip = 0;
+			}
+			else if(ev.keyboard.keycode == ALLEGRO_KEY_UP) {
+				bee_flip = ALLEGRO_FLIP_VERTICAL;
+			}
+			else if(ev.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+				bee_flip = ALLEGRO_FLIP_HORIZONTAL | ALLEGRO_FLIP_VERTICAL;
+			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
 			break;
@@ -113,7 +126,7 @@ int main(int argc, char **argv){
 				bee, 
 				0, 0, al_get_bitmap_width(bee), al_get_bitmap_height(bee), 
 				bee_x, bee_y, bee_SIZE, bee_SIZE, 
-				0
+				bee_flip
 			);
 			al_flip_display();
 		}
