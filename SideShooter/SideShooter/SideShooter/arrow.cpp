@@ -2,6 +2,7 @@
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_image.h>
 #include "Arrow.h"
+#include "player.h"
 
 Arrow::Arrow()
 {
@@ -38,7 +39,7 @@ void Arrow::UpdateArrow(int WIDTH)
 			live = false;
 	}
 }
-void Arrow::CollideArrow(ghost ghosts[], int cSize)
+void Arrow::CollideArrow(ghost ghosts[], int cSize, player &Player)
 {
 	if(live)
 	{
@@ -53,6 +54,7 @@ void Arrow::CollideArrow(ghost ghosts[], int cSize)
 				{
 					live = false;
 					ghosts[j].setLive(false);
+					Player.addScore();
 				}
 			}
 		}

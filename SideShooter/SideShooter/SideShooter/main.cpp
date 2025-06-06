@@ -86,7 +86,7 @@ int main(void)
 			for(int i=0;i<NUM_ghostS;i++)
 				ghosts[i].Updateghost();
 			for(int i=0;i<NUM_ArrowS;i++)
-				Arrows[i].CollideArrow(ghosts, NUM_ghostS);
+				Arrows[i].CollideArrow(ghosts, NUM_ghostS, myPlayer);
 			for(int i=0;i<NUM_ghostS;i++)
 				ghosts[i].Collideghost(myPlayer);
 		}
@@ -162,7 +162,7 @@ int main(void)
 			{
 				al_clear_to_color(al_map_rgb(0,0,0));
 				al_draw_textf(font, al_map_rgb(255,0,0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTRE, "game over!");
-				al_draw_textf(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2, ALLEGRO_ALIGN_CENTRE, "final ghosts killed: %d", myPlayer.getScore());
+				al_draw_textf(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2, ALLEGRO_ALIGN_CENTRE, "total ghosts killed: %d", myPlayer.getScore());
 				al_draw_textf(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2 + 40, ALLEGRO_ALIGN_CENTRE, "thanks for playing!");
 				al_flip_display();
 				al_rest(5.0);

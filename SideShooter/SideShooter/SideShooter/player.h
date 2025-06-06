@@ -17,6 +17,7 @@ public:
 	void removeLife();
 	int getLives(){return lives;}
 	int getScore(){return score;}
+	void addScore(){score++;}
 private:
 	int x;
 	int y;
