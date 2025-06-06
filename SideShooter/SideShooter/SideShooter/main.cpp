@@ -1,6 +1,8 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_image.h>
+#include <allegro5\allegro_font.h>
+#include <allegro5\allegro_ttf.h>
 #include "player.h"
 #include "ghost.h"
 #include "Arrow.h"
@@ -26,18 +28,24 @@ int main(void)
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer = NULL;
+	ALLEGRO_FONT *font = NULL;
 
 	//Initialization Functions
-	if(!al_init())										//initialize Allegro
+	if(!al_init())										
 		return -1;
 
-	display = al_create_display(WIDTH, HEIGHT);			//create our display object
+	display = al_create_display(WIDTH, HEIGHT);			
 
-	if(!display)										//test display object
+	if(!display)										
 		return -1;
 
 	al_install_keyboard();
 	al_init_image_addon();
+	al_init_font_addon();
+	al_init_ttf_addon();
+	font = al_load_ttf_font("Bombing.ttf", 20, 0);
+	if(!font)
+		return -1;
 
 	//object variables
 	player myPlayer(HEIGHT);
@@ -147,6 +155,9 @@ int main(void)
 			for(int i=0;i<NUM_ghostS;i++)
 				ghosts[i].Drawghost();
 
+			al_draw_textf(font, al_map_rgb(255,255,255), 10, 10, 0, "lives: %d", myPlayer.getLives());
+			al_draw_textf(font, al_map_rgb(255,255,255), 10, 40, 0, "ghosts killed: %d", myPlayer.getScore());
+
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
@@ -154,7 +165,8 @@ int main(void)
 
 	al_destroy_event_queue(event_queue);
 	al_destroy_timer(timer);
-	al_destroy_display(display);						//destroy our display object
+	al_destroy_display(display);					
+	al_destroy_font(font);
 	system("Pause");
 	return 0;
 }
