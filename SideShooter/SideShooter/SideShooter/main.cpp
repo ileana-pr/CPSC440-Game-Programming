@@ -43,7 +43,7 @@ int main(void)
 	al_init_image_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();
-	font = al_load_ttf_font("Bombing.ttf", 20, 0);
+	font = al_load_ttf_font("AppleGaramond.ttf", 20, 0);
 	if(!font)
 		return -1;
 
@@ -157,6 +157,17 @@ int main(void)
 
 			al_draw_textf(font, al_map_rgb(255,255,255), 10, 10, 0, "lives: %d", myPlayer.getLives());
 			al_draw_textf(font, al_map_rgb(255,255,255), 10, 40, 0, "ghosts killed: %d", myPlayer.getScore());
+
+			if(myPlayer.getLives() <= 0)
+			{
+				al_clear_to_color(al_map_rgb(0,0,0));
+				al_draw_textf(font, al_map_rgb(255,0,0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTRE, "game over!");
+				al_draw_textf(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2, ALLEGRO_ALIGN_CENTRE, "final ghosts killed: %d", myPlayer.getScore());
+				al_draw_textf(font, al_map_rgb(255,255,255), WIDTH/2, HEIGHT/2 + 40, ALLEGRO_ALIGN_CENTRE, "thanks for playing!");
+				al_flip_display();
+				al_rest(5.0);
+				break;
+			}
 
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
