@@ -43,7 +43,7 @@ int main(void)
 	al_init_image_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();
-	font = al_load_ttf_font("AppleGaramond.ttf", 20, 0);
+	font = al_load_ttf_font("GROBOLD.ttf", 20, 0);
 	if(!font)
 		return -1;
 
