@@ -23,6 +23,7 @@ private:
 	int boundx;
 	int boundy;
 	int score;
-	ALLEGRO_BITMAP *image;
+	int image_index;
+	ALLEGRO_BITMAP *images[5];
 };
 #endif
