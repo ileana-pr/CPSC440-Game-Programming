@@ -33,8 +33,8 @@ void player::MoveUp()
 void player::MoveDown(int HEIGHT)
 {
 	y += speed;
-	if(y > HEIGHT)
-		y = HEIGHT;
+	if(y + boundy > HEIGHT)
+		y = HEIGHT - boundy;
 }
 void player::MoveLeft()
 {
@@ -48,3 +48,4 @@ void player::MoveRight()
 	if(x > 300)
 		x = 300;
 }
+ 
