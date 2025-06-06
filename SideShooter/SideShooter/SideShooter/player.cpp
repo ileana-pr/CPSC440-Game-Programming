@@ -60,4 +60,10 @@ void player::MoveRight()
 	if(x > 300)
 		x = 300;
 }
+
+void player::removeLife() {
+    lives--;
+    if(image_index < 4)
+        image_index++;
+}
  
