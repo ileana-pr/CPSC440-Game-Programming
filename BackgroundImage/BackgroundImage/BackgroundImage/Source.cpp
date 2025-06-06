@@ -1,3 +1,4 @@
+
 //Name: Ileana Perez 
 // CPSC 440: Lab 8
 
@@ -78,28 +79,25 @@ int main(int argc, char **argv){
 				bee_x += bee_dx;
 				bee_y += bee_dy;
 
-				// left edge
 				if(bee_x < 0) {
 					bee_x = 0;
 					bee_dx = -bee_dx;
 					target_angle = angle + 3.14f;
 					rotating = true;
 				}
-				// right edge
 				if(bee_x > SCREEN_W - bee_draw_size) {
 					bee_x = SCREEN_W - bee_draw_size;
 					bee_dx = -bee_dx;
 					target_angle = angle + 3.14f;
 					rotating = true;
 				}
-				// top edge
 				if(bee_y < 0) {
 					bee_y = 0;
 					bee_dy = -bee_dy;
 					target_angle = angle + 3.14f;
 					rotating = true;
 				}
-				// bottom edge
+				
 				if(bee_y > SCREEN_H - bee_draw_size) {
 					bee_y = SCREEN_H - bee_draw_size;
 					bee_dy = -bee_dy;
@@ -107,10 +105,8 @@ int main(int argc, char **argv){
 					rotating = true;
 				}
 			}
-
-			// rotate towards target_angle
 			if(rotating) {
-				float rotation_speed = 0.1f; // adjust for smoothness
+				float rotation_speed = 0.1f;
 				if(angle < target_angle) {
 					angle += rotation_speed;
 					if(angle >= target_angle) {
