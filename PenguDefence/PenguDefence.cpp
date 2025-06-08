@@ -24,9 +24,9 @@ int main(void)
     int score = 0;
     int FPS = 60;
 
-    penguinClass penguin;
-    icebergClass iceberg;
-    snowballClass snowball;
+    penguin penguin;
+    iceberg iceberg;
+    snowball snowball;
    
 
     // create the display
@@ -52,6 +52,10 @@ int main(void)
     font = al_load_font("GROBOLD.TTF", 16, 0);
     if (!font) return -1;
 
+    al_install_keyboard();
+	al_init_primitives_addon();
+
+    
     // create the iceberg
     iceberg.create_iceberg_bitmap(display);
 
@@ -60,6 +64,91 @@ int main(void)
 
     // create the snowball
     snowball.create_snowball_bitmap(display);
+
+     while(!done)
+      {
+            ALLEGRO_EVENT ev;
+            al_wait_for_event(event_queue, &ev);
+            if(ev.type == ALLEGRO_EVENT_TIMER)
+            {
+                  redraw = true;
+                  Left Keyboard Call
+                        Call rotate cannon
+                  Right Keyboard
+                        Call rotate cannon
+                  Update Snowballs
+                  Start Penguins Dropping
+                  Update Penguins Dropping
+                  Collide Snowballs
+                  Collide Penguins
+            }
+            else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            {
+                  done = true;
+            }
+            else if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
+            {
+                  switch(ev.keyboard.keycode)
+                  {
+                  case ALLEGRO_KEY_ESCAPE:
+                        done = true;
+                        break;
+                  case ALLEGRO_KEY_UP:
+                        keys[UP] = true;
+                        break;
+                  case ALLEGRO_KEY_DOWN:
+                        keys[DOWN] = true;
+                        break;
+                  case ALLEGRO_KEY_LEFT:
+                        keys[LEFT] = true;
+                        break;
+                  case ALLEGRO_KEY_RIGHT:
+                        keys[RIGHT] = true;
+                        break;
+                  case ALLEGRO_KEY_SPACE:
+                        keys[SPACE] = true;
+                        for(int i=0;i<NUM_SNOWBALLS;i++)
+                              snowballs.FireSnowballs(penguinFiring);
+                        break;
+                  }
+            }
+            else if(ev.type == ALLEGRO_EVENT_KEY_UP)
+            {
+                  switch(ev.keyboard.keycode)
+                  {
+                  case ALLEGRO_KEY_ESCAPE:
+                        done = true;
+                        break;
+                  case ALLEGRO_KEY_UP:
+                        keys[UP] = false;
+                        break;
+                  case ALLEGRO_KEY_DOWN:
+                        keys[DOWN] = false;
+                        break;
+                  case ALLEGRO_KEY_LEFT:
+                        keys[LEFT] = false;
+                        break;
+                  case ALLEGRO_KEY_RIGHT:
+                        keys[RIGHT] = false;
+                        break;
+                  case ALLEGRO_KEY_SPACE:
+                        keys[SPACE] = false;
+                        break;
+                  }
+            }
+            if(redraw && al_is_event_queue_empty(event_queue))
+            {
+                  redraw = false;
+                  draw background
+                  draw iceberg
+                  draw penguinFiring
+                  draw snowballs
+                  draw penguin Dropping
+                  al_flip_display();
+                  al_clear_to_color(al_map_rgb(0,0,0));
+            }
+      }
+
     
 }
 

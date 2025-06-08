@@ -1,3 +1,5 @@
+#ifndef SNOWBALLH
+#define SNOWBALLH
 #include "penguin.h"
 #include "iceberg.h"
 
@@ -21,4 +23,3 @@ class snowball
     ALLEGRO_BITMAP *image;
 };
 #endif
-}
