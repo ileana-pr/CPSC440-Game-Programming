@@ -1,19 +1,19 @@
 #ifndef SNOWBALLH
 #define SNOWBALLH
-#include "penguin.h"
-#include "iceberg.h"
+#include "penguinFiring.h"
+#include "penguinDropping.h"
 
 class snowball
 {
-    public:
+public:
     snowball();
     ~snowball();
-    void fire_snowball(iceberg &iceberg);
+    void fire_snowball(penguinFiring &penguinFiring);
     void draw_snowball();
     void update_snowball();
-    void collide_snowball(penguin &penguin, iceberg &iceberg);
+    void collide_snowball(penguinDropping pd[], int cSize);
 
-    private:
+private:
     int x;
     int y;
     int bound_x;

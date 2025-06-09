@@ -4,7 +4,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include "iceberg.h"
-#include "penguin.h"
+#include "penguinFiring.h"
 #include "snowball.h"
 
 
@@ -24,7 +24,7 @@ int main(void)
     int score = 0;
     int FPS = 60;
 
-    penguin penguin;
+    penguinFiring penguin;
     iceberg iceberg;
     snowball snowball;
    
@@ -54,16 +54,29 @@ int main(void)
 
     al_install_keyboard();
 	al_init_primitives_addon();
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
     
     // create the iceberg
     iceberg.create_iceberg_bitmap(display);
-
     // create the penguin
     penguin.create_penguin_bitmap(display);
-
     // create the snowball
     snowball.create_snowball_bitmap(display);
+
+    ALLEGRO_BITMAP* background_bmp = al_create_bitmap(width, height);
+    al_set_target_bitmap(background_bmp);
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+
+    //draw snowball 
+    snowball.draw_snowball();
+    al_flip_display();
+
+    al_start_timer(timer);
+
+    
+
 
      while(!done)
       {

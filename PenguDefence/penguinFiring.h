@@ -1,16 +1,17 @@
-#ifndef PENGUINH
-#define PENGUINH
+#ifndef PENGUINFIRINGH
+#define PENGUINFIRINGH
 #include "iceberg.h"
+#include "penguinDropping.h"
 
-class penguin 
+class penguinFiring  
 {
     public:
-    penguin();
-    ~penguin();
-    void draw_penguin();
-    penguin start_penguin(int width, int height);
-    void update_penguin();
-    void collide_penguin(iceberg &iceberg);
+    penguinFiring();
+    ~penguinFiring();
+    void draw_penguinFiring();
+    penguinFiring start_penguinFiring(int width, int height);
+    void update_penguinFiring();
+    void collide_penguinFiring(iceberg &iceberg);
     int get_x();
     int get_y();
     int get_bound_x();
