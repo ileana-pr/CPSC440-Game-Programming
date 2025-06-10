@@ -14,8 +14,36 @@ iceberg::iceberg()
     image = al_load_bitmap("iceberg.png");
 }
 
+iceberg::~iceberg()
+{
+    al_destroy_bitmap(image);
+}
+void iceberg::draw_iceberg()
+{
+    al_draw_bitmap(image, x, y, 0);
+}
 
+void iceberg::update_iceberg()
+{
+    x -= speed;
+}
+void iceberg::removeLife()
+{
+    live = false;
+}
 
+void iceberg::start_iceberg(int width, int height)
+{
+    if(!live)
+    {
+        if(rand() % 500 == 0)
+        {
+            live = true;    
+            x = width;
+            y = rand() % (height-bound_y);
+        }
+    }
+}
 
 
 

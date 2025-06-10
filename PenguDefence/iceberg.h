@@ -8,6 +8,8 @@ class iceberg
     ~iceberg();
     void draw_iceberg();
     void update_iceberg();
+    void removeLife();
+    void start_iceberg(int width, int height);
   
 
     int get_x();
