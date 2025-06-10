@@ -11,7 +11,7 @@ public:
     void fire_snowball(penguinFiring &penguinFiring);
     void draw_snowball();
     void update_snowball(int width, int height);
-    void collide_snowball(penguinDropping pd[], int cSize);
+    void collide_snowball(penguinDropping pd[], int cSize, penguinFiring &penguinFiring);
     int get_x();
     int get_y();
     int get_bound_x();

@@ -16,7 +16,6 @@ penguinFiring::penguinFiring()
     y = 0;
     bound_x = al_get_bitmap_width(image);
     bound_y = al_get_bitmap_height(image);
-    live = false;
     speed = 0;
 }
 
@@ -30,6 +29,11 @@ void penguinFiring::draw_penguinFiring()
     al_draw_bitmap(image, x, y, 0);
 }
 
+
+void penguinFiring::add_score()
+{
+    score++;
+}
 
 
 

@@ -18,6 +18,7 @@ class penguinFiring
     int get_bound_y();
     bool get_live();
     void set_live(bool live);
+    void add_score();
 
     private:
     int x;
@@ -27,6 +28,7 @@ class penguinFiring
     bool live;
     int speed;
     ALLEGRO_BITMAP *image;
+    int score;
 };
 
 
