@@ -10,8 +10,14 @@ public:
     ~snowball();
     void fire_snowball(penguinFiring &penguinFiring);
     void draw_snowball();
-    void update_snowball();
+    void update_snowball(int width, int height);
     void collide_snowball(penguinDropping pd[], int cSize);
+    int get_x();
+    int get_y();
+    int get_bound_x();
+    int get_bound_y();
+    bool get_live();
+    void set_live(bool live);
 
 private:
     int x;
