@@ -6,10 +6,10 @@
 
 penguinFiring::penguinFiring()
 {
-    image = al_load_bitmap("penguin.png");
+    image = al_load_bitmap("happy.png");
     if (!image)
     {
-        printf("Failed to load penguin image\n");
+        printf("Failed to load happy image\n");
     }
 
     x = 0;

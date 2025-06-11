@@ -7,14 +7,14 @@
 
 snowball::snowball()
 {
-    image = al_load_bitmap("snowball.png");
+    image = al_load_bitmap("smile.png");
 }
 
 snowball::snowball()
 {
 	speed = 10;
 	live = false;
-	image = al_load_bitmap("arrow.png");
+	image = al_load_bitmap("smile.png");
 }
 snowball::~snowball()
 {

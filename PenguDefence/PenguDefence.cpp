@@ -6,6 +6,7 @@
 #include "iceberg.h"
 #include "penguinFiring.h"
 #include "snowball.h"
+#include "penguinDropping.h"
 
 
 // The object of the game is to defend your iceberg from dropping penguins by firing snowballs at them. You will use the left and right keys to aim, and the spacebar to fire. If enough penguins land on the iceberg, it will sink. The penguins will drop from the top of the screen, and you will need to fire at them before they reach the iceberg. 
@@ -17,23 +18,21 @@ int main(void)
      // initialize allegro
     if(!al_init()) return -1;
 
-
     bool done = false; 
     int width = 640;
     int height = 520;
     int score = 0;
     int FPS = 60;
 
-    penguinFiring penguin;
+    penguinFiring penguinFiring;
     iceberg iceberg;
     snowball snowball;
+    penguinDropping penguinDropping;
    
-
     // create the display
     ALLEGRO_DISPLAY *display = NULL;
     display = al_create_display(width, height);
     if (!display) return -1;
-
 
     // create the event queue
     ALLEGRO_EVENT_QUEUE *event_queue = NULL;
@@ -59,11 +58,11 @@ int main(void)
 
     
     // create the iceberg
-    iceberg.create_iceberg_bitmap(display);
-    // create the penguin
-    penguin.create_penguin_bitmap(display);
+    iceberg.start_iceberg(width, height);
+    // create the penguinFiring
+    penguinFiring.start_penguinFiring(width, height);
     // create the snowball
-    snowball.create_snowball_bitmap(display);
+    snowball.fire_snowball(penguinFiring);
 
     ALLEGRO_BITMAP* background_bmp = al_create_bitmap(width, height);
     al_set_target_bitmap(background_bmp);
@@ -75,8 +74,12 @@ int main(void)
 
     al_start_timer(timer);
 
-    
 
+    bool redraw = false;
+    bool keys[5] = {false};
+    const int NUM_SNOWBALLS = 10;
+
+    enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE};
 
      while(!done)
       {
@@ -85,15 +88,14 @@ int main(void)
             if(ev.type == ALLEGRO_EVENT_TIMER)
             {
                   redraw = true;
-                  Left Keyboard Call
-                        Call rotate cannon
-                  Right Keyboard
-                        Call rotate cannon
-                  Update Snowballs
-                  Start Penguins Dropping
-                  Update Penguins Dropping
-                  Collide Snowballs
-                  Collide Penguins
+                  if(keys[LEFT])
+                        penguinFiring.rotate_left();
+                  if(keys[RIGHT])
+                        penguinFiring.rotate_right();
+                  snowball.update_snowball(width, height);
+                  penguinFiring.update_penguinFiring();
+                  snowball.collide_snowball(penguinDropping, NUM_SNOWBALLS, penguinFiring);
+                  penguinFiring.collide_penguinFiring(iceberg);
             }
             else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             {
@@ -120,8 +122,7 @@ int main(void)
                         break;
                   case ALLEGRO_KEY_SPACE:
                         keys[SPACE] = true;
-                        for(int i=0;i<NUM_SNOWBALLS;i++)
-                              snowballs.FireSnowballs(penguinFiring);
+                        snowball.fire_snowball(penguinFiring);
                         break;
                   }
             }
@@ -152,11 +153,12 @@ int main(void)
             if(redraw && al_is_event_queue_empty(event_queue))
             {
                   redraw = false;
-                  draw background
-                  draw iceberg
-                  draw penguinFiring
-                  draw snowballs
-                  draw penguin Dropping
+                  al_draw_bitmap(background_bmp, 0, 0, 0);
+                  iceberg.draw_iceberg();
+                  penguinFiring.draw_penguinFiring();
+                  for(int i=0;i<NUM_SNOWBALLS;i++)
+                        snowball.draw_snowball();
+                  penguinDropping.draw_penguinDropping();
                   al_flip_display();
                   al_clear_to_color(al_map_rgb(0,0,0));
             }

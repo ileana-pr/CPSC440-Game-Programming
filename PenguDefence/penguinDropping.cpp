@@ -8,10 +8,10 @@
 
 penguinDropping::penguinDropping()
 {
-    image = al_load_bitmap("penguin.png");
+    image = al_load_bitmap("mad.png");
     if (!image)
     {
-        printf("Failed to load penguin image\n");
+        printf("Failed to load mad image\n");
         return;
     }
 
