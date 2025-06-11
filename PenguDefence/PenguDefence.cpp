@@ -28,8 +28,9 @@ int main(void)
 
     penguinFiring penguinFiring;
     iceberg iceberg;
+    const int NUM_PENGUINS = 5;
     snowball snowballs[10];
-    penguinDropping penguinDropping;
+    penguinDropping droppingPenguins[NUM_PENGUINS];
    
     // create the display
     ALLEGRO_DISPLAY *display = NULL;
@@ -63,12 +64,14 @@ int main(void)
     iceberg.start_iceberg(width, height);
     // create the penguinFiring
     penguinFiring.start_penguinFiring(width, height);
-    // create the snowball
+    // create the snowballs
     for(int i = 0; i < 10; i++) {
         snowballs[i].fire_snowball(penguinFiring);
     }
     // create the penguinDropping
-    penguinDropping.start_penguinDropping(width, height);
+    for(int i = 0; i < NUM_PENGUINS; i++) {
+        droppingPenguins[i].start_penguinDropping(width, height);
+    }
 
     ALLEGRO_BITMAP* background_bmp = al_create_bitmap(width, height);
     al_set_target_bitmap(background_bmp);
@@ -104,9 +107,22 @@ int main(void)
                         snowballs[i].update_snowball(width, height);
                   }
                   penguinFiring.update_penguinFiring();
-                  for(int i = 0; i < NUM_SNOWBALLS; i++) {
-                        snowballs[i].collide_snowball(&penguinDropping, NUM_SNOWBALLS, penguinFiring);
+
+                  //Start and Update Penguins
+                  for(int i = 0; i < NUM_PENGUINS; i++) {
+                      droppingPenguins[i].update_penguinDropping();
                   }
+
+                  //Collide Snowballs with Penguins
+                  for(int i = 0; i < NUM_SNOWBALLS; i++) {
+                        snowballs[i].collide_snowball(droppingPenguins, NUM_PENGUINS, penguinFiring);
+                  }
+
+                  //Collide Penguins with Iceberg
+                  for(int i = 0; i < NUM_PENGUINS; i++) {
+                      droppingPenguins[i].collide_penguinDropping(iceberg);
+                  }
+
                   penguinFiring.collide_penguinFiring(iceberg);
             }
             else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -176,7 +192,9 @@ int main(void)
                   for(int i = 0; i < NUM_SNOWBALLS; i++) {
                         snowballs[i].draw_snowball();
                   }
-                  penguinDropping.draw_penguinDropping();
+                  for(int i = 0; i < NUM_PENGUINS; i++) {
+                        droppingPenguins[i].draw_penguinDropping();
+                  }
                   al_draw_textf(font, al_map_rgb(255, 255, 255), 10, 10, 0, "Score: %d", penguinFiring.get_score());
                   al_flip_display();
                   al_clear_to_color(al_map_rgb(0,0,0));

@@ -9,7 +9,7 @@ class penguinFiring
     penguinFiring();
     ~penguinFiring();
     void draw_penguinFiring();
-    penguinFiring start_penguinFiring(int width, int height);
+    void start_penguinFiring(int width, int height);
     void update_penguinFiring();
     void collide_penguinFiring(iceberg &iceberg);
     void rotate_left();

@@ -65,5 +65,9 @@ void snowball::collide_snowball(penguinDropping pd[], int cSize, penguinFiring &
 			}
 		}
 	}
+}
 
+bool snowball::is_live()
+{
+	return live;
 }

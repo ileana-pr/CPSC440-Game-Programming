@@ -20,6 +20,7 @@ public:
     bool get_live();
     void set_live(bool live);
     void update_snowball();
+    bool is_live();
 
 private:
     float angle;  // angle in degrees
