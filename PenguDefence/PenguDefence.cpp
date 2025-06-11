@@ -18,6 +18,8 @@ int main(void)
      // initialize allegro
     if(!al_init()) return -1;
 
+    al_init_image_addon();
+
     bool done = false; 
     int width = 640;
     int height = 520;
@@ -26,7 +28,7 @@ int main(void)
 
     penguinFiring penguinFiring;
     iceberg iceberg;
-    snowball snowball;
+    snowball snowballs[10];
     penguinDropping penguinDropping;
    
     // create the display
@@ -62,14 +64,20 @@ int main(void)
     // create the penguinFiring
     penguinFiring.start_penguinFiring(width, height);
     // create the snowball
-    snowball.fire_snowball(penguinFiring);
+    for(int i = 0; i < 10; i++) {
+        snowballs[i].fire_snowball(penguinFiring);
+    }
+    // create the penguinDropping
+    penguinDropping.start_penguinDropping(width, height);
 
     ALLEGRO_BITMAP* background_bmp = al_create_bitmap(width, height);
     al_set_target_bitmap(background_bmp);
     al_clear_to_color(al_map_rgb(0, 0, 0));
 
     //draw snowball 
-    snowball.draw_snowball();
+    for(int i = 0; i < 10; i++) {
+        snowballs[i].draw_snowball();
+    }
     al_flip_display();
 
     al_start_timer(timer);
@@ -92,9 +100,13 @@ int main(void)
                         penguinFiring.rotate_left();
                   if(keys[RIGHT])
                         penguinFiring.rotate_right();
-                  snowball.update_snowball(width, height);
+                  for(int i = 0; i < NUM_SNOWBALLS; i++) {
+                        snowballs[i].update_snowball(width, height);
+                  }
                   penguinFiring.update_penguinFiring();
-                  snowball.collide_snowball(penguinDropping, NUM_SNOWBALLS, penguinFiring);
+                  for(int i = 0; i < NUM_SNOWBALLS; i++) {
+                        snowballs[i].collide_snowball(&penguinDropping, NUM_SNOWBALLS, penguinFiring);
+                  }
                   penguinFiring.collide_penguinFiring(iceberg);
             }
             else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -122,7 +134,12 @@ int main(void)
                         break;
                   case ALLEGRO_KEY_SPACE:
                         keys[SPACE] = true;
-                        snowball.fire_snowball(penguinFiring);
+                        for(int i = 0; i < NUM_SNOWBALLS; i++) {
+                              if(!snowballs[i].is_live()) {
+                                    snowballs[i].fire_snowball(penguinFiring);
+                                    break;
+                              }
+                        }
                         break;
                   }
             }
@@ -156,15 +173,27 @@ int main(void)
                   al_draw_bitmap(background_bmp, 0, 0, 0);
                   iceberg.draw_iceberg();
                   penguinFiring.draw_penguinFiring();
-                  for(int i=0;i<NUM_SNOWBALLS;i++)
-                        snowball.draw_snowball();
+                  for(int i = 0; i < NUM_SNOWBALLS; i++) {
+                        snowballs[i].draw_snowball();
+                  }
                   penguinDropping.draw_penguinDropping();
+                  al_draw_textf(font, al_map_rgb(255, 255, 255), 10, 10, 0, "Score: %d", penguinFiring.get_score());
                   al_flip_display();
                   al_clear_to_color(al_map_rgb(0,0,0));
+            }
+            if(iceberg.get_lives() <= 0) {
+                done = true;
             }
       }
 
     
+    al_destroy_display(display);
+    al_destroy_event_queue(event_queue);
+    al_destroy_timer(timer);
+    al_destroy_font(font);
+    al_destroy_bitmap(background_bmp);
+
+   
 }
 
 

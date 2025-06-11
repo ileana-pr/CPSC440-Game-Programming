@@ -2,6 +2,7 @@
 #define SNOWBALLH
 #include "penguinFiring.h"
 #include "penguinDropping.h"
+#include <cmath>
 
 class snowball
 {
@@ -18,14 +19,16 @@ public:
     int get_bound_y();
     bool get_live();
     void set_live(bool live);
+    void update_snowball();
 
 private:
-    int x;
-    int y;
+    float angle;  // angle in degrees
+    float x;
+    float y;
     int bound_x;
     int bound_y;
     bool live;
-    int speed;
+    const float BALL_SPEED = 5.0;  // adjust as needed
     ALLEGRO_BITMAP *image;
 };
 #endif

@@ -11,7 +11,8 @@ iceberg::iceberg()
     bound_y = 0;
     live = true;
     speed = 0;
-    image = al_load_bitmap("iceberg.png");
+    image = al_load_bitmap("boat.png");
+    lives = 3;
 }
 
 iceberg::~iceberg()
@@ -29,7 +30,12 @@ void iceberg::update_iceberg()
 }
 void iceberg::removeLife()
 {
-    live = false;
+    lives--;
+}
+
+int iceberg::get_lives()
+{
+    return lives;       
 }
 
 void iceberg::start_iceberg(int width, int height)

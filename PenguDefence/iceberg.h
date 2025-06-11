@@ -18,6 +18,7 @@ class iceberg
     int get_bound_y();
     bool get_live();
     void set_live(bool live);
+    int get_lives();
 
     private:
     int x;
@@ -27,5 +28,6 @@ class iceberg
     bool live;
     int speed;
     ALLEGRO_BITMAP *image;
+    int lives;
 };
 #endif
