@@ -8,17 +8,18 @@
 
 penguinDropping::penguinDropping()
 {
-    image = al_load_bitmap("mad.png");
-    if (!image)
-    {
-        printf("Failed to load mad image\n");
-        return;
-    }
+    // image = al_load_bitmap("mad.png");
+    image = NULL; // temporarily disable
+    // if (!image)
+    // {
+    //     printf("Failed to load mad image\n");
+    //     return;
+    // }
 
     live = false;
     speed = 5; 
-    bound_x = al_get_bitmap_width(image) * 0.6;
-    bound_y = al_get_bitmap_height(image) * 0.6;
+    bound_x = 50; // default size when no image
+    bound_y = 50;
     x = 0;
     y = 0;
 }

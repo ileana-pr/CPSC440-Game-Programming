@@ -16,7 +16,8 @@ snowball::snowball()
 	x = 0;
 	y = 0;
 	angle = 0;
-	image = al_load_bitmap("smile.png");
+	// image = al_load_bitmap("smile.png");
+	image = NULL; // temporarily disable
 }
 
 snowball::~snowball()

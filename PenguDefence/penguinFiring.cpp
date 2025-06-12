@@ -14,7 +14,7 @@ penguinFiring::penguinFiring()
     image = al_load_bitmap("happy.png");
     if (!image)
     {
-        printf("Failed to load happy.png image\n");
+        printf("failed to load happy.png image\n");
     }
 
     angle = 213;
@@ -38,7 +38,7 @@ void penguinFiring::draw_penguinFiring()
     if(live && image)
     {
         float display_angle = (angle - 64.0) / 256.0 * (2 * M_PI);
-        float scale = 0.6; // scale down to 60%
+        float scale = 0.36;  
         al_draw_scaled_rotated_bitmap(image, 
                                      al_get_bitmap_width(image) / 2, al_get_bitmap_height(image) / 2, 
                                      x, y, scale, scale, display_angle, 0);
@@ -47,7 +47,10 @@ void penguinFiring::draw_penguinFiring()
 
 void penguinFiring::update_penguinFiring()
 {
-    // any other update logic for the firing penguin
+    if (x < get_bound_x())
+        x = get_bound_x();
+    if (x > 640 - get_bound_x())
+        x = 640 - get_bound_x();
 }
 
 void penguinFiring::rotate_left()
@@ -93,12 +96,12 @@ int penguinFiring::get_y()
 
 int penguinFiring::get_bound_x()
 {
-    return al_get_bitmap_width(image) * 0.6; // scaled size
+    return al_get_bitmap_width(image) * 0.36; 
 }
 
 int penguinFiring::get_bound_y()
 {
-    return al_get_bitmap_height(image) * 0.6; // scaled size
+    return al_get_bitmap_height(image) * 0.36; 
 }
 
 bool penguinFiring::get_live()
@@ -119,11 +122,6 @@ int penguinFiring::get_score()
 void penguinFiring::add_score()
 {
     score++;
-}
-
-void penguinFiring::collide_penguinFiring(iceberg &iceberg)
-{
-    // collision logic with iceberg if needed
 }
 
 

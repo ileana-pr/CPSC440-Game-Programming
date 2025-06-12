@@ -27,5 +27,8 @@ class iceberg
     int speed;
     ALLEGRO_BITMAP *image;
     int lives;
+    const float SCALE_FACTOR = 0.36f; // 60% of 60%
+    int scaled_width;
+    int scaled_height;
 };
 #endif

@@ -68,19 +68,17 @@ int main(void)
         droppingPenguins[i].start_penguinDropping(width, height);
     }
 
-    // load the actual background image
     ALLEGRO_BITMAP* background_bmp = al_load_bitmap("background.png");
     if (!background_bmp) {
-        // fallback to colored background if image fails
         background_bmp = al_create_bitmap(width, height);
         al_set_target_bitmap(background_bmp);
-        al_clear_to_color(al_map_rgb(135, 206, 235)); // sky blue
-        al_set_target_bitmap(al_get_backbuffer(display)); // reset target
+        al_clear_to_color(al_map_rgb(135, 206, 235)); 
+        al_set_target_bitmap(al_get_backbuffer(display)); 
     }
 
     al_start_timer(timer);
 
-    bool redraw = true; // start with redraw true to ensure first frame draws
+    bool redraw = true;
     bool keys[5] = {false};
     const int NUM_SNOWBALLS = 10;
 
@@ -102,22 +100,17 @@ int main(void)
                   }
                   penguinFiring.update_penguinFiring();
 
-                  //Start and Update Penguins
                   for(int i = 0; i < NUM_PENGUINS; i++) {
                       droppingPenguins[i].update_penguinDropping();
                   }
 
-                  //Collide Snowballs with Penguins
                   for(int i = 0; i < NUM_SNOWBALLS; i++) {
                         snowballs[i].collide_snowball(droppingPenguins, NUM_PENGUINS, penguinFiring);
                   }
 
-                  //Collide Penguins with Iceberg
                   for(int i = 0; i < NUM_PENGUINS; i++) {
                       droppingPenguins[i].collide_penguinDropping(iceberg);
                   }
-
-                  penguinFiring.collide_penguinFiring(iceberg);
             }
             else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             {
@@ -180,7 +173,22 @@ int main(void)
             if(redraw && al_is_event_queue_empty(event_queue))
             {
                   redraw = false;
-                  al_draw_bitmap(background_bmp, 0, 0, 0);
+                  float bg_width = al_get_bitmap_width(background_bmp);
+                  float bg_height = al_get_bitmap_height(background_bmp);
+                  float scale_x = width / bg_width;
+                  float scale_y = height / bg_height;
+                  float scale = scale_x > scale_y ? scale_x : scale_y;
+                  
+                  int scaled_width = bg_width * scale;
+                  int scaled_height = bg_height * scale;
+                  int x_offset = (width - scaled_width) / 2;
+                  int y_offset = (height - scaled_height) / 2;
+                  
+                  al_draw_scaled_bitmap(background_bmp, 
+                                      0, 0, bg_width, bg_height,
+                                      x_offset, y_offset, scaled_width, scaled_height, 
+                                      0);
+
                   iceberg.draw_iceberg();
                   penguinFiring.draw_penguinFiring();
                   for(int i = 0; i < NUM_SNOWBALLS; i++) {

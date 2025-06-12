@@ -11,7 +11,6 @@ class penguinFiring
     void draw_penguinFiring();
     void start_penguinFiring(int width, int height);
     void update_penguinFiring();
-    void collide_penguinFiring(iceberg &iceberg);
     void rotate_left();
     void rotate_right();
     float get_angle();
@@ -35,6 +34,5 @@ class penguinFiring
     ALLEGRO_BITMAP *image;
     int score;
 };
-
 
 #endif
