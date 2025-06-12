@@ -1,21 +1,24 @@
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_image.h>
+#include <cmath>
 #include "snowball.h"
 #include "penguinFiring.h"
 #include "penguinDropping.h"
 
-snowball::snowball()
-{
-    image = al_load_bitmap("smile.png");
-}
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 snowball::snowball()
 {
-	speed = 10;
 	live = false;
+	x = 0;
+	y = 0;
+	angle = 0;
 	image = al_load_bitmap("smile.png");
 }
+
 snowball::~snowball()
 {
 	al_destroy_bitmap(image);
@@ -33,6 +36,7 @@ void snowball::fire_snowball(penguinFiring &penguinFiring)
 	{
 		x = penguinFiring.get_x();
 		y = penguinFiring.get_y();
+		angle = penguinFiring.get_angle();
 		live = true;
 	}
 }
@@ -40,8 +44,11 @@ void snowball::update_snowball(int width, int height)
 {
 	if(live)
 	{
-		x += speed;
-		if(x > width || y > height)
+		float angle_rad = (angle - 64.0) / 256.0 * (2 * M_PI);
+		x += BALL_SPEED * cos(angle_rad);
+		y += BALL_SPEED * sin(angle_rad);
+		
+		if(x > width || x < 0 || y > height || y < 0)
 			live = false;
 	}
 }
@@ -70,4 +77,34 @@ void snowball::collide_snowball(penguinDropping pd[], int cSize, penguinFiring &
 bool snowball::is_live()
 {
 	return live;
+}
+
+int snowball::get_x()
+{
+	return (int)x;
+}
+
+int snowball::get_y()
+{
+	return (int)y;
+}
+
+int snowball::get_bound_x()
+{
+	return al_get_bitmap_width(image);
+}
+
+int snowball::get_bound_y()
+{
+	return al_get_bitmap_height(image);
+}
+
+bool snowball::get_live()
+{
+	return live;
+}
+
+void snowball::set_live(bool l)
+{
+	live = l;
 }

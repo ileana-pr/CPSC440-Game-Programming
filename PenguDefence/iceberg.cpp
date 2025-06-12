@@ -7,12 +7,17 @@ iceberg::iceberg()
 {
     x = 0;
     y = 0;
-    bound_x = 0;
-    bound_y = 0;
     live = true;
     speed = 0;
     image = al_load_bitmap("boat.png");
     lives = 3;
+    if(image) {
+        bound_x = al_get_bitmap_width(image);
+        bound_y = al_get_bitmap_height(image);
+    } else {
+        bound_x = 50; 
+        bound_y = 50;
+    }
 }
 
 iceberg::~iceberg()
@@ -40,15 +45,30 @@ int iceberg::get_lives()
 
 void iceberg::start_iceberg(int width, int height)
 {
-    if(!live)
-    {
-        if(rand() % 500 == 0)
-        {
-            live = true;    
-            x = width;
-            y = rand() % (height-bound_y);
-        }
-    }
+    // position iceberg at bottom center of screen
+    x = width / 2 - bound_x / 2;
+    y = height - bound_y - 10;
+    live = true;
+}
+
+int iceberg::get_x()
+{
+    return x;
+}
+
+int iceberg::get_y() 
+{
+    return y;
+}
+
+int iceberg::get_bound_x()
+{
+    return al_get_bitmap_width(image);
+}
+
+int iceberg::get_bound_y()
+{
+    return al_get_bitmap_height(image);
 }
 
 

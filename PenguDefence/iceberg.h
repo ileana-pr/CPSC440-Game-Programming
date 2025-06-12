@@ -10,8 +10,6 @@ class iceberg
     void update_iceberg();
     void removeLife();
     void start_iceberg(int width, int height);
-  
-
     int get_x();
     int get_y();
     int get_bound_x();

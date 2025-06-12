@@ -22,10 +22,13 @@ public:
     void update_snowball();
     bool is_live();
 
+
+
 private:
     float angle;  // angle in degrees
     float x;
     float y;
+    int speed;
     int bound_x;
     int bound_y;
     bool live;

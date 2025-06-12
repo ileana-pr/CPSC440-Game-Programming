@@ -74,3 +74,33 @@ void penguinDropping::collide_penguinDropping(iceberg &iceberg)
 		}
 	}
 }
+
+int penguinDropping::get_x()
+{
+    return x;
+}
+
+int penguinDropping::get_y()
+{
+    return y;
+}
+
+int penguinDropping::get_bound_x()
+{
+    return bound_x;
+}
+
+int penguinDropping::get_bound_y()
+{
+    return bound_y;
+}
+
+bool penguinDropping::get_live()
+{
+    return live;
+}
+
+void penguinDropping::set_live(bool l)
+{
+    live = l;
+}
