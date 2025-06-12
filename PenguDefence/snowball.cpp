@@ -25,10 +25,13 @@ snowball::~snowball()
 }
 void snowball::draw_snowball()
 {
-
-	if(live)
-		al_draw_rotated_bitmap(image,al_get_bitmap_width(image)/2,al_get_bitmap_height(image)/2,x,y,90,0);
-
+	if(live && image)
+	{
+		float scale = 0.6; 
+		al_draw_scaled_rotated_bitmap(image, 
+									 al_get_bitmap_width(image)/2, al_get_bitmap_height(image)/2,
+									 x, y, scale, scale, 90, 0);
+	}
 }
 void snowball::fire_snowball(penguinFiring &penguinFiring)
 {
@@ -91,12 +94,12 @@ int snowball::get_y()
 
 int snowball::get_bound_x()
 {
-	return al_get_bitmap_width(image);
+	return al_get_bitmap_width(image) * 0.6; 
 }
 
 int snowball::get_bound_y()
 {
-	return al_get_bitmap_height(image);
+	return al_get_bitmap_height(image) * 0.6; 
 }
 
 bool snowball::get_live()

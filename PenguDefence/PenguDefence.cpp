@@ -60,33 +60,27 @@ int main(void)
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
     
-    // create the iceberg
     iceberg.start_iceberg(width, height);
-    // create the penguinFiring
     penguinFiring.start_penguinFiring(width, height);
-    // create the snowballs
     for(int i = 0; i < 10; i++) {
-        snowballs[i].fire_snowball(penguinFiring);
     }
-    // create the penguinDropping
     for(int i = 0; i < NUM_PENGUINS; i++) {
         droppingPenguins[i].start_penguinDropping(width, height);
     }
 
-    ALLEGRO_BITMAP* background_bmp = al_create_bitmap(width, height);
-    al_set_target_bitmap(background_bmp);
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-
-    //draw snowball 
-    for(int i = 0; i < 10; i++) {
-        snowballs[i].draw_snowball();
+    // load the actual background image
+    ALLEGRO_BITMAP* background_bmp = al_load_bitmap("background.png");
+    if (!background_bmp) {
+        // fallback to colored background if image fails
+        background_bmp = al_create_bitmap(width, height);
+        al_set_target_bitmap(background_bmp);
+        al_clear_to_color(al_map_rgb(135, 206, 235)); // sky blue
+        al_set_target_bitmap(al_get_backbuffer(display)); // reset target
     }
-    al_flip_display();
 
     al_start_timer(timer);
 
-
-    bool redraw = false;
+    bool redraw = true; // start with redraw true to ensure first frame draws
     bool keys[5] = {false};
     const int NUM_SNOWBALLS = 10;
 

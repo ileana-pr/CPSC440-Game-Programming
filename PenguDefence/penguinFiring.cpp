@@ -11,10 +11,10 @@
 
 penguinFiring::penguinFiring()
 {
-    image = al_load_bitmap("penguin.png");
+    image = al_load_bitmap("happy.png");
     if (!image)
     {
-        printf("Failed to load penguin image\n");
+        printf("Failed to load happy.png image\n");
     }
 
     angle = 213;
@@ -35,10 +35,13 @@ void penguinFiring::start_penguinFiring(int width, int height)
 
 void penguinFiring::draw_penguinFiring()
 {
-    if(live)
+    if(live && image)
     {
         float display_angle = (angle - 64.0) / 256.0 * (2 * M_PI);
-        al_draw_rotated_bitmap(image, al_get_bitmap_width(image) / 2, al_get_bitmap_height(image) / 2, x, y, display_angle, 0);
+        float scale = 0.6; // scale down to 60%
+        al_draw_scaled_rotated_bitmap(image, 
+                                     al_get_bitmap_width(image) / 2, al_get_bitmap_height(image) / 2, 
+                                     x, y, scale, scale, display_angle, 0);
     }
 }
 
@@ -90,12 +93,12 @@ int penguinFiring::get_y()
 
 int penguinFiring::get_bound_x()
 {
-    return al_get_bitmap_width(image);
+    return al_get_bitmap_width(image) * 0.6; // scaled size
 }
 
 int penguinFiring::get_bound_y()
 {
-    return al_get_bitmap_height(image);
+    return al_get_bitmap_height(image) * 0.6; // scaled size
 }
 
 bool penguinFiring::get_live()

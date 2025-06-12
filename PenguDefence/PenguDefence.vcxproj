@@ -70,6 +70,19 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Allegro_AddonImage>true</Allegro_AddonImage>
+    <Allegro_AddonTTF>true</Allegro_AddonTTF>
+    <Allegro_AddonPrimitives>true</Allegro_AddonPrimitives>
+    <Allegro_AddonAudio>true</Allegro_AddonAudio>
+    <Allegro_AddonAcodec>true</Allegro_AddonAcodec>
+    <Allegro_AddonPhysfs>true</Allegro_AddonPhysfs>
+    <Allegro_AddonDialog>true</Allegro_AddonDialog>
+    <Allegro_AddonMemfile>true</Allegro_AddonMemfile>
+    <Allegro_AddonFont>true</Allegro_AddonFont>
+    <Allegro_AddonColor>true</Allegro_AddonColor>
+    <Allegro_AddonVideo>true</Allegro_AddonVideo>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Allegro_AddonImage>true</Allegro_AddonImage>
     <Allegro_AddonTTF>true</Allegro_AddonTTF>
@@ -137,6 +150,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="PenguDefence.cpp" />
+    <ClCompile Include="iceberg.cpp" />
+    <ClCompile Include="penguinDropping.cpp" />
+    <ClCompile Include="penguinFiring.cpp" />
+    <ClCompile Include="snowball.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="iceberg.h" />
+    <ClInclude Include="penguinDropping.h" />
+    <ClInclude Include="penguinFiring.h" />
+    <ClInclude Include="snowball.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

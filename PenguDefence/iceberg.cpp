@@ -26,7 +26,12 @@ iceberg::~iceberg()
 }
 void iceberg::draw_iceberg()
 {
-    al_draw_bitmap(image, x, y, 0);
+    if(image && live) {
+        int scaled_width = al_get_bitmap_width(image) * 0.6;
+        int scaled_height = al_get_bitmap_height(image) * 0.6;
+        al_draw_scaled_bitmap(image, 0, 0, al_get_bitmap_width(image), al_get_bitmap_height(image), 
+                             x, y, scaled_width, scaled_height, 0);
+    }
 }
 
 void iceberg::update_iceberg()
@@ -45,7 +50,6 @@ int iceberg::get_lives()
 
 void iceberg::start_iceberg(int width, int height)
 {
-    // position iceberg at bottom center of screen
     x = width / 2 - bound_x / 2;
     y = height - bound_y - 10;
     live = true;
@@ -63,12 +67,12 @@ int iceberg::get_y()
 
 int iceberg::get_bound_x()
 {
-    return al_get_bitmap_width(image);
+    return al_get_bitmap_width(image) * 0.6;
 }
 
 int iceberg::get_bound_y()
 {
-    return al_get_bitmap_height(image);
+    return al_get_bitmap_height(image) * 0.6;
 }
 
 

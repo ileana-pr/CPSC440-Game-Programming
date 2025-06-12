@@ -17,8 +17,8 @@ penguinDropping::penguinDropping()
 
     live = false;
     speed = 5; 
-    bound_x = al_get_bitmap_width(image);
-    bound_y = al_get_bitmap_height(image);
+    bound_x = al_get_bitmap_width(image) * 0.6;
+    bound_y = al_get_bitmap_height(image) * 0.6;
     x = 0;
     y = 0;
 }
@@ -30,32 +30,39 @@ penguinDropping::~penguinDropping()
 
 void penguinDropping::draw_penguinDropping()
 {
-    al_draw_bitmap(image, x, y, 0);
+    if(live && image) {
+        int scaled_width = al_get_bitmap_width(image) * 0.6;
+        int scaled_height = al_get_bitmap_height(image) * 0.6;
+        al_draw_scaled_bitmap(image, 0, 0, al_get_bitmap_width(image), al_get_bitmap_height(image), 
+                             x, y, scaled_width, scaled_height, 0);
+    }
 }
 
 void penguinDropping::start_penguinDropping(int width, int height)
 {
     if(!live)
 	{
-		if(rand() % 500 == 0)
+		if(rand() % 200 == 0)
 		{
 			live = true;
-			x = width;
-			y = rand() % (height-bound_y);
-
+			x = rand() % (width - bound_x);
+			y = -bound_y;
 		}
 	}
 }
 
 void penguinDropping::update_penguinDropping()
 {
-
 	if(live)
 	{
-		x -= speed;
+		y += speed;
+		if(y > 600)
+		{
+			live = false;
+		}
 	}
-
 }
+
 void penguinDropping::collide_penguinDropping(iceberg &iceberg)
 {
 	if(live)
