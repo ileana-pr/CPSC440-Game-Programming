@@ -35,7 +35,6 @@ void iceberg::draw_iceberg()
     if(live) {
         if(image) {
             if(is_sinking) {
-                // sinking animation
                 al_draw_scaled_rotated_bitmap(image, 
                     al_get_bitmap_width(image)/2, al_get_bitmap_height(image)/2,
                     x + scaled_width/2, y + scaled_height/2, 
@@ -48,7 +47,6 @@ void iceberg::draw_iceberg()
             }
         }
         
-        // lives in top right corner
         if(!is_sinking) {
             for(int i = 0; i < lives; i++) {
                 al_draw_filled_circle(600 - (i * 20), 20, 8, al_map_rgb(255, 0, 0));
@@ -76,7 +74,7 @@ void iceberg::removeLife()
 {
     lives--;
     if(lives <= 0 && !is_sinking) {
-        al_rest(2.0);  // Pause for 2 seconds before sinking
+        al_rest(2.0);  
         is_sinking = true;
         sink_speed = 1;
         sink_angle = 0;
@@ -92,7 +90,7 @@ void iceberg::start_iceberg(int width, int height)
 {
     if (image) {
         x = (width - scaled_width) / 2; 
-        y = height - scaled_height + 50;  // Lowered by increasing offset from +30 to +50
+        y = height - scaled_height + 50;  
     } else {
         x = width / 2 - 50;  
         y = height - 50;  

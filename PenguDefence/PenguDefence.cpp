@@ -1,3 +1,11 @@
+/**
+ * Name: Ileana Perez 
+ * CPSC 440
+ * Assignment #3 
+ * 
+ * The object of the game is to defend your iceberg from dropping penguins by firing snowballs at them. You will use the left and right keys to aim, and the spacebar to fire. If enough penguins land on the iceberg, it will sink. The penguins will drop from the top of the screen, and you will need to fire at them before they reach the iceberg. 
+ */
+
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>
@@ -10,16 +18,35 @@
 #include "snowball.h"
 #include "penguinDropping.h"
 
-// The object of the game is to defend your iceberg from dropping penguins by firing snowballs at them. You will use the left and right keys to aim, and the spacebar to fire. If enough penguins land on the iceberg, it will sink. The penguins will drop from the top of the screen, and you will need to fire at them before they reach the iceberg. 
-
 int main(void)
 {
-    if(!al_init()) return -1;
-    if(!al_init_image_addon()) return -1;
-    if(!al_init_primitives_addon()) return -1;
-    if(!al_init_font_addon()) return -1;
-    if(!al_init_ttf_addon()) return -1;
-    if(!al_install_keyboard()) return -1;
+    // Initialize Allegro
+    if(!al_init()) {
+        return -1;
+    }
+
+    // Initialize image addon
+    if(!al_init_image_addon()) {
+        return -1;
+    }
+
+    // Initialize primitives addon
+    if(!al_init_primitives_addon()) {
+        return -1;
+    }
+
+    // Initialize font addons
+    if(!al_init_font_addon()) {
+        return -1;
+    }
+    if(!al_init_ttf_addon()) {
+        return -1;
+    }
+
+    // Initialize keyboard
+    if(!al_install_keyboard()) {
+        return -1;
+    }
 
     srand(time(NULL));
 
@@ -62,7 +89,6 @@ int main(void)
         }
     }
 
-    // register event sources
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_display_event_source(display));
@@ -82,55 +108,69 @@ int main(void)
         al_set_target_bitmap(al_get_backbuffer(display)); 
     }
 
+    // start the timer
     al_start_timer(timer);
 
+    // initialize game state
     bool redraw = true;
     bool keys[5] = {false};
     const int NUM_SNOWBALLS = 10;
 
     enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE};
 
-    // Initial display flip to show the first frame
+    // draw the first frame
     al_clear_to_color(al_map_rgb(0,0,0));
     iceberg.draw_iceberg();
     penguinFiring.draw_penguinFiring();
     al_flip_display();
 
+    // main game loop
     while(!done)
     {
         ALLEGRO_EVENT ev;
         al_wait_for_event(event_queue, &ev);
 
+        // handle timer events
         if(ev.type == ALLEGRO_EVENT_TIMER)
         {
             redraw = true;
+
+            // handle key presses
             if(keys[LEFT])
                 penguinFiring.rotate_left();
             if(keys[RIGHT])
                 penguinFiring.rotate_right();
+
+            // update snowballs
             for(int i = 0; i < NUM_SNOWBALLS; i++) {
                 snowballs[i].update_snowball(width, height);
             }
+
+            // update penguin firing
             penguinFiring.update_penguinFiring();
 
-            // Try to spawn new penguins in any available slot
+            // update dropping penguins
             for(int i = 0; i < NUM_PENGUINS; i++) {
                 droppingPenguins[i].start_penguinDropping(width, height, iceberg);
             }
 
-            // Update all penguins
             for(int i = 0; i < NUM_PENGUINS; i++) {
                 droppingPenguins[i].update_penguinDropping(iceberg);
             }
 
+            // check for collisions
             for(int i = 0; i < NUM_SNOWBALLS; i++) {
                 snowballs[i].collide_snowball(droppingPenguins, NUM_PENGUINS, penguinFiring);
             }
         }
+
+        // handle display close events
         else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
         {
             done = true;
         }
+
+        // handle key down events
         else if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
         {
             switch(ev.keyboard.keycode)
@@ -186,12 +226,13 @@ int main(void)
             }
         }
 
+        // handle redraw events
         if(redraw && al_is_event_queue_empty(event_queue))
         {
             redraw = false;
             al_clear_to_color(al_map_rgb(0,0,0));
 
-            // Draw background
+            // draw the background
             float bg_width = al_get_bitmap_width(background_bmp);
             float bg_height = al_get_bitmap_height(background_bmp);
             float scale_x = width / bg_width;
@@ -206,7 +247,7 @@ int main(void)
             al_draw_scaled_bitmap(background_bmp, 0, 0, bg_width, bg_height,
                                 x_offset, y_offset, scaled_width, scaled_height, 0);
 
-            // Draw game objects
+            // draw the game objects
             iceberg.draw_iceberg();
             penguinFiring.draw_penguinFiring();
             
@@ -218,12 +259,12 @@ int main(void)
                 droppingPenguins[i].draw_penguinDropping();
             }
 
-            // Draw score and lives
+            // draw the score
             al_draw_textf(font, al_map_rgb(255, 255, 255), 10, 10, 0, "Score: %d", penguinFiring.get_score());
             al_flip_display();
         }
 
-        // Check game over 
+        // check for game over
         if(iceberg.get_lives() <= 0) {
             al_clear_to_color(al_map_rgb(0,0,0));
             al_draw_text(font, al_map_rgb(255, 0, 0), width/2, height/2, ALLEGRO_ALIGN_CENTER, "Game Over!");
@@ -235,6 +276,7 @@ int main(void)
         }
     }
 
+    // clean up
     al_destroy_bitmap(background_bmp);
     al_destroy_font(font);
     al_destroy_timer(timer);

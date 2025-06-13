@@ -37,7 +37,7 @@ void penguinDropping::draw_penguinDropping()
 
 void penguinDropping::start_penguinDropping(int width, int height, iceberg &iceberg)
 {
-    if(!live)
+    if(!live || landed)
     {
         if(rand() % 180 == 0)  
         {
@@ -62,7 +62,6 @@ void penguinDropping::update_penguinDropping(iceberg &iceberg)
         {
             y = 420;  
             landed = true;
-            live = false;  
             iceberg.removeLife();  
         }
     }
@@ -73,6 +72,7 @@ void penguinDropping::update_penguinDropping(iceberg &iceberg)
         if(y > 600)  
         {
             landed = false;
+            live = false;
         }
     }
 }

@@ -34,6 +34,11 @@ void snowball::draw_snowball()
 									 x, y, scale, scale, 0, 0);
 	}
 }
+
+/**
+ * @brief Fire the snowball
+ * @param penguinFiring The penguin firing object
+ */
 void snowball::fire_snowball(penguinFiring &penguinFiring)
 {
 	if(!live)
@@ -46,6 +51,12 @@ void snowball::fire_snowball(penguinFiring &penguinFiring)
 		live = true;
 	}
 }
+
+/**
+ * @brief Update the snowball
+ * @param width The width of the screen
+ * @param height The height of the screen
+ */
 void snowball::update_snowball(int width, int height)
 {
 	if(live)
@@ -58,6 +69,13 @@ void snowball::update_snowball(int width, int height)
 			live = false;
 	}
 }
+
+/**
+ * @brief Collide the snowball with the penguin dropping
+ * @param pd The penguin dropping object
+ * @param cSize The size of the penguin dropping array
+ * @param penguinFiring The penguin firing object
+ */
 void snowball::collide_snowball(penguinDropping pd[], int cSize, penguinFiring &penguinFiring)
 {
 	if(live)
