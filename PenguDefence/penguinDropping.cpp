@@ -8,18 +8,14 @@
 
 penguinDropping::penguinDropping()
 {
-    // image = al_load_bitmap("mad.png");
-    image = NULL; // temporarily disable
-    // if (!image)
-    // {
-    //     printf("Failed to load mad image\n");
-    //     return;
-    // }
+    image = al_load_bitmap("mad.png");
+   
 
     live = false;
-    speed = 5; 
-    bound_x = 50; // default size when no image
-    bound_y = 50;
+    landed = false;
+    speed = 2; 
+    bound_x = 32; 
+    bound_y = 32;
     x = 0;
     y = 0;
 }
@@ -31,56 +27,54 @@ penguinDropping::~penguinDropping()
 
 void penguinDropping::draw_penguinDropping()
 {
-    if(live && image) {
-        int scaled_width = al_get_bitmap_width(image) * 0.6;
-        int scaled_height = al_get_bitmap_height(image) * 0.6;
-        al_draw_scaled_bitmap(image, 0, 0, al_get_bitmap_width(image), al_get_bitmap_height(image), 
-                             x, y, scaled_width, scaled_height, 0);
+    if((live || landed) && image) {
+        float scale = 0.1; 
+        al_draw_scaled_rotated_bitmap(image, 
+                                    al_get_bitmap_width(image)/2, al_get_bitmap_height(image)/2,
+                                    x, y, scale, scale, 0, 0);
     }
 }
 
-void penguinDropping::start_penguinDropping(int width, int height)
+void penguinDropping::start_penguinDropping(int width, int height, iceberg &iceberg)
 {
     if(!live)
-	{
-		if(rand() % 200 == 0)
-		{
-			live = true;
-			x = rand() % (width - bound_x);
-			y = -bound_y;
-		}
-	}
+    {
+        if(rand() % 180 == 0)  
+        {
+            live = true;
+            landed = false;
+            
+            int iceberg_x = iceberg.get_x();
+            int iceberg_width = iceberg.get_bound_x();
+            x = iceberg_x + bound_x + (rand() % (iceberg_width - 2 * bound_x));
+            y = -50;
+        }
+    }
 }
 
-void penguinDropping::update_penguinDropping()
+void penguinDropping::update_penguinDropping(iceberg &iceberg)
 {
-	if(live)
-	{
-		y += speed;
-		if(y > 600)
-		{
-			live = false;
-		}
-	}
-}
-
-void penguinDropping::collide_penguinDropping(iceberg &iceberg)
-{
-	if(live)
-	{
-		if( x - bound_x < iceberg.get_x() + iceberg.get_bound_x() &&
-			x + bound_x > iceberg.get_x() - iceberg.get_bound_x() &&
-			y - bound_y < iceberg.get_y() + iceberg.get_bound_y() &&
-			y + bound_y > iceberg.get_y() - iceberg.get_bound_y())
-		{
-			iceberg.removeLife();
-			live = false;
-		}
-		else if(x < 0)
-		{
-			live = false;
-		}
-	}
+    if(live && !landed)
+    {
+        y += speed;
+        
+        if(y > 420)
+        {
+            y = 420;  
+            landed = true;
+            live = false;  
+            iceberg.removeLife();  
+        }
+    }
+    
+    if(landed && iceberg.get_lives() <= 0)
+    {
+        y += 1;  
+        if(y > 600)  
+        {
+            landed = false;
+        }
+    }
 }
 
 int penguinDropping::get_x()
