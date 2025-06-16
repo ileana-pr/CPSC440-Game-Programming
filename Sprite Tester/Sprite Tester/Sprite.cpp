@@ -21,21 +21,34 @@ sprite::sprite()
 	framedelay = 8;
 	collisionIsTrue = false;
 	scale = 1.0;
+	rotation_angle = 0.0;
 	currentColor = al_map_rgb(255, 255, 255);  
 	collisionTime = 0;
 	scaredLifetime = 0;
+	spinningLifetime = 0;
 	live = true;
 	
-	//randomly assign either scared, baby, or freeze power
+	//randomly assign either spinning, scared, baby, or freeze power
 	for(int i = 0; i < 4; i++) specialtyPower[i] = false;
-	int power = (rand() % 3) + 1;  
+	int power = rand() % 4;  
 	specialtyPower[power] = true;
 	
+	// if it's a scared sprite, start with random color
+	if(specialtyPower[1]) {
+		scaredSprite();
+	}
 }
 
 void sprite::drawSprite()
 {
-	if(specialtyPower[1])  // scared sprite
+	if(specialtyPower[0])  // spinning sprite
+	{
+		ALLEGRO_BITMAP* current = image[curframe];
+		int cx = width / 2;
+		int cy = height / 2;
+		al_draw_rotated_bitmap(current, cx, cy, x + cx, y + cy, rotation_angle, 0);
+	}
+	else if(specialtyPower[1])  // scared sprite
 	{
 		al_draw_tinted_bitmap(image[curframe], currentColor, x, y, 0);
 	}
@@ -78,6 +91,22 @@ void sprite::updatesprite()
 			live = false;
 			return;
 		}
+	}
+
+	// handle spinning sprite lifetime
+	if(specialtyPower[0] && live)
+	{
+		spinningLifetime++;
+		if(spinningLifetime >= 900)  // 15 seconds * 60 frames
+		{
+			live = false;
+			return;
+		}
+		
+		// update spinning sprite rotation
+		rotation_angle += 0.1;  // rotate by 0.1 radians per frame
+		if(rotation_angle >= 6.28318)  // 2*PI
+			rotation_angle = 0;
 	}
 
 	// update animation for all sprites
@@ -215,7 +244,13 @@ void sprite::collision(sprite aliens[], int size, int currentIndex, int SCREEN_W
 			{
 				if(y < aliens[i].y + height && y + height > aliens[i].y)  // height collision
 				{
-					if(specialtyPower[3] && !collisionIsTrue)  // freeze power
+					if(specialtyPower[0])  // spinning power
+					{
+						// teleport to random location like scared sprite
+						x = rand() % (SCREEN_W - width);
+						y = rand() % (SCREEN_H - height);
+					}
+					else if(specialtyPower[3] && !collisionIsTrue)  // freeze power
 					{
 						collisionIsTrue = true;
 						collisionTime = al_get_time();
@@ -226,7 +261,6 @@ void sprite::collision(sprite aliens[], int size, int currentIndex, int SCREEN_W
 						x = rand() % (SCREEN_W - width);
 						y = rand() % (SCREEN_H - height);
 						scaredSprite();  // change color
-						
 					}
 					else if(specialtyPower[2])  // baby power
 					{

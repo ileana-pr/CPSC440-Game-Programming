@@ -40,27 +40,23 @@ int main(void)
 	//addon init
 	if(!al_install_keyboard())
 	{
-		
 		return -1;
 	}
 	
 	if(!al_init_image_addon())
 	{
-		;
 		return -1;
 	}
 
 	timer = al_create_timer(1.0 / FPS);
 	if(!timer)
 	{
-		
 		return -1;
 	}
 
 	event_queue = al_create_event_queue();
 	if(!event_queue)
 	{
-		
 		return -1;
 	}
 
@@ -75,27 +71,23 @@ int main(void)
 	{
 		if(!alien[i].load_animated_sprite(8))
 		{
-			
 			all_sprites_loaded = false;
 			break;
 		}
 		
-		// For first 3 sprites, assign one of each power
-		if(i < 3) {
-			setPower(alien[i], i + 1);  // powers are 1=scared, 2=baby, 3=freeze
-			
+		// For first 4 sprites, assign one of each power
+		if(i < 4) {
+			setPower(alien[i], i);  // powers are 0=spinning, 1=scared, 2=baby, 3=freeze
 		}
-		// For remaining sprites, use random power
+		// For remaining sprite, use random power
 		else {
-			int power = (rand() % 3) + 1;
+			int power = rand() % 4;
 			setPower(alien[i], power);
-			
 		}
 	}
 
 	if(!all_sprites_loaded)
 	{
-		
 		al_destroy_timer(timer);
 		al_destroy_event_queue(event_queue);
 		al_destroy_display(display);
