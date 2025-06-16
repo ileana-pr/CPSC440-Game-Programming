@@ -1,20 +1,27 @@
 class sprite
 {
 public: 
+	sprite();  
 	~sprite();
 	void updatesprite();
 	void bouncesprite(int SCREEN_W, int SCREEN_H);
-	void load_animated_sprite(int size);
+	bool load_animated_sprite(int size);
 	void drawSprite();
 	void scaredSprite();
 	void babySprite();
-	void spinningSprite();
 	void freezeSprite();
 	void collision(sprite aliens[], int size, int currentIndex, int SCREEN_W, int SCREEN_H);
 	bool isColliding(sprite& other);
 	int getX(){return x;}
 	int getY(){return y;}
-
+	bool hasScaredPower() const {return specialtyPower[1];}
+	bool hasBabyPower() const {return specialtyPower[2];}
+	bool hasFreezePower() const {return specialtyPower[3];}
+	bool live;
+	bool specialtyPower[4];  
+	void destroy_images();
+	bool collisionIsTrue;
+	double collisionTime;
 
 private:
 	int x,y;
@@ -22,13 +29,10 @@ private:
 	int xspeed,yspeed;
 	int xdelay,ydelay;
 	int xcount,ycount;
-	int curframe,maxframe,animdir;
+	int curframe,maxframe;
 	int framecount,framedelay;
-	bool specialtyPower[4];  // [spinning, scared, baby, freeze]
-	bool collisionIsTrue; 
+	int scaredLifetime;  
 	float scale;
-	float rotation;
 	ALLEGRO_COLOR currentColor;
-	double collisionTime;
 	ALLEGRO_BITMAP *image[9];
 };
