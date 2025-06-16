@@ -5,7 +5,6 @@
 #include <iostream>
 using namespace std;
 
-// Constructor
 sprite::sprite()
 {
 	for (int i = 0; i < 9; i++) image[i] = nullptr;
@@ -26,17 +25,12 @@ sprite::sprite()
 	collisionTime = 0;
 	scaredLifetime = 0;
 	spinningLifetime = 0;
-	live = true;
 	
-	//randomly assign either spinning, scared, baby, or freeze power
+	// set all powers to false
 	for(int i = 0; i < 4; i++) specialtyPower[i] = false;
-	int power = rand() % 4;  
-	specialtyPower[power] = true;
 	
-	// if it's a scared sprite, start with random color
-	if(specialtyPower[1]) {
-		scaredSprite();
-	}
+	// load sprite and set flag if successful 
+	live = load_animated_sprite(8);
 }
 
 void sprite::drawSprite()
@@ -86,7 +80,7 @@ void sprite::updatesprite()
 	if(specialtyPower[1] && live)
 	{
 		scaredLifetime++;
-		if(scaredLifetime >= 900)  // 15 seconds * 60 frames
+		if(scaredLifetime >= 900)  
 		{
 			live = false;
 			return;
@@ -97,19 +91,19 @@ void sprite::updatesprite()
 	if(specialtyPower[0] && live)
 	{
 		spinningLifetime++;
-		if(spinningLifetime >= 900)  // 15 seconds * 60 frames
+		if(spinningLifetime >= 900) 
 		{
 			live = false;
 			return;
 		}
 		
 		// update spinning sprite rotation
-		rotation_angle += 0.1;  // rotate by 0.1 radians per frame
-		if(rotation_angle >= 6.28318)  // 2*PI
+		rotation_angle += 0.1; 
+		if(rotation_angle >= 6.28318) 
 			rotation_angle = 0;
 	}
 
-	// update animation for all sprites
+	
 	if (framecount++ > framedelay)
 	{
 		framecount = 0;
@@ -118,15 +112,14 @@ void sprite::updatesprite()
 			curframe = 0;
 	}
 
-	// update position for non-frozen sprites
-	//update x position
+	
 	if (++xcount > xdelay)
 	{
 		xcount = 0;
 		x += xspeed;
 	}
 
-	//update y position
+	
 	if (++ycount > ydelay)
 	{
 		ycount = 0;
@@ -208,7 +201,6 @@ void sprite::babySprite()
 	if(scale < 0.1)  // if too small, die
 	{
 		live = false;
-		cout << "Baby sprite has died from being too small!" << endl;
 	}
 }
 
@@ -226,14 +218,6 @@ void sprite::freezeSprite()
 	}
 }
 
-bool sprite::isColliding(sprite& other)
-{
-	return (x < other.x + other.width &&
-			x + width > other.x &&
-			y < other.y + other.height &&
-			y + height > other.y);
-}
-
 void sprite::collision(sprite aliens[], int size, int currentIndex, int SCREEN_W, int SCREEN_H)
 {
 	for(int i = 0; i < size; i++)
@@ -244,7 +228,7 @@ void sprite::collision(sprite aliens[], int size, int currentIndex, int SCREEN_W
 			{
 				if(y < aliens[i].y + height && y + height > aliens[i].y)  // height collision
 				{
-					if(specialtyPower[0])  // spinning power
+					if(specialtyPower[0])  // spinning power 
 					{
 						// teleport to random location like scared sprite
 						x = rand() % (SCREEN_W - width);
@@ -284,5 +268,15 @@ void sprite::destroy_images() {
 			al_destroy_bitmap(image[i]);
 			image[i] = nullptr;
 		}
+	}
+}
+
+void sprite::setPower(int power) {
+	for(int i = 0; i < 4; i++) 
+	specialtyPower[i] = false;
+	specialtyPower[power] = true;
+	
+	if(power == 1) {
+		scaredSprite();
 	}
 }

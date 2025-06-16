@@ -11,8 +11,8 @@ public:
 	void babySprite();
 	void freezeSprite();
 	void spinningSprite();
+	void setPower(int power);  // 0=spinning, 1=scared, 2=baby, 3=freeze
 	void collision(sprite aliens[], int size, int currentIndex, int SCREEN_W, int SCREEN_H);
-	bool isColliding(sprite& other);
 	int getX(){return x;}
 	int getY(){return y;}
 	bool hasSpinningPower() const {return specialtyPower[0];}
