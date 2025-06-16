@@ -45,6 +45,23 @@ void sprite::drawSprite()
 
 void sprite::updatesprite()
 {
+	double currentTime = al_get_time();
+	
+	// handle freeze sprite
+	if(specialtyPower[3] && collisionIsTrue && 
+	   currentTime - collisionTime < 5.0)
+	{
+		return; // skip movement updates
+	}
+	
+	// handle baby sprite timeout
+	if(specialtyPower[2] && collisionIsTrue && 
+	   currentTime - collisionTime > 10.0)
+	{
+		scale = 1.0;
+		collisionIsTrue = false;
+	}
+
 	//update x position
 	if (++xcount > xdelay)
 	{
@@ -131,20 +148,64 @@ sprite::~sprite()
 
 void sprite::scaredSprite()
 {
-	
+	if(collisionIsTrue)
+	{
+		// generate random color
+		unsigned char r = rand() % 256;
+		unsigned char g = rand() % 256;
+		unsigned char b = rand() % 256;
+		currentColor = al_map_rgb(r, g, b);
+	}
 }
 
 void sprite::babySprite()
 {
-
+	if(collisionIsTrue && scale > 0)
+	{
+		scale *= 0.5;
+		if(scale < 0.1) // threshold for "death"
+		{
+			cout << "A baby sprite has died!" << endl;
+			scale = 0;
+		}
+	}
 }
 
-void sprite::spinningSprite() 
+void sprite::spinningSprite()
 {
-
+	rotation += 0.1; // increment rotation angle
+	if(rotation >= ALLEGRO_PI * 2)
+		rotation = 0;
 }
 
 void sprite::freezeSprite()
 {
+	// handled in updatesprite()
+}
 
+void sprite::collision(sprite aliens[], int size, int currentIndex, int SCREEN_W, int SCREEN_H)
+{
+	for(int i = 0; i < size; i++)
+	{
+		if(i != currentIndex) // don't check collision with self
+		{
+			if(isColliding(aliens[i]))
+			{
+				collisionIsTrue = true;
+				collisionTime = al_get_time();
+				
+				// randomly teleport
+				x = rand() % (SCREEN_W - width);
+				y = rand() % (SCREEN_H - height);
+			}
+		}
+	}
+}
+
+bool sprite::isColliding(sprite& other)
+{
+	return (x < other.x + other.width &&
+			x + width > other.x &&
+			y < other.y + other.height &&
+			y + height > other.y);
 }
