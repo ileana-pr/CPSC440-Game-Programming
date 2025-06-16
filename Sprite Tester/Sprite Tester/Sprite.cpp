@@ -8,7 +8,39 @@ using namespace std;
 
 void sprite::drawSprite()
 {
-	al_draw_bitmap(image[curframe],x,y,0);
+	ALLEGRO_TRANSFORM transform;
+	al_identity_transform(&transform);
+	
+	if(specialtyPower[0]) // spinning
+	{
+		al_translate_transform(&transform, x + width/2, y + height/2);
+		al_rotate_transform(&transform, rotation);
+		al_translate_transform(&transform, -(x + width/2), -(y + height/2));
+		al_use_transform(&transform);
+	}
+	
+	if(specialtyPower[1] && collisionIsTrue) // scared
+	{
+		al_draw_tinted_bitmap(image[curframe], currentColor, x, y, 0);
+	}
+	else if(specialtyPower[2] && collisionIsTrue) // baby
+	{
+		al_draw_scaled_bitmap(image[curframe], 
+			0, 0, width, height,
+			x, y, width * scale, height * scale,
+			0);
+	}
+	else if(specialtyPower[3] && collisionIsTrue) // freeze
+	{
+		al_draw_bitmap(image[curframe], x, y, 0);
+	}
+	else
+	{
+		al_draw_bitmap(image[curframe], x, y, 0);
+	}
+	
+	al_identity_transform(&transform);
+	al_use_transform(&transform);
 }
 
 void sprite::updatesprite()
@@ -97,5 +129,22 @@ sprite::~sprite()
 		al_destroy_bitmap(image[i]);
 }
 
+void sprite::scaredSprite()
+{
+	
+}
 
+void sprite::babySprite()
+{
 
+}
+
+void sprite::spinningSprite() 
+{
+
+}
+
+void sprite::freezeSprite()
+{
+
+}
