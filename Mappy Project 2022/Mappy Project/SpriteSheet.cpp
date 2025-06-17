@@ -21,11 +21,11 @@ void Sprite::InitSprites(int width, int height)
 	frameHeight = 64;
 	animationColumns = 8;
 	animationDirection = 1;
-	isJumping = false;  // start not jumping
-	jumpStartFrame = 8; // jumping frames start at index 8 (after walking frames)
+	isJumping = false;  
+	jumpStartFrame = 8; 
 
 	// start in standing position for initial drop
-	curFrame = 0;  // use first frame for initial drop
+	curFrame = 0;  
 
 	image = al_load_bitmap("guy.bmp");
 	al_convert_mask_to_alpha(image, al_map_rgb(255,0,255));
@@ -108,64 +108,56 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 }
 
 int Sprite::jumping(int jump, const int JUMPIT)
-{
-	// if jump equals JUMPIT, we're on the ground
+{	
+	//if jump = JUMPIT, we're on the ground 
 	if (jump == JUMPIT) { 
-		// check if there's ground below us
 		if (!collided(x + frameWidth/2, y + frameHeight + 5)) {
-			jump = -1; // start falling if no ground below
+			jump = -1; 
 		}
-		isJumping = false; // not jumping when on ground
+		isJumping = false; 
 	}
 	else
 	{
-		// going up (positive jump value means moving up)
+		// if jump is greater than 0, we're in the air
 		if (jump > 0) {
-			// only stop upward movement if we hit blocks at the top of screen
 			if (y < mapblockheight && collided(x + frameWidth/2, y)) {
-				jump = -1; // start falling
+				jump = -1; 
 				isJumping = false;
 			} else {
-				// move upward
 				y -= jump/3; 
 				jump--; 
 				isJumping = true;
 				
-				// use first two jump frames for going up
 				if (jump > JUMPIT/2) {
-					curFrame = jumpStartFrame; // starting jump pose
+					curFrame = jumpStartFrame; // starting jump pose 
 				} else {
-					curFrame = jumpStartFrame + 1; // mid-jump pose
+					curFrame = jumpStartFrame + 1; //mid-jump pose 
 				}
 			}
 		}
-		// if jump is 0 or negative, we should be falling
+		// if jump is less than 0 , we're falling
 		else {
-			jump = -1; // make sure we're falling
-			y += 3; // move downward
-			// use last two jump frames for falling
-			curFrame = jumpStartFrame + 2; // falling pose
+			jump = -1; 
+			y += 3; 
+			curFrame = jumpStartFrame + 2; //falling pose
 		}
 	}
-
-	// falling (negative jump value means moving down)
+	// falling, check if we hit the ground
 	if (jump < 0) 
 	{ 
-		// check if we hit the ground
 		if (collided(x + frameWidth/2, y + frameHeight))
 		{ 
-			jump = JUMPIT; // back to ground state
+			jump = JUMPIT; 
 			isJumping = false;
-			curFrame = jumpStartFrame + 3; // landing pose
+			curFrame = jumpStartFrame + 3; //landing pose
 			
-			// make sure we don't get stuck in the ground
 			while (collided(x + frameWidth/2, y + frameHeight))
 			{
 				y -= 3;
 			}
 		} 
 		else {
-			y += 3; // keep falling if we haven't hit ground
+			y += 3; 
 			curFrame = jumpStartFrame + 2; // falling pose
 		}
 	}
