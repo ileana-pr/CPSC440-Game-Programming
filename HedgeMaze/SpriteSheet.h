@@ -20,13 +20,11 @@ public:
 	float getY() {return y;}
 	int getWidth() {return frameWidth;}
 	int getHeight() {return frameHeight;}
-	int jumping(int jump, const int JUMPIT);
 	bool CollisionEndBlock();
 
 private:
 	float x;
 	float y;
-
 	int maxFrame;
 	int curFrame;
 	int frameCount;
@@ -34,10 +32,6 @@ private:
 	int frameWidth;
 	int frameHeight;
 	int animationColumns;
-	int animationRows;
-	int animationDirection;
-	bool isJumping; // track if we're in jumping animation
-	int jumpStartFrame; // starting frame for jump animation
-
+	int animationDirection; // 0=left, 1=right, 2=up, 3=down, 4=standing
 	ALLEGRO_BITMAP *image;
 };
