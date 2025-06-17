@@ -36,6 +36,8 @@ private:
 	int animationColumns;
 	int animationRows;
 	int animationDirection;
+	bool isJumping; // track if we're in jumping animation
+	int jumpStartFrame; // starting frame for jump animation
 
 	ALLEGRO_BITMAP *image;
 };

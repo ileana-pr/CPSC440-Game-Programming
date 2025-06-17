@@ -23,7 +23,7 @@ int main(void)
 	//Player Variable
 	Sprite player;
 	const int JUMPIT=1600;
-	int jump = JUMPIT;
+	int jump = 0;  // start with 0 to make character fall at beginning
 	
 	// Message variables
 	bool showMessage = false;
