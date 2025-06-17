@@ -2,6 +2,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include "mappy_A5.h"
 #include <iostream>
 using namespace std;
 class Sprite

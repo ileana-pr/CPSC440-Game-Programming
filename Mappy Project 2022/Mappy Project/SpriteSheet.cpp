@@ -103,9 +103,10 @@ int Sprite::jumping(int jump, const int JUMPIT)
 	}
 	else
 	{
-		// Check for collision above before moving up
-		if (jump > 0 && collided(x + frameWidth/2, y)) {
-			jump = 0; // Stop upward movement if there's a collision above
+		// Only check for collision above if we're near the top of the screen
+		// Allow jumping through blocks from below otherwise
+		if (jump > 0 && y < mapblockheight && collided(x + frameWidth/2, y)) {
+			jump = 0; // Stop upward movement if there's a collision with top blocks
 		} else {
 			y -= jump/3; 
 			jump--; 

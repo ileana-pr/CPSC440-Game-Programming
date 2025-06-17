@@ -1,6 +1,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
 #include "SpriteSheet.h"
 #include "mappy_A5.h"
 #include <iostream>
@@ -8,6 +9,8 @@ using namespace std;
 
 int collided(int x, int y);  //Tile Collision
 bool endValue( int x, int y ); //End Block with the User Value = 8
+bool messageValue(int x, int y); // Message Block with User Value = 9
+
 int main(void)
 {
 	const int WIDTH = 900;
@@ -21,8 +24,11 @@ int main(void)
 	Sprite player;
 	const int JUMPIT=1600;
 	int jump = JUMPIT;
-
-
+	
+	// Message variables
+	bool showMessage = false;
+	float messageTimer = 0;
+	ALLEGRO_FONT* font = NULL;
 
 	//allegro variable
 	ALLEGRO_DISPLAY *display = NULL;
@@ -42,6 +48,13 @@ int main(void)
 	al_install_keyboard();
 	al_init_image_addon();
 	al_init_primitives_addon();
+	al_init_font_addon();
+	
+	font = al_create_builtin_font();
+	if (!font) {
+		cout << "Failed to create font!" << endl;
+		return -1;
+	}
 
 	player.InitSprites(WIDTH,HEIGHT);
 
@@ -72,6 +85,7 @@ int main(void)
 		if(ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			render = true;
+			MapUpdateAnims();
 			if(keys[UP])
 				;
 			else if(keys[DOWN])
@@ -165,10 +179,30 @@ int main(void)
 			MapDrawFG(xOff,yOff, 0, 0, WIDTH, HEIGHT, 0);
 			jump=player.jumping(jump,JUMPIT);
 			player.DrawSprites(xOff, yOff);
+			
+			// check for message block
+			if (messageValue(player.getX() + player.getWidth()/2, player.getY() + player.getHeight() + 5)) {
+				showMessage = true;
+				messageTimer = 0;
+			}
+			
+			// message block
+			if (showMessage) {
+				messageTimer += 1.0f/60.0f; 
+				al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2, ALLEGRO_ALIGN_CENTER, "You found a secret message! Game will exit in 10 seconds.");
+				
+				if (messageTimer >= 10.0f) { 
+					done = true;
+				}
+			}
+			
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
 	}
+	
+	// Cleanup
+	al_destroy_font(font);
 	MapFreeMem();
 	al_destroy_event_queue(event_queue);
 	al_destroy_display(display);						//destroy our display object
@@ -196,4 +230,11 @@ bool endValue( int x, int y )
 		return true;
 	}else
 		return false;
+}
+
+bool messageValue(int x, int y)
+{
+	BLKSTR* data;
+	data = MapGetBlock(x/mapblockwidth, y/mapblockheight);
+	return data->user1 == 9;
 }
