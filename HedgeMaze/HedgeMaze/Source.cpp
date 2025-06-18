@@ -11,7 +11,6 @@
 #include <iostream>
 using namespace std;
 
-// Function declarations
 int collided(int x, int y);
 bool endValue(int x, int y);
 bool messageValue(int x, int y);
@@ -26,13 +25,13 @@ int main(void)
 	bool done = false;
 	bool render = false;
 	int currentLevel = 1;
-	float levelTimer = 60.0f;  // 60 seconds per level
-	float endMessageTimer = 5.0f;  // 5 seconds for end message
+	float levelTimer = 60.0f;  
+	float endMessageTimer = 5.0f;  
 	Sprite player;
 	char timerText[32];
 
 	bool showEndMessage = false;
-	bool showMessage = false;
+	bool showTimeUpMessage = false;
 	float messageTimer = 0;
 	ALLEGRO_FONT* font = NULL;
 
@@ -107,66 +106,115 @@ int main(void)
 		if(ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			render = true;
-			MapUpdateAnims();
-
-			// Update timer
-			if(!showEndMessage) {
+			
+			// update game state if not showing end messages
+			if(!showEndMessage && !showTimeUpMessage) {
+				MapUpdateAnims();
 				levelTimer -= 1.0f/60.0f;
+				
+				// player movement only if game is still active
+				if(keys[UP])
+					player.UpdateSprites(WIDTH,HEIGHT,0);
+				else if(keys[DOWN])
+					player.UpdateSprites(WIDTH,HEIGHT,1);
+				else if(keys[LEFT])
+					player.UpdateSprites(WIDTH,HEIGHT,2);
+				else if(keys[RIGHT])
+					player.UpdateSprites(WIDTH,HEIGHT,3);
+				
+				// check level completion only if game is active
+				if (player.CollisionEndBlock()) {
+					if (currentLevel == 1) {
+						cout << "Level 1 complete! Loading level 2..." << endl;
+						MapFreeMem();
+						if(MapLoad("level2.FMP", 1)) {
+							cout << "Failed to load level 2!" << endl;
+							done = true;
+						} else {
+							currentLevel = 2;
+							levelTimer = 60.0f;
+							int startX, startY;
+							findStartPosition(startX, startY);
+							player.SetPosition(startX, startY);
+						}
+					} else if (currentLevel == 2) {
+						cout << "Level 2 complete! Loading level 3..." << endl;
+						MapFreeMem();
+						if(MapLoad("level3.FMP", 1)) {
+							cout << "Failed to load level 3!" << endl;
+							done = true;
+						} else {
+							currentLevel = 3;
+							levelTimer = 60.0f;
+							int startX, startY;
+							findStartPosition(startX, startY);
+							player.SetPosition(startX, startY);
+						}
+					} else if (currentLevel == 3) {
+						showEndMessage = true;
+					}
+				}
+
+				// Check for time up
 				if(levelTimer <= 0) {
-					cout << "Time's up! Game Over!" << endl;
-					done = true;
+					showTimeUpMessage = true;
+					endMessageTimer = 5.0f;
+					// Reset all movement keys
+					for(int i = 0; i < 5; i++) {
+						keys[i] = false;
+					}
 				}
 			} else {
-				// Count down end message timer
+				// end message timer
 				endMessageTimer -= 1.0f/60.0f;
 				if(endMessageTimer <= 0) {
 					done = true;
 				}
 			}
 
-			if(keys[UP])
-				player.UpdateSprites(WIDTH,HEIGHT,0);
-			else if(keys[DOWN])
-				player.UpdateSprites(WIDTH,HEIGHT,1);
-			else if(keys[LEFT])
-				player.UpdateSprites(WIDTH,HEIGHT,2);
-			else if(keys[RIGHT])
-				player.UpdateSprites(WIDTH,HEIGHT,3);
-			
-			if (player.CollisionEndBlock()) {
-				if (currentLevel == 1) {
-					cout << "Level 1 complete! Loading level 2..." << endl;
-					MapFreeMem();
-					if(MapLoad("level2.FMP", 1)) {
-						cout << "Failed to load level 2!" << endl;
-						done = true;
-					} else {
-						currentLevel = 2;
-						levelTimer = 60.0f;  // Reset timer for level 2
-						int startX, startY;
-						findStartPosition(startX, startY);
-						player.SetPosition(startX, startY);
-					}
-				} else if (currentLevel == 2) {
-					cout << "Level 2 complete! Loading level 3..." << endl;
-					MapFreeMem();
-					if(MapLoad("level3.FMP", 1)) {
-						cout << "Failed to load level 3!" << endl;
-						done = true;
-					} else {
-						currentLevel = 3;
-						levelTimer = 60.0f;  // Reset timer for level 3
-						int startX, startY;
-						findStartPosition(startX, startY);
-						player.SetPosition(startX, startY);
-					}
-				} else if (currentLevel == 3) {
-					showEndMessage = true;
-					cout << "Congratulations! You've completed all levels!" << endl;
+			if(render && al_is_event_queue_empty(event_queue))
+			{
+				render = false;
+
+				//update the map scroll position
+				xOff = player.getX()+player.getWidth() - WIDTH/2 ;
+				yOff = player.getY()+player.getHeight()   - HEIGHT/2 ;
+
+				//avoid moving beyond the map edge
+				if (xOff < 0) xOff = 0;
+
+				if (xOff > (mapwidth * mapblockwidth - WIDTH))
+					xOff = mapwidth * mapblockwidth - WIDTH;
+				if (yOff < 0) 
+					yOff = 0;
+				if (yOff > (mapheight * mapblockheight - HEIGHT)) 
+					yOff = mapheight * mapblockheight - HEIGHT;
+
+				//draw background tiles
+				MapDrawBG(xOff,yOff, 0, 0, WIDTH, HEIGHT);
+
+				//draw foreground tiles
+				MapDrawFG(xOff,yOff, 0, 0, WIDTH, HEIGHT, 0);
+				player.DrawSprites(xOff, yOff);
+
+				//draw timer
+				sprintf(timerText, "Time: %.1f", levelTimer);
+				al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, timerText);
+
+				// end game message
+				if(showEndMessage) {
+					al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "CONGRATULATIONS!");
+					al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, "You've completed all levels!");
+				} else if(showTimeUpMessage) {
+					al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "TIME'S UP!");
+					char levelText[64];  
+					sprintf(levelText, "Level %d - Try again!", currentLevel);  
+					al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, levelText);
 				}
+				
+				al_flip_display();
+				al_clear_to_color(al_map_rgb(0,0,0));
 			}
-			
-			render = true;
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
@@ -218,54 +266,21 @@ int main(void)
 				break;
 			}
 		}
-		if(render && al_is_event_queue_empty(event_queue))
-		{
-			render = false;
-
-			//update the map scroll position
-			xOff = player.getX()+player.getWidth() - WIDTH/2 ;
-			yOff = player.getY()+player.getHeight()   - HEIGHT/2 ;
-
-			//avoid moving beyond the map edge
-			if (xOff < 0) xOff = 0;
-
-			if (xOff > (mapwidth * mapblockwidth - WIDTH))
-				xOff = mapwidth * mapblockwidth - WIDTH;
-			if (yOff < 0) 
-				yOff = 0;
-			if (yOff > (mapheight * mapblockheight - HEIGHT)) 
-				yOff = mapheight * mapblockheight - HEIGHT;
-
-			//draw background tiles
-			MapDrawBG(xOff,yOff, 0, 0, WIDTH, HEIGHT);
-
-			//draw foreground tiles
-			MapDrawFG(xOff,yOff, 0, 0, WIDTH, HEIGHT, 0);
-			player.DrawSprites(xOff, yOff);
-
-			//draw timer
-			sprintf(timerText, "Time: %.1f", levelTimer);
-			al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, timerText);
-
-			// end game message
-			if(showEndMessage) {
-				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "CONGRATULATIONS!");
-				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, "You've completed all levels!");
-				// remaining time for message
-				char endText[32];
-				sprintf(endText, "Game closing in %.1f seconds", endMessageTimer);
-				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 50, ALLEGRO_ALIGN_CENTER, endText);
-			}
-			
-			al_flip_display();
-			al_clear_to_color(al_map_rgb(0,0,0));
-		}
 	}
 	
-	if (font) al_destroy_font(font);
-	MapFreeMem();
-	if (event_queue) al_destroy_event_queue(event_queue);
-	if (display) al_destroy_display(display);
+	if (event_queue) {
+		al_unregister_event_source(event_queue, al_get_timer_event_source(timer));
+		al_unregister_event_source(event_queue, al_get_keyboard_event_source());
+	}
+		al_stop_timer(timer);
+		al_destroy_bitmap(sprite);
+		al_destroy_font(font);
+		MapFreeMem();
+		al_destroy_timer(timer);
+		al_destroy_event_queue(event_queue);
+		al_destroy_display(display);
+		
+
 	return 0;
 }
 
