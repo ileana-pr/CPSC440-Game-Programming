@@ -5,6 +5,7 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include "SpriteSheet.h"
 #include "mappy_A5.h"
 #include <iostream>
@@ -26,9 +27,11 @@ int main(void)
 	bool render = false;
 	int currentLevel = 1;
 	float levelTimer = 60.0f;  // 60 seconds per level
+	float endMessageTimer = 5.0f;  // 5 seconds for end message
 	Sprite player;
 	char timerText[32];
 
+	bool showEndMessage = false;
 	bool showMessage = false;
 	float messageTimer = 0;
 	ALLEGRO_FONT* font = NULL;
@@ -49,10 +52,11 @@ int main(void)
 	al_init_image_addon();
 	al_init_primitives_addon();
 	al_init_font_addon();
+	al_init_ttf_addon();
 	
-	font = al_create_builtin_font();
+	font = al_load_font("../HedgeMaze/GROBOLD.ttf", 24, 0);
 	if (!font) {
-		cout << "Failed to create font!" << endl;
+		cout << "Failed to load font!" << endl;
 		return -1;
 	}
 
@@ -106,10 +110,18 @@ int main(void)
 			MapUpdateAnims();
 
 			// Update timer
-			levelTimer -= 1.0f/60.0f;  // Decrease timer (assuming 60 FPS)
-			if(levelTimer <= 0) {
-				cout << "Time's up! Game Over!" << endl;
-				done = true;
+			if(!showEndMessage) {
+				levelTimer -= 1.0f/60.0f;
+				if(levelTimer <= 0) {
+					cout << "Time's up! Game Over!" << endl;
+					done = true;
+				}
+			} else {
+				// Count down end message timer
+				endMessageTimer -= 1.0f/60.0f;
+				if(endMessageTimer <= 0) {
+					done = true;
+				}
 			}
 
 			if(keys[UP])
@@ -149,8 +161,8 @@ int main(void)
 						player.SetPosition(startX, startY);
 					}
 				} else if (currentLevel == 3) {
+					showEndMessage = true;
 					cout << "Congratulations! You've completed all levels!" << endl;
-					done = true;
 				}
 			}
 			
@@ -234,6 +246,16 @@ int main(void)
 			//draw timer
 			sprintf(timerText, "Time: %.1f", levelTimer);
 			al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, timerText);
+
+			// end game message
+			if(showEndMessage) {
+				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "CONGRATULATIONS!");
+				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, "You've completed all levels!");
+				// remaining time for message
+				char endText[32];
+				sprintf(endText, "Game closing in %.1f seconds", endMessageTimer);
+				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 50, ALLEGRO_ALIGN_CENTER, endText);
+			}
 			
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
