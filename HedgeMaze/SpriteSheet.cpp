@@ -10,8 +10,9 @@ Sprite::~Sprite()
 }
 void Sprite::InitSprites(int width, int height)
 {
+	// initial position
 	x = 80;
-	y = -10;
+	y = 80;  // changed from -10 since we don't need falling
 
 	maxFrame = 8;
 	curFrame = 0;
@@ -20,58 +21,56 @@ void Sprite::InitSprites(int width, int height)
 	frameWidth = 50;
 	frameHeight = 64;
 	animationColumns = 8;
-	animationDirection = 1;
-	isJumping = false;  
-	jumpStartFrame = 8; 
+	animationDirection = 4;  // start standing still
 
-	// start in standing position for initial drop
-	curFrame = 0;  
-
-	image = al_load_bitmap("guy.bmp");
-	al_convert_mask_to_alpha(image, al_map_rgb(255,0,255));
+	image = al_load_bitmap("guy.png");
+	al_convert_mask_to_alpha(image, al_map_rgb(255, 0, 255));
 }
 
 void Sprite::UpdateSprites(int width, int height, int dir)
 {
 	int oldx = x;
 	int oldy = y;
+	const int MOVE_SPEED = 2;
 
-	if(dir == 1){ //right key
-		animationDirection = 1; 
-		x+=2; 
-		if (++frameCount > frameDelay)
-		{
-			frameCount=0;
-			if (++curFrame > maxFrame)
-				curFrame=1;
-		}
-	} else if (dir == 0){ //left key
-		animationDirection = 0; 
-		x-=2; 
-		if (++frameCount > frameDelay)
-		{
-			frameCount=0;
-			if (++curFrame > maxFrame)
-				curFrame=1;
-		}
-	}else //represent that they hit the space bar and that mean direction = 0
-		animationDirection = dir;
-
-	//check for collided with foreground tiles
-	if (animationDirection==0)
-	{ 
-		if (collided(x, y + frameHeight)) { //collision detection to the left
-			x = oldx; 
-			y= oldy;
-		}
-
+	// update position
+	switch(dir) {
+		case 0: // left
+			x -= MOVE_SPEED;
+			animationDirection = 0;
+			break;
+		case 1: // right
+			x += MOVE_SPEED;
+			animationDirection = 1;
+			break;
+		case 2: // up
+			y -= MOVE_SPEED;
+			animationDirection = 2;
+			break;
+		case 3: // down
+			y += MOVE_SPEED;
+			animationDirection = 3;
+			break;
+		case 4: // standing
+			animationDirection = 4;
+			break;
 	}
-	else if (animationDirection ==1)
-	{ 
-		if (collided(x + frameWidth, y + frameHeight)) { //collision detection to the right
-			x = oldx; 
-			y= oldy;
+
+	// animation frame
+	if (dir != 4) {  // if moving
+		if (++frameCount > frameDelay) {
+			frameCount = 0;
+			if (++curFrame > maxFrame)
+				curFrame = 1;
 		}
+	}
+
+	// collision
+	if (collided(x + frameWidth/2, y + frameHeight) || 
+		collided(x, y + frameHeight) ||
+		collided(x + frameWidth, y + frameHeight)) {
+		x = oldx;
+		y = oldy;
 	}
 }
 
