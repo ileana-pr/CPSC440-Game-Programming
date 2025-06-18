@@ -33,7 +33,7 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 	int oldy = y;
 	const int MOVE_SPEED = 2;
 
-	// update position
+	// update position based on direction
 	switch(dir) {
 		case 0: // left
 			x -= MOVE_SPEED;
@@ -56,7 +56,7 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 			break;
 	}
 
-	// animation frame
+	// update animation frame
 	if (dir != 4) {  // if moving
 		if (++frameCount > frameDelay) {
 			frameCount = 0;
@@ -65,7 +65,7 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 		}
 	}
 
-	// collision
+	// collision detection
 	if (collided(x + frameWidth/2, y + frameHeight) || 
 		collided(x, y + frameHeight) ||
 		collided(x + frameWidth, y + frameHeight)) {
@@ -87,12 +87,19 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 	int fx;
 	int fy;
 	
-	if (isJumping) {
-		// jumping frames are in the bottom row
-		fx = ((curFrame - jumpStartFrame) % 4) * frameWidth;
-		fy = frameHeight; // second row
-	} else {
-		// walking frames are in the top row
+	if (animationDirection==1){
+		fx = (curFrame % animationColumns) * frameWidth;
+		fy = 0;
+	}else if (animationDirection == 0 ){
+		fx = (curFrame % animationColumns) * frameWidth;
+		fy = 0;
+	}else if (animationDirection == 2 ){
+		fx = (curFrame % animationColumns) * frameWidth;
+		fy = 0;
+	}else if (animationDirection == 3 ){
+		fx = (curFrame % animationColumns) * frameWidth;
+		fy = 0;
+	}else if (animationDirection == 4 ){
 		fx = (curFrame % animationColumns) * frameWidth;
 		fy = 0;
 	}
