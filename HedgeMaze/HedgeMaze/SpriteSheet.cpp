@@ -89,7 +89,12 @@ bool Sprite::CollideSprite()
 
 bool Sprite::CollisionEndBlock()
 {
-	return endValue(x + frameWidth/2, y + frameHeight + 5);
+	// Check top and bottom points
+	bool topCollision = endValue(x + frameWidth/2, y + frameHeight + 5);
+	// Check left and right points at middle height
+	bool sideCollision = endValue(x + frameWidth + 5, y + frameHeight/2);
+	
+	return topCollision || sideCollision;
 }
 
 void Sprite::SetPosition(int newX, int newY)

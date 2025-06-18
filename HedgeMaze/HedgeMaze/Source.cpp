@@ -19,7 +19,7 @@ void findStartPosition(int& startX, int& startY) {
         for(int x = 0; x < mapwidth; x++) {
             BLKSTR* data = MapGetBlock(x, y);
             if(data->user1 == 7) {  
-                startX = x * mapblockwidth;
+                startX = (x * mapblockwidth) + mapblockwidth;  // Add one block width to place player to the right
                 startY = y * mapblockheight;
                 return;
             }
@@ -138,7 +138,20 @@ int main(void)
 						player.SetPosition(startX, startY);
 					}
 				} else if (currentLevel == 2) {
-					cout << "Congratulations! You've completed the game!" << endl;
+					cout << "Level 2 complete! Loading level 3..." << endl;
+					MapFreeMem();  // Free current level
+					if(MapLoad("level3.FMP", 1)) {
+						cout << "Failed to load level 3!" << endl;
+						done = true;
+					} else {
+						currentLevel = 3;
+						// Find and set start position for level 3
+						int startX, startY;
+						findStartPosition(startX, startY);
+						player.SetPosition(startX, startY);
+					}
+				} else if (currentLevel == 3) {
+					cout << "Congratulations! You've completed all levels!" << endl;
 					done = true;
 				}
 			}
@@ -168,9 +181,6 @@ int main(void)
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = true;
 				break;
-			case ALLEGRO_KEY_SPACE:
-				keys[SPACE] = true;
-				jump=30;
 
 			}
 		}
@@ -268,7 +278,7 @@ bool endValue( int x, int y )
 	BLKSTR* data;
 	data = MapGetBlock( x/mapblockwidth, y/mapblockheight );
 
-	if( data->user1 == 8 )
+	if( data->user1 == 9 )
 	{
 		return true;
 	}else
