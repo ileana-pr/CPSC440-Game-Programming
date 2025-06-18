@@ -12,7 +12,7 @@ class Sprite
 public:
 	Sprite();
 	~Sprite();
-	void InitSprites(int width, int height);
+	bool InitSprites(ALLEGRO_BITMAP *image);
 	void UpdateSprites(int width, int height, int dir); //dir 0 = up, 1 = down, 2 = left, 3 = right
 	void DrawSprites(int xoffset, int yoffset);
 	bool CollideSprite();
@@ -39,4 +39,5 @@ private:
 
 	
 	ALLEGRO_BITMAP *image;
+	ALLEGRO_BITMAP *spriteSheet;
 };

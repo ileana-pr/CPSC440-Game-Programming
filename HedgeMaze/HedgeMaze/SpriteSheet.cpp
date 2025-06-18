@@ -4,18 +4,9 @@
 Sprite::Sprite()
 {
 	image = NULL;
-}
-
-Sprite::~Sprite()
-{
-	al_destroy_bitmap(image);
-}
-
-void Sprite::InitSprites(int width, int height)
-{
+	spriteSheet = NULL;
 	x = 80;
 	y = -10;
-
 	maxFrame = 4;
 	curFrame = 0;
 	frameCount = 0;
@@ -24,14 +15,20 @@ void Sprite::InitSprites(int width, int height)
 	frameHeight = 48;
 	animationColumns = 4;
 	animationDirection = 1;
+	animationRows = 4;
+}
 
-	image = al_load_bitmap("guy.bmp");
-	if(!image) {
-		std::cout << "Failed to load guy.bmp!" << std::endl;
-		return;
-	}
-	std::cout << "Successfully loaded guy.bmp" << std::endl;
-	al_convert_mask_to_alpha(image, al_map_rgb(255, 0, 255));
+Sprite::~Sprite()
+{
+	al_destroy_bitmap(image);
+}
+
+bool Sprite::InitSprites(ALLEGRO_BITMAP *image)
+{
+	spriteSheet = image;
+	if(!spriteSheet)
+		return false;
+	return true;
 }
 
 void Sprite::UpdateSprites(int width, int height, int dir)
@@ -70,7 +67,7 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 	}
 
 	// collision detection
-	if(collided(x, y + frameHeight)) {
+	if(collided(x, y) || collided(x, y + frameHeight) || collided(x + frameWidth, y) || collided(x + frameWidth, y + frameHeight)) {
 		x = oldx;
 		y = oldy;
 	}
@@ -81,7 +78,7 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 	int fx = (curFrame % animationColumns) * frameWidth;
 	int fy = animationDirection * frameHeight;
 
-	al_draw_bitmap_region(image, fx, fy, frameWidth, frameHeight, 
+	al_draw_bitmap_region(spriteSheet, fx, fy, frameWidth, frameHeight, 
 		x - xoffset, y - yoffset, 0);
 }
 

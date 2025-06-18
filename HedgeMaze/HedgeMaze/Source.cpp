@@ -59,7 +59,12 @@ int main(void)
 		return -1;
 	}
 
-	player.InitSprites(WIDTH,HEIGHT);
+	ALLEGRO_BITMAP *sprite = al_load_bitmap("../HedgeMaze/guy.png");
+	if (!sprite) {
+		cout << "Failed to load ../HedgeMaze/guy.png!" << endl;
+		return -1;
+	}
+	player.InitSprites(sprite);
 	cout << "Initializing map..." << endl;
 	if(MapLoad("level1.FMP", 1)) {
 		cout << "Failed to load map!" << endl;
