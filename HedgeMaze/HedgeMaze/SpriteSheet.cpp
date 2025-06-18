@@ -92,12 +92,6 @@ bool Sprite::CollisionEndBlock()
 	return endValue(x + frameWidth/2, y + frameHeight + 5);
 }
 
-void Sprite::ResetPosition()
-{
-	x = 80;
-	y = -10;
-}
-
 void Sprite::SetPosition(int newX, int newY)
 {
 	x = newX;

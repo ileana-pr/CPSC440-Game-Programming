@@ -14,38 +14,45 @@ int collided(int x, int y);  //Tile Collision
 bool endValue( int x, int y ); //End Block with the User Value = 8
 bool messageValue(int x, int y); // Message Block with User Value = 9
 
+void findStartPosition(int& startX, int& startY) {
+    for(int y = 0; y < mapheight; y++) {
+        for(int x = 0; x < mapwidth; x++) {
+            BLKSTR* data = MapGetBlock(x, y);
+            if(data->user1 == 7) {  
+                startX = x * mapblockwidth;
+                startY = y * mapblockheight;
+                return;
+            }
+        }
+    }
+}
+
 int main(void)
 {
 	const int WIDTH = 900;
 	const int HEIGHT = 480;
 	bool keys[] = {false, false, false, false, false};
 	enum KEYS{UP, DOWN, LEFT, RIGHT, SPACE};
-	//variables
 	bool done = false;
 	bool render = false;
 	int currentLevel = 1;
-	//Player Variable
 	Sprite player;
-	const int JUMPIT=1600;
-	int jump = 0;  // start with 0 to make character fall at beginning
-	
-	// Message variables
+
 	bool showMessage = false;
 	float messageTimer = 0;
 	ALLEGRO_FONT* font = NULL;
 
-	//allegro variable
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer;
 
 	//program init
-	if(!al_init())										//initialize Allegro
+	if(!al_init())										
 		return -1;
 
-	display = al_create_display(WIDTH, HEIGHT);			//create our display object
+	display = al_create_display(WIDTH, HEIGHT);			
 
-	if(!display)										//test display object
+	if(!display)										
 		return -1;
 
 	//addon init
@@ -72,6 +79,11 @@ int main(void)
 		return -5;
 	}
 	cout << "Map loaded successfully" << endl;
+
+	// Find and set initial position
+	int startX, startY;
+	findStartPosition(startX, startY);
+	player.SetPosition(startX, startY);
 
 	int xOff = 0;
 	int yOff = 0;
@@ -120,8 +132,10 @@ int main(void)
 						done = true;
 					} else {
 						currentLevel = 2;
-						// Reset player position for level 2
-						player.ResetPosition();
+						// Find and set start position for level 2
+						int startX, startY;
+						findStartPosition(startX, startY);
+						player.SetPosition(startX, startY);
 					}
 				} else if (currentLevel == 2) {
 					cout << "Congratulations! You've completed the game!" << endl;
