@@ -60,6 +60,12 @@ int main(void)
 	}
 
 	player.InitSprites(WIDTH,HEIGHT);
+	cout << "Initializing map..." << endl;
+	if(MapLoad("level1.FMP", 1)) {
+		cout << "Failed to load map!" << endl;
+		return -5;
+	}
+	cout << "Map loaded successfully" << endl;
 
 	int xOff = 0;
 	int yOff = 0;
@@ -90,15 +96,13 @@ int main(void)
 			render = true;
 			MapUpdateAnims();
 			if(keys[UP])
-				;
-			else if(keys[DOWN])
-				;
-			else if(keys[LEFT])
 				player.UpdateSprites(WIDTH,HEIGHT,0);
-			else if(keys[RIGHT])
+			else if(keys[DOWN])
 				player.UpdateSprites(WIDTH,HEIGHT,1);
-			else
+			else if(keys[LEFT])
 				player.UpdateSprites(WIDTH,HEIGHT,2);
+			else if(keys[RIGHT])
+				player.UpdateSprites(WIDTH,HEIGHT,3);
 			if (player.CollisionEndBlock())
 				cout<<"Hit an End Block\n";
 			render = true;
@@ -180,7 +184,6 @@ int main(void)
 
 			//draw foreground tiles
 			MapDrawFG(xOff,yOff, 0, 0, WIDTH, HEIGHT, 0);
-			jump=player.jumping(jump,JUMPIT);
 			player.DrawSprites(xOff, yOff);
 			
 			// check for message block

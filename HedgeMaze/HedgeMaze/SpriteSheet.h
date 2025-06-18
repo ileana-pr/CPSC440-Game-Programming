@@ -13,31 +13,30 @@ public:
 	Sprite();
 	~Sprite();
 	void InitSprites(int width, int height);
-	void UpdateSprites(int width, int height, int dir); //dir 1 = right, 0 = left, 2 = Standing Still
+	void UpdateSprites(int width, int height, int dir); //dir 0 = up, 1 = down, 2 = left, 3 = right
 	void DrawSprites(int xoffset, int yoffset);
 	bool CollideSprite();
 	float getX() {return x;}
 	float getY() {return y;}
 	int getWidth() {return frameWidth;}
 	int getHeight() {return frameHeight;}
-	int jumping(int jump, const int JUMPIT);
 	bool CollisionEndBlock();
 
 private:
 	float x;
 	float y;
 
-	int maxFrame;
-	int curFrame;
-	int frameCount;
-	int frameDelay;
-	int frameWidth;
-	int frameHeight;
-	int animationColumns;
-	int animationRows;
-	int animationDirection;
-	bool isJumping; // track if we're in jumping animation
-	int jumpStartFrame; // starting frame for jump animation
+	// animation
+	int maxFrame;        
+	int curFrame;       
+	int frameCount;      
+	int frameDelay;      
+	int frameWidth;      
+	int frameHeight;    
+	int animationColumns; 
+	int animationRows;    
+	int animationDirection; 
 
+	
 	ALLEGRO_BITMAP *image;
 };
