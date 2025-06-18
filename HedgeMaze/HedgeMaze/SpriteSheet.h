@@ -15,6 +15,8 @@ public:
 	bool InitSprites(ALLEGRO_BITMAP *image);
 	void UpdateSprites(int width, int height, int dir); //dir 0 = up, 1 = down, 2 = left, 3 = right
 	void DrawSprites(int xoffset, int yoffset);
+	void SetPosition(int newX, int newY);
+	void ResetPosition();
 	bool CollideSprite();
 	float getX() {return x;}
 	float getY() {return y;}

@@ -23,6 +23,7 @@ int main(void)
 	//variables
 	bool done = false;
 	bool render = false;
+	int currentLevel = 1;
 	//Player Variable
 	Sprite player;
 	const int JUMPIT=1600;
@@ -108,10 +109,27 @@ int main(void)
 				player.UpdateSprites(WIDTH,HEIGHT,2);
 			else if(keys[RIGHT])
 				player.UpdateSprites(WIDTH,HEIGHT,3);
-			if (player.CollisionEndBlock())
-				cout<<"Hit an End Block\n";
+			
+			// Check for level completion
+			if (player.CollisionEndBlock()) {
+				if (currentLevel == 1) {
+					cout << "Level 1 complete! Loading level 2..." << endl;
+					MapFreeMem();  // Free current level
+					if(MapLoad("level2.FMP", 1)) {
+						cout << "Failed to load level 2!" << endl;
+						done = true;
+					} else {
+						currentLevel = 2;
+						// Reset player position for level 2
+						player.ResetPosition();
+					}
+				} else if (currentLevel == 2) {
+					cout << "Congratulations! You've completed the game!" << endl;
+					done = true;
+				}
+			}
+			
 			render = true;
-
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		{
