@@ -10,22 +10,11 @@
 #include <iostream>
 using namespace std;
 
-int collided(int x, int y);  //Tile Collision
-bool endValue( int x, int y ); //End Block with the User Value = 8
-bool messageValue(int x, int y); // Message Block with User Value = 9
-
-void findStartPosition(int& startX, int& startY) {
-    for(int y = 0; y < mapheight; y++) {
-        for(int x = 0; x < mapwidth; x++) {
-            BLKSTR* data = MapGetBlock(x, y);
-            if(data->user1 == 7) {  
-                startX = (x * mapblockwidth) + mapblockwidth;  // Add one block width to place player to the right
-                startY = y * mapblockheight;
-                return;
-            }
-        }
-    }
-}
+// Function declarations
+int collided(int x, int y);
+bool endValue(int x, int y);
+bool messageValue(int x, int y);
+void findStartPosition(int& startX, int& startY);
 
 int main(void)
 {
@@ -36,7 +25,9 @@ int main(void)
 	bool done = false;
 	bool render = false;
 	int currentLevel = 1;
+	float levelTimer = 60.0f;  // 60 seconds per level
 	Sprite player;
+	char timerText[32];
 
 	bool showMessage = false;
 	float messageTimer = 0;
@@ -46,7 +37,6 @@ int main(void)
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer;
 
-	//program init
 	if(!al_init())										
 		return -1;
 
@@ -55,7 +45,6 @@ int main(void)
 	if(!display)										
 		return -1;
 
-	//addon init
 	al_install_keyboard();
 	al_init_image_addon();
 	al_init_primitives_addon();
@@ -67,20 +56,21 @@ int main(void)
 		return -1;
 	}
 
+	//load sprite sheet
 	ALLEGRO_BITMAP *sprite = al_load_bitmap("../HedgeMaze/guy.png");
 	if (!sprite) {
 		cout << "Failed to load ../HedgeMaze/guy.png!" << endl;
 		return -1;
 	}
 	player.InitSprites(sprite);
-	cout << "Initializing map..." << endl;
+	cout << "Loading map..." << endl;
 	if(MapLoad("level1.FMP", 1)) {
 		cout << "Failed to load map!" << endl;
 		return -5;
 	}
-	cout << "Map loaded successfully" << endl;
+	cout << "Map loaded" << endl;
 
-	// Find and set initial position
+	//find and set start position
 	int startX, startY;
 	findStartPosition(startX, startY);
 	player.SetPosition(startX, startY);
@@ -97,10 +87,11 @@ int main(void)
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 
 	al_start_timer(timer);
-	//draw the background tiles
+	
+	//draw background tiles
 	MapDrawBG(xOff,yOff, 0, 0, WIDTH-1, HEIGHT-1);
 
-	//draw foreground tiles
+	//draw foreground tiles 
 	MapDrawFG(xOff,yOff, 0, 0, WIDTH-1, HEIGHT-1, 0);
 	player.DrawSprites(0,0);
 	al_flip_display();
@@ -113,6 +104,14 @@ int main(void)
 		{
 			render = true;
 			MapUpdateAnims();
+
+			// Update timer
+			levelTimer -= 1.0f/60.0f;  // Decrease timer (assuming 60 FPS)
+			if(levelTimer <= 0) {
+				cout << "Time's up! Game Over!" << endl;
+				done = true;
+			}
+
 			if(keys[UP])
 				player.UpdateSprites(WIDTH,HEIGHT,0);
 			else if(keys[DOWN])
@@ -122,30 +121,29 @@ int main(void)
 			else if(keys[RIGHT])
 				player.UpdateSprites(WIDTH,HEIGHT,3);
 			
-			// Check for level completion
 			if (player.CollisionEndBlock()) {
 				if (currentLevel == 1) {
 					cout << "Level 1 complete! Loading level 2..." << endl;
-					MapFreeMem();  // Free current level
+					MapFreeMem();
 					if(MapLoad("level2.FMP", 1)) {
 						cout << "Failed to load level 2!" << endl;
 						done = true;
 					} else {
 						currentLevel = 2;
-						// Find and set start position for level 2
+						levelTimer = 60.0f;  // Reset timer for level 2
 						int startX, startY;
 						findStartPosition(startX, startY);
 						player.SetPosition(startX, startY);
 					}
 				} else if (currentLevel == 2) {
 					cout << "Level 2 complete! Loading level 3..." << endl;
-					MapFreeMem();  // Free current level
+					MapFreeMem();
 					if(MapLoad("level3.FMP", 1)) {
 						cout << "Failed to load level 3!" << endl;
 						done = true;
 					} else {
 						currentLevel = 3;
-						// Find and set start position for level 3
+						levelTimer = 60.0f;  // Reset timer for level 3
 						int startX, startY;
 						findStartPosition(startX, startY);
 						player.SetPosition(startX, startY);
@@ -226,44 +224,28 @@ int main(void)
 			if (yOff > (mapheight * mapblockheight - HEIGHT)) 
 				yOff = mapheight * mapblockheight - HEIGHT;
 
-			//draw the background tiles
+			//draw background tiles
 			MapDrawBG(xOff,yOff, 0, 0, WIDTH, HEIGHT);
 
 			//draw foreground tiles
 			MapDrawFG(xOff,yOff, 0, 0, WIDTH, HEIGHT, 0);
 			player.DrawSprites(xOff, yOff);
-			
-			// check for message block
-			if (messageValue(player.getX() + player.getWidth()/2, player.getY() + player.getHeight() + 5)) {
-				showMessage = true;
-				messageTimer = 0;
-			}
-			
-			// message block
-			if (showMessage) {
-				messageTimer += 1.0f/60.0f; 
-				al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2, ALLEGRO_ALIGN_CENTER, "You found a secret message! Game will exit in 10 seconds.");
-				
-				if (messageTimer >= 10.0f) { 
-					done = true;
-				}
-			}
+
+			//draw timer
+			sprintf(timerText, "Time: %.1f", levelTimer);
+			al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, timerText);
 			
 			al_flip_display();
 			al_clear_to_color(al_map_rgb(0,0,0));
 		}
 	}
 	
-	// Cleanup
-	al_destroy_font(font);
+	if (font) al_destroy_font(font);
 	MapFreeMem();
-	al_destroy_event_queue(event_queue);
-	al_destroy_display(display);						//destroy our display object
-
+	if (event_queue) al_destroy_event_queue(event_queue);
+	if (display) al_destroy_display(display);
 	return 0;
 }
-
-
 
 int collided(int x, int y)
 {
@@ -272,21 +254,30 @@ int collided(int x, int y)
 	return blockdata->tl;
 }
 
-bool endValue( int x, int y )
+bool endValue(int x, int y)
 {
-
 	BLKSTR* data;
-	data = MapGetBlock( x/mapblockwidth, y/mapblockheight );
-
-	if( data->user1 == 9 )
-	{
-		return true;
-	}else
-		return false;
+	data = MapGetBlock(x/mapblockwidth, y/mapblockheight);
+	return data->user1 == 9;
 }
+
 bool messageValue(int x, int y)
 {
 	BLKSTR* data;
 	data = MapGetBlock(x/mapblockwidth, y/mapblockheight);
 	return data->user1 == 9;
+}
+
+void findStartPosition(int& startX, int& startY) 
+{
+	for(int y = 0; y < mapheight; y++) {
+		for(int x = 0; x < mapwidth; x++) {
+			BLKSTR* data = MapGetBlock(x, y);
+			if(data->user1 == 7) {  
+				startX = (x * mapblockwidth) + mapblockwidth;
+				startY = y * mapblockheight;
+				return;
+			}
+		}
+	}
 }
