@@ -10,30 +10,71 @@ Sprite::~Sprite()
 }
 void Sprite::InitSprites(int width, int height)
 {
-	// initial position
-	x = 80;
-	y = 80;  // changed from -10 since we don't need falling
+	// Load original
+	ALLEGRO_BITMAP* temp_image = al_load_bitmap("guy.png");
+	if(!temp_image) {
+		cout << "failed to load guy.png" << endl;
+		return;
+	}
 
-	maxFrame = 8;
+	// create smaller bitmap 
+	image = al_create_bitmap(96, 128);  // 24x32 * 4 frames
+	if(!image) {
+		cout << "failed to create resized bitmap" << endl;
+		al_destroy_bitmap(temp_image);
+		return;
+	}
+
+	// Draw large image onto smaller bitmap
+	al_set_target_bitmap(image);
+	al_draw_scaled_bitmap(temp_image,
+		0, 0,                                    // source x, y
+		al_get_bitmap_width(temp_image),         // source width
+		al_get_bitmap_height(temp_image),        // source height
+		0, 0,                                    // dest x, y  
+		96, 128,                                 // dest width, height
+		0                                        // flags
+	);
+	al_destroy_bitmap(temp_image);
+
+	// Set correct frame dimensions 
+	frameWidth = 24;     
+	frameHeight = 32;    
+	animationColumns = 4;
+	animationRows = 4;
+	maxFrame = 3;
 	curFrame = 0;
 	frameCount = 0;
-	frameDelay = 6;
-	frameWidth = 50;
-	frameHeight = 64;
-	animationColumns = 8;
-	animationDirection = 4;  // start standing still
+	frameDelay = 8;
+	animationDirection = 1;
 
-	image = al_load_bitmap("guy.png");
+	// Find start position 
+	for (int my = 0; my < mapheight; my++) {
+		for (int mx = 0; mx < mapwidth; mx++) {
+			BLKSTR* block = MapGetBlock(mx, my);
+			if (block->user1 == 7) {
+				x = (mx + 1) * mapblockwidth;
+				y = my * mapblockheight;
+				break;
+			}
+		}
+	}
+
 	al_convert_mask_to_alpha(image, al_map_rgb(255, 0, 255));
+
+	scaleX = (mapblockwidth * 2.0f) / frameWidth;
+	scaleY = scaleX;  // maintain aspect ratio
 }
 
 void Sprite::UpdateSprites(int width, int height, int dir)
 {
 	int oldx = x;
 	int oldy = y;
-	const int MOVE_SPEED = 2;
+	
+	// Base movement speed on tile size
+	const float MOVE_SPEED = mapblockwidth / 16.0f;  // adjust divisor to tune speed
 
-	// update position based on direction
+	// Update position and direction
 	switch(dir) {
 		case 0: // left
 			x -= MOVE_SPEED;
@@ -56,19 +97,28 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 			break;
 	}
 
-	// update animation frame
-	if (dir != 4) {  // if moving
+	// Update animation frame if moving
+	if (dir != 4) {
 		if (++frameCount > frameDelay) {
 			frameCount = 0;
 			if (++curFrame > maxFrame)
-				curFrame = 1;
+				curFrame = 0;
 		}
 	}
 
-	// collision detection
-	if (collided(x + frameWidth/2, y + frameHeight) || 
-		collided(x, y + frameHeight) ||
-		collided(x + frameWidth, y + frameHeight)) {
+	// Collision detection with map boundaries
+	if (x < 0) x = 0;
+	if (y < 0) y = 0;
+	if (x > width - (frameWidth * scaleX)) x = width - (frameWidth * scaleX);
+	if (y > height - (frameHeight * scaleY)) y = height - (frameHeight * scaleY);
+
+	// Collision detection with tiles
+	float scaledWidth = frameWidth * scaleX;
+	float scaledHeight = frameHeight * scaleY;
+	
+	if (collided(x + scaledWidth/2, y + scaledHeight) || 
+		collided(x, y + scaledHeight) ||
+		collided(x + scaledWidth, y + scaledHeight)) {
 		x = oldx;
 		y = oldy;
 	}
@@ -84,88 +134,40 @@ bool Sprite::CollisionEndBlock()
 
 void Sprite::DrawSprites(int xoffset, int yoffset)
 {
-	int fx;
-	int fy;
-	
-	if (animationDirection==1){
-		fx = (curFrame % animationColumns) * frameWidth;
-		fy = 0;
-	}else if (animationDirection == 0 ){
-		fx = (curFrame % animationColumns) * frameWidth;
-		fy = 0;
-	}else if (animationDirection == 2 ){
-		fx = (curFrame % animationColumns) * frameWidth;
-		fy = 0;
-	}else if (animationDirection == 3 ){
-		fx = (curFrame % animationColumns) * frameWidth;
-		fy = 0;
-	}else if (animationDirection == 4 ){
-		fx = (curFrame % animationColumns) * frameWidth;
-		fy = 0;
+	int fx = (curFrame % animationColumns) * frameWidth;
+	int fy = 0;
+
+	// Calculate scale to fit character within two map tiles
+	float targetWidth = mapblockwidth * 2;  // width of two tiles
+	float scaleX = targetWidth / frameWidth;
+	float scaleY = scaleX; // maintain aspect ratio
+
+	// Select the correct row based on direction
+	switch(animationDirection) {
+		case 0: // left
+			fy = 2 * frameHeight;
+			break;
+		case 1: // right
+			fy = 0;
+			break;
+		case 2: // up
+			fy = 3 * frameHeight;
+			break;
+		case 3: // down
+			fy = frameHeight;
+			break;
+		case 4: // standing
+			curFrame = 0;
+			break;
 	}
 
-	if (animationDirection==1){
-		al_draw_bitmap_region(image, fx, fy, frameWidth, frameHeight, x-xoffset, y-yoffset, 0);
-	}else if (animationDirection == 0 ){
-		al_draw_bitmap_region(image, fx, fy, frameWidth, frameHeight, x-xoffset, y-yoffset, ALLEGRO_FLIP_HORIZONTAL);
-	}else if (animationDirection == 2 ){
-		al_draw_bitmap_region(image, 0, fy, frameWidth, frameHeight, x-xoffset, y-yoffset, 0);
-	}
+	// Draw the sprite scaled to fit two map tiles
+	al_draw_scaled_bitmap(image,
+		fx, fy,                           // source x, y
+		frameWidth, frameHeight,          // source width, height
+		x - xoffset, y - yoffset,         // dest x, y
+		frameWidth * scaleX, frameHeight * scaleY,  // dest width, height
+		0                                 // flags
+	);
 }
 
-int Sprite::jumping(int jump, const int JUMPIT)
-{	
-	//if jump = JUMPIT, we're on the ground 
-	if (jump == JUMPIT) { 
-		if (!collided(x + frameWidth/2, y + frameHeight + 5)) {
-			jump = -1; 
-		}
-		isJumping = false; 
-	}
-	else
-	{
-		// if jump is greater than 0, we're in the air
-		if (jump > 0) {
-			if (y < mapblockheight && collided(x + frameWidth/2, y)) {
-				jump = -1; 
-				isJumping = false;
-			} else {
-				y -= jump/3; 
-				jump--; 
-				isJumping = true;
-				
-				if (jump > JUMPIT/2) {
-					curFrame = jumpStartFrame; // starting jump pose 
-				} else {
-					curFrame = jumpStartFrame + 1; //mid-jump pose 
-				}
-			}
-		}
-		// if jump is less than 0 , we're falling
-		else {
-			jump = -1; 
-			y += 3; 
-			curFrame = jumpStartFrame + 2; //falling pose
-		}
-	}
-	// falling, check if we hit the ground
-	if (jump < 0) 
-	{ 
-		if (collided(x + frameWidth/2, y + frameHeight))
-		{ 
-			jump = JUMPIT; 
-			isJumping = false;
-			curFrame = jumpStartFrame + 3; //landing pose
-			
-			while (collided(x + frameWidth/2, y + frameHeight))
-			{
-				y -= 3;
-			}
-		} 
-		else {
-			y += 3; 
-			curFrame = jumpStartFrame + 2; // falling pose
-		}
-	}
-	return jump;
-}

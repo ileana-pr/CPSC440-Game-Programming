@@ -25,13 +25,16 @@ public:
 private:
 	float x;
 	float y;
-	int maxFrame;
+	int maxFrame;        // will be 3 (0-3 for 4 frames)
 	int curFrame;
 	int frameCount;
 	int frameDelay;
-	int frameWidth;
-	int frameHeight;
-	int animationColumns;
-	int animationDirection; // 0=left, 1=right, 2=up, 3=down, 4=standing
+	int frameWidth;      
+	int frameHeight;    
+	int animationColumns;  // 4 columns
+	int animationRows;     // 4 rows
+	int animationDirection;  // 0=left, 1=right, 2=up, 3=down, 4=standing
 	ALLEGRO_BITMAP *image;
+	float scaleX;
+	float scaleY;
 };

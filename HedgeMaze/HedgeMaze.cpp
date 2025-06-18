@@ -180,7 +180,6 @@ int main(void)
 
 			//draw foreground tiles
 			MapDrawFG(xOff, yOff, 0, 0, WIDTH, HEIGHT, 0);
-			jump = player.jumping(jump, JUMPIT);
 			player.DrawSprites(xOff, yOff);
 
 			// check for message block
@@ -190,7 +189,7 @@ int main(void)
 			}
 
 			// message block
-			if (showMessage) {
+			if (showMessage) { 
 				messageTimer += 1.0f / 60.0f;
 				al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH / 2, HEIGHT / 2, ALLEGRO_ALIGN_CENTER, "You found a secret message! Game will exit in 10 seconds.");
 
