@@ -11,11 +11,6 @@
 #include <iostream>
 using namespace std;
 
-int collided(int x, int y);
-bool endValue(int x, int y);
-bool messageValue(int x, int y);
-void findStartPosition(int& startX, int& startY);
-
 int main(void)
 {
 	const int WIDTH = 900;
@@ -25,14 +20,14 @@ int main(void)
 	bool done = false;
 	bool render = false;
 	int currentLevel = 1;
-	float levelTimer = 60.0f;  
-	float endMessageTimer = 5.0f;  
-	Sprite player;
-	char timerText[32];
+	
+	// scroll speed (pixels per frame)
+	const float SCROLL_SPEED = 2.0f;
+	float scrollX = 0;
 
 	bool showEndMessage = false;
-	bool showTimeUpMessage = false;
-	float messageTimer = 0;
+	float endMessageTimer = 5.0f;
+	Sprite player;
 	
 	ALLEGRO_FONT* font = NULL;
 	ALLEGRO_DISPLAY *display = NULL;
@@ -72,11 +67,21 @@ int main(void)
 		return -5;
 	}
 	cout << "Map loaded" << endl;
+	cout << "Map dimensions: " << mapwidth << "x" << mapheight << " blocks of " << mapblockwidth << "x" << mapblockheight << " pixels" << endl;
+	
+	// total map size in pixels
+	const int TOTAL_MAP_WIDTH = mapwidth * mapblockwidth;
+	const int TOTAL_MAP_HEIGHT = mapheight * mapblockheight;
+	
+	cout << "Total map size in pixels: " << TOTAL_MAP_WIDTH << "x" << TOTAL_MAP_HEIGHT << endl;
+	
+	if (TOTAL_MAP_WIDTH < WIDTH || TOTAL_MAP_HEIGHT < HEIGHT) {
+		cout << "Error: Map is smaller than screen size!" << endl;
+		return -6;
+	}
 
-	//find and set start position
-	int startX, startY;
-	findStartPosition(startX, startY);
-	player.SetPosition(startX, startY);
+	// start near left side
+	player.SetPosition(WIDTH/4, HEIGHT/2);
 
 	int xOff = 0;
 	int yOff = 0;
@@ -86,130 +91,51 @@ int main(void)
 
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
+	al_register_event_source(event_queue, al_get_display_event_source(display));
 
 	al_start_timer(timer);
 	
-	//draw background tiles
-	MapDrawBG(xOff,yOff, 0, 0, WIDTH-1, HEIGHT-1);
-
-	//draw foreground tiles 
-	MapDrawFG(xOff,yOff, 0, 0, WIDTH-1, HEIGHT-1, 0);
-	player.DrawSprites(0,0);
-	al_flip_display();
-	al_clear_to_color(al_map_rgb(0,0,0));
 	while(!done)
 	{
 		ALLEGRO_EVENT ev;
 		al_wait_for_event(event_queue, &ev);
+
 		if(ev.type == ALLEGRO_EVENT_TIMER)
 		{
 			render = true;
 			
-			// update game state if not showing end messages
-			if(!showEndMessage && !showTimeUpMessage) {
+			// update game state if not showing end message
+			if(!showEndMessage) {
 				MapUpdateAnims();
-				levelTimer -= 1.0f/60.0f;
 				
-				// player movement only if game is still active
-				if(keys[UP])
-					player.UpdateSprites(WIDTH,HEIGHT,0);
-				else if(keys[DOWN])
-					player.UpdateSprites(WIDTH,HEIGHT,1);
-				else if(keys[LEFT])
-					player.UpdateSprites(WIDTH,HEIGHT,2);
-				else if(keys[RIGHT])
-					player.UpdateSprites(WIDTH,HEIGHT,3);
-				
-				// check level completion only if game is active
-				if (player.CollisionEndBlock()) {
-					if (currentLevel == 1) {
-						MapFreeMem();
-						if(MapLoad("level2.FMP", 1)) {
-							cout << "Failed to load level 2!" << endl;
-							done = true;
-						} else {
-							currentLevel = 2;
-							levelTimer = 60.0f;
-							int startX, startY;
-							findStartPosition(startX, startY);
-							player.SetPosition(startX, startY);
-						}
-					} else if (currentLevel == 2) {
-						MapFreeMem();
-						if(MapLoad("level3.FMP", 1)) {
-							cout << "Failed to load level 3!" << endl;
-							done = true;
-						} else {
-							currentLevel = 3;
-							levelTimer = 60.0f;
-							int startX, startY;
-							findStartPosition(startX, startY);
-							player.SetPosition(startX, startY);
-						}
-					} else if (currentLevel == 3) {
+				// scroll the map
+				scrollX += SCROLL_SPEED;
+				if(scrollX >= TOTAL_MAP_WIDTH - WIDTH) {
+					// Player reached the end of the map
+					if(currentLevel < 3) {
+						currentLevel++;
+						scrollX = 0;
+						player.SetPosition(WIDTH/4, player.getY());
+					} else {
 						showEndMessage = true;
 					}
 				}
 
-				// Check for time up
-				if(levelTimer <= 0) {
-					showTimeUpMessage = true;
-					endMessageTimer = 5.0f;
-					// Reset all movement keys
-					for(int i = 0; i < 5; i++) {
-						keys[i] = false;
-					}
-				}
+				// movement - only up and down
+				if(keys[UP] && player.getY() > 0)
+					player.UpdateSprites(WIDTH, HEIGHT, 0);
+				else if(keys[DOWN] && player.getY() < HEIGHT - player.getHeight())
+					player.UpdateSprites(WIDTH, HEIGHT, 1);
+
+				// set map offset based on scroll position
+				xOff = (int)scrollX;
+				yOff = 0;  // no vertical scrolling
 			} else {
 				// end message timer
 				endMessageTimer -= 1.0f/60.0f;
 				if(endMessageTimer <= 0) {
 					done = true;
 				}
-			}
-
-			if(render && al_is_event_queue_empty(event_queue))
-			{
-				render = false;
-
-				//update the map scroll position
-				xOff = player.getX()+player.getWidth() - WIDTH/2 ;
-				yOff = player.getY()+player.getHeight()   - HEIGHT/2 ;
-
-				//avoid moving beyond the map edge
-				if (xOff < 0) xOff = 0;
-
-				if (xOff > (mapwidth * mapblockwidth - WIDTH))
-					xOff = mapwidth * mapblockwidth - WIDTH;
-				if (yOff < 0) 
-					yOff = 0;
-				if (yOff > (mapheight * mapblockheight - HEIGHT)) 
-					yOff = mapheight * mapblockheight - HEIGHT;
-
-				//draw background tiles
-				MapDrawBG(xOff,yOff, 0, 0, WIDTH, HEIGHT);
-
-				//draw foreground tiles
-				MapDrawFG(xOff,yOff, 0, 0, WIDTH, HEIGHT, 0);
-				player.DrawSprites(xOff, yOff);
-
-				//draw timer
-				sprintf(timerText, "Time: %.1f", levelTimer);
-				al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, timerText);
-
-				// end game message
-				if(showEndMessage) {
-					al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "CONGRATULATIONS!");
-					al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, "You've completed all levels!");
-				} else if(showTimeUpMessage) {
-					al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "TIME'S UP!");
-					char levelText[64];  
-					sprintf(levelText, "Level %d - Try again!", currentLevel);  
-					al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, levelText);
-				}
-				
-				al_flip_display();
-				al_clear_to_color(al_map_rgb(0,0,0));
 			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -229,88 +155,52 @@ int main(void)
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = true;
 				break;
-			case ALLEGRO_KEY_LEFT:
-				keys[LEFT] = true;
-				break;
-			case ALLEGRO_KEY_RIGHT:
-				keys[RIGHT] = true;
-				break;
-
 			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_KEY_UP)
 		{
 			switch(ev.keyboard.keycode)
 			{
-			case ALLEGRO_KEY_ESCAPE:
-				done = true;
-				break;
 			case ALLEGRO_KEY_UP:
 				keys[UP] = false;
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = false;
 				break;
-			case ALLEGRO_KEY_LEFT:
-				keys[LEFT] = false;
-				break;
-			case ALLEGRO_KEY_RIGHT:
-				keys[RIGHT] = false;
-				break;
-			case ALLEGRO_KEY_SPACE:
-				keys[SPACE] = false;
-				break;
 			}
 		}
+
+		if(render && al_is_event_queue_empty(event_queue))
+		{
+			render = false;
+
+			// game state
+			MapDrawBG(xOff, yOff, 0, 0, WIDTH, HEIGHT);
+			MapDrawFG(xOff, yOff, 0, 0, WIDTH, HEIGHT, 0);
+			player.DrawSprites(0, 0);  
+			// level info
+			char levelText[32];
+			sprintf(levelText, "Level %d", currentLevel);
+			al_draw_text(font, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, levelText);
+
+			// end game message
+			if(showEndMessage) {
+				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 - 30, ALLEGRO_ALIGN_CENTER, "CONGRATULATIONS!");
+				al_draw_text(font, al_map_rgb(255, 215, 0), WIDTH/2, HEIGHT/2 + 10, ALLEGRO_ALIGN_CENTER, "You've completed all levels!");
+			}
+			
+			al_flip_display();
+			al_clear_to_color(al_map_rgb(0,0,0));
+		}
 	}
+
+	// Cleanup
+	al_destroy_timer(timer);
+	al_destroy_display(display);
+	al_destroy_event_queue(event_queue);
+	al_destroy_font(font);
+	al_destroy_bitmap(sprite);
+	MapFreeMem();
 	
-	if (event_queue) {
-		al_unregister_event_source(event_queue, al_get_timer_event_source(timer));
-		al_unregister_event_source(event_queue, al_get_keyboard_event_source());
-	}
-		al_stop_timer(timer);
-		al_destroy_bitmap(sprite);
-		al_destroy_font(font);
-		MapFreeMem();
-		al_destroy_timer(timer);
-		al_destroy_event_queue(event_queue);
-		al_destroy_display(display);
-		
-
 	return 0;
-}
-
-int collided(int x, int y)
-{
-	BLKSTR *blockdata;
-	blockdata = MapGetBlock(x/mapblockwidth, y/mapblockheight);
-	return blockdata->tl;
-}
-
-bool endValue(int x, int y)
-{
-	BLKSTR* data;
-	data = MapGetBlock(x/mapblockwidth, y/mapblockheight);
-	return data->user1 == 9;
-}
-
-bool messageValue(int x, int y)
-{
-	BLKSTR* data;
-	data = MapGetBlock(x/mapblockwidth, y/mapblockheight);
-	return data->user1 == 9;
-}
-
-void findStartPosition(int& startX, int& startY) 
-{
-	for(int y = 0; y < mapheight; y++) {
-		for(int x = 0; x < mapwidth; x++) {
-			BLKSTR* data = MapGetBlock(x, y);
-			if(data->user1 == 7) {  
-				startX = (x * mapblockwidth) + mapblockwidth;
-				startY = y * mapblockheight;
-				return;
-			}
-		}
-	}
 }
