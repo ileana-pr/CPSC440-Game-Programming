@@ -16,7 +16,6 @@ public:
 	void UpdateSprites(int width, int height, int dir); //dir 0 = up, 1 = down, 2 = left, 3 = right
 	void DrawSprites(int xoffset, int yoffset);
 	void SetPosition(int newX, int newY);
-	bool CollideSprite();
 	bool CollisionEndBlock();
 	float getX() {return x;}
 	float getY() {return y;}

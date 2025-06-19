@@ -1,5 +1,5 @@
 // Name: Ileana Perez 
-// CPSC 340 - Lab 11 
+// CPSC 340 - Assignment 4
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
@@ -33,8 +33,8 @@ int main(void)
 	bool showEndMessage = false;
 	bool showTimeUpMessage = false;
 	float messageTimer = 0;
+	
 	ALLEGRO_FONT* font = NULL;
-
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer;
@@ -80,8 +80,6 @@ int main(void)
 
 	int xOff = 0;
 	int yOff = 0;
-	if(MapLoad("level1.FMP", 1))
-		return -5;
 
 	event_queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / 60);
@@ -125,7 +123,6 @@ int main(void)
 				// check level completion only if game is active
 				if (player.CollisionEndBlock()) {
 					if (currentLevel == 1) {
-						cout << "Level 1 complete! Loading level 2..." << endl;
 						MapFreeMem();
 						if(MapLoad("level2.FMP", 1)) {
 							cout << "Failed to load level 2!" << endl;
@@ -138,7 +135,6 @@ int main(void)
 							player.SetPosition(startX, startY);
 						}
 					} else if (currentLevel == 2) {
-						cout << "Level 2 complete! Loading level 3..." << endl;
 						MapFreeMem();
 						if(MapLoad("level3.FMP", 1)) {
 							cout << "Failed to load level 3!" << endl;

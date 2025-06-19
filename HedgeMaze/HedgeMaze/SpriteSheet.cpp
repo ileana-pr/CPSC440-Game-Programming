@@ -82,16 +82,9 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 		x - xoffset, y - yoffset, 0);
 }
 
-bool Sprite::CollideSprite()
-{
-	return false;
-}
-
 bool Sprite::CollisionEndBlock()
 {
-	// Check top and bottom points
 	bool topCollision = endValue(x + frameWidth/2, y + frameHeight + 5);
-	// Check left and right points at middle height
 	bool sideCollision = endValue(x + frameWidth + 5, y + frameHeight/2);
 	
 	return topCollision || sideCollision;
