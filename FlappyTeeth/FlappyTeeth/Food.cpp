@@ -14,7 +14,6 @@ Food::Food()
 
 Food::~Food()
 {
-    // image is destroyed in main
 }
 
 void Food::Init(ALLEGRO_BITMAP* foodSprite)
@@ -37,16 +36,50 @@ void Food::DrawFood()
     }
 }
 
-void Food::StartFood(int WIDTH, int HEIGHT)
+bool Food::CheckSpawnCollision(Food foods[], int numFoods, float newX, float newY)
+{
+    for(int i = 0; i < numFoods; i++)
+    {
+        if(foods[i].isLive() && &foods[i] != this)  
+        {
+            if(newX > (foods[i].getX() - foods[i].getBoundX()) &&
+               newX < (foods[i].getX() + foods[i].getBoundX()) &&
+               newY > (foods[i].getY() - foods[i].getBoundY()) &&
+               newY < (foods[i].getY() + foods[i].getBoundY()))
+            {
+                return true;  
+            }
+        }
+    }
+    return false; 
+}
+
+void Food::StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods)
 {
     if(!live)
     {
         if(rand() % 100 == 0) 
         {
-            live = true;
-            x = WIDTH;
-            y = rand() % (HEIGHT - boundy);
-            type = rand() % (16 * 8);  
+            
+            float newX = WIDTH;
+            float newY;
+            bool validPosition = false;
+            int attempts = 0;
+            const int MAX_ATTEMPTS = 10;
+
+            while(!validPosition && attempts < MAX_ATTEMPTS)
+            {
+                newY = rand() % (HEIGHT - boundy);
+                if(!CheckSpawnCollision(foods, numFoods, newX, newY))
+                {
+                    validPosition = true;
+                    live = true;
+                    x = newX;
+                    y = newY;
+                    type = rand() % (16 * 8);
+                }
+                attempts++;
+            }
         }
     }
 }
@@ -56,7 +89,6 @@ void Food::UpdateFood()
     if(live)
     {
         x -= speed;
-        
         
         if(x < -boundx) 
             live = false;

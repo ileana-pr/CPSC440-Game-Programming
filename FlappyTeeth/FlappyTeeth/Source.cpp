@@ -36,7 +36,7 @@ int main(void)
 	bool showEndMessage = false;
 	float endMessageTimer = 5.0f;
 	Sprite player;
-	Food foods[NUM_FOODS];  // array of food items
+	Food foods[NUM_FOODS];  
 	
 	ALLEGRO_FONT* font = NULL;
 	ALLEGRO_DISPLAY *display = NULL;
@@ -152,7 +152,7 @@ int main(void)
 					}
 				}
 
-				// movement
+				// handle player movement
 				if(keys[UP] && player.getY() > 0) {
 					player.UpdateSprites(WIDTH, HEIGHT, 0);
 					if(!collided(player.getX() + xOff, player.getY() - 4) && 
@@ -167,14 +167,17 @@ int main(void)
 				}
 				
 				float currentY = player.getY();  
-				if(keys[LEFT] && player.getX() > 0) {
+				const int LEFT_BOUNDARY = 0;
+				const int RIGHT_BOUNDARY = WIDTH / 3;  // restrict to left third
+
+				if(keys[LEFT] && player.getX() > LEFT_BOUNDARY) {
 					player.UpdateSprites(WIDTH, HEIGHT, 0);  
 					if(!collided(player.getX() - 4 + xOff, currentY) &&
 					   !collided(player.getX() - 4 + xOff, currentY + player.getHeight())) {
 						player.SetPosition(player.getX() - 4, currentY);  
 					}
 				}
-				else if(keys[RIGHT] && player.getX() < WIDTH - player.getWidth()) {
+				else if(keys[RIGHT] && player.getX() < RIGHT_BOUNDARY - player.getWidth()) {
 					player.UpdateSprites(WIDTH, HEIGHT, 1);  
 					if(!collided(player.getX() + player.getWidth() + 4 + xOff, currentY) &&
 					   !collided(player.getX() + player.getWidth() + 4 + xOff, currentY + player.getHeight())) {
@@ -187,7 +190,7 @@ int main(void)
 
 				// update all food items
 				for(int i = 0; i < NUM_FOODS; i++) {
-					foods[i].StartFood(WIDTH, HEIGHT);
+					foods[i].StartFood(WIDTH, HEIGHT, foods, NUM_FOODS);
 					foods[i].UpdateFood();
 					foods[i].CollideFood(player.getX(), player.getY(), player.getWidth(), player.getHeight());
 				}
