@@ -11,12 +11,18 @@
 #include "SpriteSheet.h"
 #include "mappy_A5.h"
 #include <iostream>
+#include "Food.h"
 using namespace std;
+
+// forward declarations
+int collided(int x, int y);
+bool endValue(int x, int y);
 
 int main(void)
 {
 	const int WIDTH = 900;
 	const int HEIGHT = 480;
+	const int NUM_FOODS = 5;  
 	bool keys[] = {false, false, false, false, false};
 	enum KEYS{UP, DOWN, LEFT, RIGHT, SPACE};
 	bool done = false;
@@ -30,6 +36,7 @@ int main(void)
 	bool showEndMessage = false;
 	float endMessageTimer = 5.0f;
 	Sprite player;
+	Food foods[NUM_FOODS];  // array of food items
 	
 	ALLEGRO_FONT* font = NULL;
 	ALLEGRO_DISPLAY *display = NULL;
@@ -61,11 +68,16 @@ int main(void)
 	font = al_load_font("GROBOLD.ttf", 24, 0);
 	
 
-	// load sprite
+	// load sprites
 	ALLEGRO_BITMAP *sprite = al_load_bitmap("1432472502_chips2.png");
 	if(!sprite)
 		return -1;
 		
+	ALLEGRO_BITMAP *foodSprite = al_load_bitmap("food.png");
+	if(!foodSprite)
+		return -1;
+
+	// initialize sprites
 	al_lock_bitmap(sprite, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
 	ALLEGRO_COLOR color = al_get_pixel(sprite, 0, 0);
 	unsigned char r, g, b;
@@ -74,7 +86,12 @@ int main(void)
 	al_convert_mask_to_alpha(sprite, al_map_rgb(r, g, b));
 	
 	player.InitSprites(sprite);
-	player.SetSpriteParameters(32, 32, 3, 1, 11, 3); // width, height, frames, rows, startRow (0-based), startCol (starting at col 3)
+	player.SetSpriteParameters(32, 32, 3, 1, 11, 3);
+	
+	// initialize each food item with the sprite sheet
+	for(int i = 0; i < NUM_FOODS; i++) {
+		foods[i].Init(foodSprite);
+	}
 
 	char* mapPath = (char*)"level1.FMP";
 	if(MapLoad(mapPath, 1))
@@ -138,40 +155,43 @@ int main(void)
 				// movement
 				if(keys[UP] && player.getY() > 0) {
 					player.UpdateSprites(WIDTH, HEIGHT, 0);
-					// check collision at both top corners
 					if(!collided(player.getX() + xOff, player.getY() - 4) && 
 					   !collided(player.getX() + player.getWidth() + xOff, player.getY() - 4))
 						player.SetPosition(player.getX(), player.getY() - 4);
 				}
 				else if(keys[DOWN] && player.getY() < HEIGHT - player.getHeight()) {
 					player.UpdateSprites(WIDTH, HEIGHT, 1);
-					// check collision at both bottom corners
 					if(!collided(player.getX() + xOff, player.getY() + player.getHeight() + 4) &&
 					   !collided(player.getX() + player.getWidth() + xOff, player.getY() + player.getHeight() + 4))
 						player.SetPosition(player.getX(), player.getY() + 4);
 				}
 				
-				// left/right movement (horizontal only)
-				float currentY = player.getY();  // store current Y to maintain it
+				float currentY = player.getY();  
 				if(keys[LEFT] && player.getX() > 0) {
-					player.UpdateSprites(WIDTH, HEIGHT, 0);  // animation only
-					// check collision at both left corners
+					player.UpdateSprites(WIDTH, HEIGHT, 0);  
 					if(!collided(player.getX() - 4 + xOff, currentY) &&
 					   !collided(player.getX() - 4 + xOff, currentY + player.getHeight())) {
-						player.SetPosition(player.getX() - 4, currentY);  // keep same Y
+						player.SetPosition(player.getX() - 4, currentY);  
 					}
 				}
 				else if(keys[RIGHT] && player.getX() < WIDTH - player.getWidth()) {
-					player.UpdateSprites(WIDTH, HEIGHT, 1);  // animation only
-					// check collision at both right corners
+					player.UpdateSprites(WIDTH, HEIGHT, 1);  
 					if(!collided(player.getX() + player.getWidth() + 4 + xOff, currentY) &&
 					   !collided(player.getX() + player.getWidth() + 4 + xOff, currentY + player.getHeight())) {
-						player.SetPosition(player.getX() + 4, currentY);  // keep same Y
+						player.SetPosition(player.getX() + 4, currentY); 
 					}
 				}
 
 				xOff = (int)scrollX;
 				yOff = 0;
+
+				// update all food items
+				for(int i = 0; i < NUM_FOODS; i++) {
+					foods[i].StartFood(WIDTH, HEIGHT);
+					foods[i].UpdateFood();
+					foods[i].CollideFood(player.getX(), player.getY(), player.getWidth(), player.getHeight());
+				}
+
 			} else {
 				endMessageTimer -= 1.0f/60.0f;
 				if(endMessageTimer <= 0)
@@ -229,11 +249,26 @@ int main(void)
 
 			MapDrawBG(xOff, yOff, 0, 0, WIDTH, HEIGHT);
 			MapDrawFG(xOff, yOff, 0, 0, WIDTH, HEIGHT, 0);
+			
+			// draw all food items
+			for(int i = 0; i < NUM_FOODS; i++) {
+				foods[i].DrawFood();
+			}
 			player.DrawSprites(0, 0);
 
+			// draw UI
 			char levelText[32];
 			sprintf(levelText, "Level %d", currentLevel);
 			al_draw_text(font, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, levelText);
+
+			// calculate total score from all food items
+			int totalScore = 0;
+			for(int i = 0; i < NUM_FOODS; i++) {
+				totalScore += foods[i].getScore();
+			}
+			char scoreText[32];
+			sprintf(scoreText, "Score: %d", totalScore);
+			al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
 
 			if(showEndMessage) {
 				al_draw_text(font, al_map_rgb(255, 255, 255), WIDTH/2, HEIGHT/2, 
@@ -250,6 +285,7 @@ int main(void)
 	al_destroy_event_queue(event_queue);
 	al_destroy_timer(timer);
 	al_destroy_bitmap(sprite);
+	al_destroy_bitmap(foodSprite);
 
 	return 0;
 }

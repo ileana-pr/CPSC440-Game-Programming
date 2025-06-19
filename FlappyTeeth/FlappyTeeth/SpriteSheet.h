@@ -22,8 +22,8 @@ public:
 	bool CollisionEndBlock();
 	float getX() {return x;}
 	float getY() {return y;}
-	int getWidth() {return frameWidth;}
-	int getHeight() {return frameHeight;}
+	int getWidth() {return frameWidth * 1.4;}
+	int getHeight() {return frameHeight * 1.4;}
 	void SetSpriteParameters(int width, int height, int frames, int rows, int startRow, int startCol);
 
 private:

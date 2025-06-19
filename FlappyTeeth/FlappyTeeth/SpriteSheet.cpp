@@ -73,8 +73,18 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 	// position in sprite sheet
 	int fx = (startCol + curFrame) * frameWidth;  
 	int fy = startRow * frameHeight;  
-	al_draw_bitmap_region(spriteSheet, fx, fy, frameWidth, frameHeight, 
-		x - xoffset, y - yoffset, 0);
+
+	// draw scaled up by 40%
+	ALLEGRO_BITMAP* temp = al_create_bitmap(frameWidth, frameHeight);
+	al_set_target_bitmap(temp);
+	al_draw_bitmap_region(spriteSheet, fx, fy, frameWidth, frameHeight, 0, 0, 0);
+	al_set_target_backbuffer(al_get_current_display());
+	al_draw_scaled_bitmap(temp, 
+		0, 0, frameWidth, frameHeight,
+		x - xoffset, y - yoffset, 
+		frameWidth * 1.4, frameHeight * 1.4, 
+		0);
+	al_destroy_bitmap(temp);
 }
 
 bool Sprite::CollisionEndBlock()
