@@ -5,6 +5,13 @@
 #include "mappy_A5.h"
 #include <iostream>
 using namespace std;
+
+// teeth vs obstacles/candies
+int collided(int x, int y);
+
+// check for end of level 
+bool endValue(int x, int y);
+
 class Sprite
 {
 	friend int collided(int x, int y); // tile collision 	

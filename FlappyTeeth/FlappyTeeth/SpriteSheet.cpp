@@ -20,7 +20,8 @@ Sprite::Sprite()
 
 Sprite::~Sprite()
 {
-	al_destroy_bitmap(image);
+	if (image != spriteSheet) 
+		al_destroy_bitmap(image);
 }
 
 bool Sprite::InitSprites(ALLEGRO_BITMAP *image)
@@ -41,23 +42,19 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 	{
 	case 0: // up
 		y -= 4;
-		animationDirection = 1; // second row
+		animationDirection = 1;
 		break;
 	case 1: // down
 		y += 4;
-		animationDirection = 0; // first row
-		break;
-	case 2: // left
-		x -= 4;
-		animationDirection = 2; // third row
-		break;
-	case 3: // right
-		x += 4;
-		animationDirection = 3; // fourth row
+		animationDirection = 0;
 		break;
 	}
 
-	// update animation
+	// keep within screen bounds
+	if (y < 0) y = 0;
+	if (y + frameHeight > height) y = height - frameHeight;
+
+	// animation
 	if(dir >= 0) {
 		if(++frameCount > frameDelay) {
 			frameCount = 0;
@@ -66,8 +63,9 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 		}
 	}
 
-	// collision detection
-	if(collided(x, y) || collided(x, y + frameHeight) || collided(x + frameWidth, y) || collided(x + frameWidth, y + frameHeight)) {
+	// collision detection 
+	if(collided(x, y) || collided(x, y + frameHeight) || 
+	   collided(x + frameWidth, y) || collided(x + frameWidth, y + frameHeight)) {
 		x = oldx;
 		y = oldy;
 	}
@@ -84,10 +82,9 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 
 bool Sprite::CollisionEndBlock()
 {
-	bool topCollision = endValue(x + frameWidth/2, y + frameHeight + 5);
-	bool sideCollision = endValue(x + frameWidth + 5, y + frameHeight/2);
 	
-	return topCollision || sideCollision;
+	bool centerCollision = endValue(x + frameWidth/2, y + frameHeight/2);
+	return centerCollision;
 }
 
 void Sprite::SetPosition(int newX, int newY)

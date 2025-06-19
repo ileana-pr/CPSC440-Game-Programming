@@ -52,6 +52,7 @@
     <Allegro_AddonDialog>true</Allegro_AddonDialog>
     <Allegro_AddonMemfile>true</Allegro_AddonMemfile>
     <Allegro_AddonVideo>true</Allegro_AddonVideo>
+    <IntDir>$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
