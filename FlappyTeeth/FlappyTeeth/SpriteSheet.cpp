@@ -28,9 +28,9 @@ Sprite::~Sprite()
 
 bool Sprite::InitSprites(ALLEGRO_BITMAP *image)
 {
-	spriteSheet = image;
-	if(!spriteSheet)
+	if(image == NULL)
 		return false;
+	spriteSheet = image;
 	return true;
 }
 
@@ -73,7 +73,6 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 	// position in sprite sheet
 	int fx = (startCol + curFrame) * frameWidth;  
 	int fy = startRow * frameHeight;  
-
 	al_draw_bitmap_region(spriteSheet, fx, fy, frameWidth, frameHeight, 
 		x - xoffset, y - yoffset, 0);
 }

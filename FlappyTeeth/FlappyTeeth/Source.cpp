@@ -49,10 +49,9 @@ int main(void)
 	al_init_primitives_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();
-	
+
 	event_queue = al_create_event_queue();
-	if(!event_queue)
-		return -1;
+	
 	
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	
@@ -60,13 +59,19 @@ int main(void)
 	al_flip_display();
 	
 	font = al_load_font("GROBOLD.ttf", 24, 0);
-	if(!font)
-		return -1;
+	
 
-	// Load new sprite sheet with teeth character
+	// load sprite
 	ALLEGRO_BITMAP *sprite = al_load_bitmap("1432472502_chips2.png");
 	if(!sprite)
 		return -1;
+		
+	al_lock_bitmap(sprite, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
+	ALLEGRO_COLOR color = al_get_pixel(sprite, 0, 0);
+	unsigned char r, g, b;
+	al_unmap_rgb(color, &r, &g, &b);
+	al_unlock_bitmap(sprite);
+	al_convert_mask_to_alpha(sprite, al_map_rgb(r, g, b));
 	
 	player.InitSprites(sprite);
 	player.SetSpriteParameters(32, 32, 3, 1, 11, 3); // width, height, frames, rows, startRow (0-based), startCol (starting at col 3)
@@ -109,23 +114,61 @@ int main(void)
 			if(!showEndMessage) {
 				MapUpdateAnims();
 				
-				// scroll map
-				scrollX += SCROLL_SPEED;
-				if(scrollX >= TOTAL_MAP_WIDTH - WIDTH) {
-					if(currentLevel < 3) {
-						currentLevel++;
-						scrollX = 0;
-						player.SetPosition(WIDTH/4, player.getY());
-					} else {
-						showEndMessage = true;
+				// check if scrolling would cause collision
+				float nextScrollX = scrollX + SCROLL_SPEED;
+				bool willCollide = collided(player.getX() + (int)nextScrollX, player.getY()) ||
+								 collided(player.getX() + player.getWidth() + (int)nextScrollX, player.getY()) ||
+								 collided(player.getX() + (int)nextScrollX, player.getY() + player.getHeight()) ||
+								 collided(player.getX() + player.getWidth() + (int)nextScrollX, player.getY() + player.getHeight());
+				
+				// only scroll if no collision
+				if (!willCollide) {
+					scrollX = nextScrollX;
+					if(scrollX >= TOTAL_MAP_WIDTH - WIDTH) {
+						if(currentLevel < 3) {
+							currentLevel++;
+							scrollX = 0;
+							player.SetPosition(WIDTH/4, player.getY());
+						} else {
+							showEndMessage = true;
+						}
 					}
 				}
 
 				// movement
-				if(keys[UP] && player.getY() > 0)
+				if(keys[UP] && player.getY() > 0) {
 					player.UpdateSprites(WIDTH, HEIGHT, 0);
-				else if(keys[DOWN] && player.getY() < HEIGHT - player.getHeight())
+					// check collision at both top corners
+					if(!collided(player.getX() + xOff, player.getY() - 4) && 
+					   !collided(player.getX() + player.getWidth() + xOff, player.getY() - 4))
+						player.SetPosition(player.getX(), player.getY() - 4);
+				}
+				else if(keys[DOWN] && player.getY() < HEIGHT - player.getHeight()) {
 					player.UpdateSprites(WIDTH, HEIGHT, 1);
+					// check collision at both bottom corners
+					if(!collided(player.getX() + xOff, player.getY() + player.getHeight() + 4) &&
+					   !collided(player.getX() + player.getWidth() + xOff, player.getY() + player.getHeight() + 4))
+						player.SetPosition(player.getX(), player.getY() + 4);
+				}
+				
+				// left/right movement (horizontal only)
+				float currentY = player.getY();  // store current Y to maintain it
+				if(keys[LEFT] && player.getX() > 0) {
+					player.UpdateSprites(WIDTH, HEIGHT, 0);  // animation only
+					// check collision at both left corners
+					if(!collided(player.getX() - 4 + xOff, currentY) &&
+					   !collided(player.getX() - 4 + xOff, currentY + player.getHeight())) {
+						player.SetPosition(player.getX() - 4, currentY);  // keep same Y
+					}
+				}
+				else if(keys[RIGHT] && player.getX() < WIDTH - player.getWidth()) {
+					player.UpdateSprites(WIDTH, HEIGHT, 1);  // animation only
+					// check collision at both right corners
+					if(!collided(player.getX() + player.getWidth() + 4 + xOff, currentY) &&
+					   !collided(player.getX() + player.getWidth() + 4 + xOff, currentY + player.getHeight())) {
+						player.SetPosition(player.getX() + 4, currentY);  // keep same Y
+					}
+				}
 
 				xOff = (int)scrollX;
 				yOff = 0;
@@ -152,6 +195,12 @@ int main(void)
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = true;
 				break;
+			case ALLEGRO_KEY_LEFT:
+				keys[LEFT] = true;
+				break;
+			case ALLEGRO_KEY_RIGHT:
+				keys[RIGHT] = true;
+				break;
 			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_KEY_UP)
@@ -163,6 +212,12 @@ int main(void)
 				break;
 			case ALLEGRO_KEY_DOWN:
 				keys[DOWN] = false;
+				break;
+			case ALLEGRO_KEY_LEFT:
+				keys[LEFT] = false;
+				break;
+			case ALLEGRO_KEY_RIGHT:
+				keys[RIGHT] = false;
 				break;
 			}
 		}
@@ -205,7 +260,9 @@ int collided(int x, int y)
 	BLKSTR *blockdata;
 	blockdata = MapGetBlock(x/mapblockwidth, y/mapblockheight);
 	if (!blockdata) return 0;
-	return blockdata->tl;
+	
+	// check if any corner has collision enabled
+	return (blockdata->tl || blockdata->tr || blockdata->bl || blockdata->br);
 }
 
 // check for end of level condition
