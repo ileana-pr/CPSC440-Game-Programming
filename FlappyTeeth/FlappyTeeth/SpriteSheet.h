@@ -6,21 +6,17 @@
 #include <iostream>
 using namespace std;
 
-// teeth vs obstacles/candies
-int collided(int x, int y);
 
-// check for end of level 
-bool endValue(int x, int y);
 
 class Sprite
 {
-	friend int collided(int x, int y); // tile collision 	
-	friend bool endValue( int x, int y ); // end of map collision
+	friend int collided(int x, int y);
+	friend bool endValue(int x, int y);
 public:
 	Sprite();
 	~Sprite();
 	bool InitSprites(ALLEGRO_BITMAP *image);
-	void UpdateSprites(int width, int height, int dir); //dir 0 = up, 1 = down, 2 = left, 3 = right
+	void UpdateSprites(int width, int height, int dir);
 	void DrawSprites(int xoffset, int yoffset);
 	void SetPosition(int newX, int newY);
 	bool CollisionEndBlock();
@@ -28,12 +24,12 @@ public:
 	float getY() {return y;}
 	int getWidth() {return frameWidth;}
 	int getHeight() {return frameHeight;}
+	void SetSpriteParameters(int width, int height, int frames, int rows, int startRow, int startCol);
 
 private:
 	float x;
 	float y;
 
-	// animation
 	int maxFrame;        
 	int curFrame;       
 	int frameCount;      
@@ -42,9 +38,10 @@ private:
 	int frameHeight;    
 	int animationColumns; 
 	int animationRows;    
-	int animationDirection; 
+	int animationDirection;
+	int startRow;        
+	int startCol;       
 
-	
 	ALLEGRO_BITMAP *image;
 	ALLEGRO_BITMAP *spriteSheet;
 };

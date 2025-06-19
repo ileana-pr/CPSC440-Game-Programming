@@ -63,11 +63,13 @@ int main(void)
 	if(!font)
 		return -1;
 
-	ALLEGRO_BITMAP *sprite = al_load_bitmap("guy.png");
+	// Load new sprite sheet with teeth character
+	ALLEGRO_BITMAP *sprite = al_load_bitmap("1432472502_chips2.png");
 	if(!sprite)
 		return -1;
 	
 	player.InitSprites(sprite);
+	player.SetSpriteParameters(32, 32, 3, 1, 11, 3); // width, height, frames, rows, startRow (0-based), startCol (starting at col 3)
 
 	char* mapPath = (char*)"level1.FMP";
 	if(MapLoad(mapPath, 1))

@@ -7,15 +7,17 @@ Sprite::Sprite()
 	spriteSheet = NULL;
 	x = 80;
 	y = -10;
-	maxFrame = 4;
+	maxFrame = 3;       
 	curFrame = 0;
 	frameCount = 0;
 	frameDelay = 6;
-	frameWidth = 32;
-	frameHeight = 48;
-	animationColumns = 4;
-	animationDirection = 1;
-	animationRows = 4;
+	frameWidth = 32;    
+	frameHeight = 32;
+	animationColumns = 3; 
+	animationDirection = 0;
+	animationRows = 1;   
+	startRow = 11;       
+	startCol = 3;       
 }
 
 Sprite::~Sprite()
@@ -42,11 +44,9 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 	{
 	case 0: // up
 		y -= 4;
-		animationDirection = 1;
 		break;
 	case 1: // down
 		y += 4;
-		animationDirection = 0;
 		break;
 	}
 
@@ -54,13 +54,10 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 	if (y < 0) y = 0;
 	if (y + frameHeight > height) y = height - frameHeight;
 
-	// animation
-	if(dir >= 0) {
-		if(++frameCount > frameDelay) {
-			frameCount = 0;
-			if(++curFrame >= maxFrame)
-				curFrame = 0;
-		}
+	// update animation
+	if(++frameCount > frameDelay) {
+		frameCount = 0;
+		curFrame = (curFrame + 1) % maxFrame;  
 	}
 
 	// collision detection 
@@ -73,8 +70,9 @@ void Sprite::UpdateSprites(int width, int height, int dir)
 
 void Sprite::DrawSprites(int xoffset, int yoffset)
 {
-	int fx = (curFrame % animationColumns) * frameWidth;
-	int fy = animationDirection * frameHeight;
+	// position in sprite sheet
+	int fx = (startCol + curFrame) * frameWidth;  
+	int fy = startRow * frameHeight;  
 
 	al_draw_bitmap_region(spriteSheet, fx, fy, frameWidth, frameHeight, 
 		x - xoffset, y - yoffset, 0);
@@ -91,4 +89,16 @@ void Sprite::SetPosition(int newX, int newY)
 {
 	x = newX;
 	y = newY;
+}
+
+void Sprite::SetSpriteParameters(int width, int height, int frames, int rows, int sRow, int sCol)
+{
+	frameWidth = width;
+	frameHeight = height;
+	maxFrame = frames;
+	animationRows = rows;
+	animationColumns = frames;
+	startRow = sRow;
+	startCol = sCol;
+	curFrame = 0;
 }
