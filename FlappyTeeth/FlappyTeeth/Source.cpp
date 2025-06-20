@@ -29,6 +29,7 @@ void handleDeathAnimation(bool &isDeathSequenceStarted, float &deathAnimationTim
                          bool &showEndMessage);
 void drawGameUI(ALLEGRO_FONT* font, ALLEGRO_FONT* bigFont, int currentLevel, float levelDisplayTimer,
                 int totalScore, int screenWidth, int screenHeight);
+void drawIntroScreen(ALLEGRO_FONT* font, ALLEGRO_FONT* bigFont, int screenWidth, int screenHeight);
 
 int main(void)
 {
@@ -61,6 +62,7 @@ int main(void)
 	float deathRotation = 0;
 	float deathScale = 1.0f;
 	bool isDeathSequenceStarted = false;
+	bool showIntro = true;
 
 	bool keys[] = {false, false, false, false, false};
 	enum KEYS{UP, DOWN, LEFT, RIGHT, SPACE};
@@ -203,7 +205,13 @@ int main(void)
 		{
 			render = true;
 			
-			if(!showEndMessage) {
+			if(showIntro) {
+				// Wait for space key to start game
+				if(keys[SPACE]) {
+					showIntro = false;
+				}
+			}
+			else if(!showEndMessage) {
 				MapUpdateAnims();
 				
 				// check collision
@@ -334,6 +342,9 @@ int main(void)
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = true;
 				break;
+			case ALLEGRO_KEY_SPACE:
+				keys[SPACE] = true;
+				break;
 			}
 		}
 		else if(ev.type == ALLEGRO_EVENT_KEY_UP)
@@ -352,6 +363,9 @@ int main(void)
 			case ALLEGRO_KEY_RIGHT:
 				keys[RIGHT] = false;
 				break;
+			case ALLEGRO_KEY_SPACE:
+				keys[SPACE] = false;
+				break;
 			}
 		}
 
@@ -360,72 +374,77 @@ int main(void)
 			render = false;
 			al_clear_to_color(al_map_rgb(135, 206, 235));
 
-			MapDrawBG(xOff, yOff, 0, 0, GAME_WIDTH, GAME_HEIGHT);
-			MapDrawFG(xOff, yOff, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0);
-			
-			// draw food
-			for(int i = 0; i < numFoods; i++) {
-				foods[i].DrawFood();
+			if(showIntro) {
+				drawIntroScreen(font, bigFont, GAME_WIDTH, GAME_HEIGHT);
 			}
-			// draw spiders
-			for(int i = 0; i < numSpiders; i++) {
-				spiders[i].DrawSpider();
-			}
-			
-			// draw player with death animation
-			if (isDeathSequenceStarted && deathAnimationTimer > 0) {
-				player.DrawSpritesWithTransform(0, 0, deathRotation, deathScale);
-			} else if (!showEndMessage) {
-				player.DrawSprites(0, 0);
-			}
+			else {
+				MapDrawBG(xOff, yOff, 0, 0, GAME_WIDTH, GAME_HEIGHT);
+				MapDrawFG(xOff, yOff, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0);
+				
+				// draw food
+				for(int i = 0; i < numFoods; i++) {
+					foods[i].DrawFood();
+				}
+				// draw spiders
+				for(int i = 0; i < numSpiders; i++) {
+					spiders[i].DrawSpider();
+				}
+				
+				// draw player with death animation
+				if (isDeathSequenceStarted && deathAnimationTimer > 0) {
+					player.DrawSpritesWithTransform(0, 0, deathRotation, deathScale);
+				} else if (!showEndMessage) {
+					player.DrawSprites(0, 0);
+				}
 
-			// draw ui
-			char levelText[32];
-			sprintf(levelText, "Level %d", currentLevel);
-			al_draw_text(font, al_map_rgb(255, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, levelText);
-
-			// level transition display
-			if(levelDisplayTimer > 0) {
+				// draw ui
+				char levelText[32];
 				sprintf(levelText, "Level %d", currentLevel);
-				al_draw_text(bigFont, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2 - 24, 
-					ALLEGRO_ALIGN_CENTRE, levelText);
-			}
+				al_draw_text(font, al_map_rgb(255, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, levelText);
 
-			// calculate score
-			int totalScore = 0;
-			for(int i = 0; i < numFoods; i++) {
-				totalScore += foods[i].getScore();
-			}
-			char scoreText[32];
-			sprintf(scoreText, "Score: %d", totalScore);
-			al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
+				// level transition display
+				if(levelDisplayTimer > 0) {
+					sprintf(levelText, "Level %d", currentLevel);
+					al_draw_text(bigFont, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2 - 24, 
+						ALLEGRO_ALIGN_CENTRE, levelText);
+				}
 
-			// draw health bar
-			int healthBarX = 10;
-			int healthBarY = GAME_HEIGHT - 30;
-			
-			al_draw_filled_rectangle(healthBarX, healthBarY, 
-				healthBarX + HEALTH_BAR_WIDTH, healthBarY + HEALTH_BAR_HEIGHT, 
-				al_map_rgb(255, 0, 0));
-			
-			float healthPercentage = (float)playerHealth / MAX_HEALTH;
-			al_draw_filled_rectangle(healthBarX, healthBarY,
-				healthBarX + (HEALTH_BAR_WIDTH * healthPercentage), 
-				healthBarY + HEALTH_BAR_HEIGHT,
-				al_map_rgb(0, 255, 0));
-			
-			char healthText[32];
-			sprintf(healthText, "Health: %d/%d", playerHealth, MAX_HEALTH);
-			al_draw_text(font, al_map_rgb(255, 0, 0), healthBarX + HEALTH_BAR_WIDTH + 10,
-				healthBarY, ALLEGRO_ALIGN_LEFT, healthText);
+				// calculate score
+				int totalScore = 0;
+				for(int i = 0; i < numFoods; i++) {
+					totalScore += foods[i].getScore();
+				}
+				char scoreText[32];
+				sprintf(scoreText, "Score: %d", totalScore);
+				al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
 
-			if(showEndMessage) {
-				al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2, 
-					ALLEGRO_ALIGN_CENTRE, "Game Over!");
-				char finalScoreText[64];
-				sprintf(finalScoreText, "Final Score: %d", totalScore);
-				al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2 + 40, 
-					ALLEGRO_ALIGN_CENTRE, finalScoreText);
+				// draw health bar
+				int healthBarX = 10;
+				int healthBarY = GAME_HEIGHT - 30;
+				
+				al_draw_filled_rectangle(healthBarX, healthBarY, 
+					healthBarX + HEALTH_BAR_WIDTH, healthBarY + HEALTH_BAR_HEIGHT, 
+					al_map_rgb(255, 0, 0));
+				
+				float healthPercentage = (float)playerHealth / MAX_HEALTH;
+				al_draw_filled_rectangle(healthBarX, healthBarY,
+					healthBarX + (HEALTH_BAR_WIDTH * healthPercentage), 
+					healthBarY + HEALTH_BAR_HEIGHT,
+					al_map_rgb(0, 255, 0));
+				
+				char healthText[32];
+				sprintf(healthText, "Health: %d/%d", playerHealth, MAX_HEALTH);
+				al_draw_text(font, al_map_rgb(255, 0, 0), healthBarX + HEALTH_BAR_WIDTH + 10,
+					healthBarY, ALLEGRO_ALIGN_LEFT, healthText);
+
+				if(showEndMessage) {
+					al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2, 
+						ALLEGRO_ALIGN_CENTRE, "Game Over!");
+					char finalScoreText[64];
+					sprintf(finalScoreText, "Final Score: %d", totalScore);
+					al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2 + 40, 
+						ALLEGRO_ALIGN_CENTRE, finalScoreText);
+				}
 			}
 
 			al_flip_display();
@@ -537,6 +556,41 @@ void drawGameUI(ALLEGRO_FONT* font, ALLEGRO_FONT* bigFont, int currentLevel, flo
 	char scoreText[32];
 	sprintf(scoreText, "Score: %d", totalScore);
 	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
+}
+
+void drawIntroScreen(ALLEGRO_FONT* font, ALLEGRO_FONT* bigFont, int screenWidth, int screenHeight) {
+	// title
+	al_draw_text(bigFont, al_map_rgb(255, 0, 0), screenWidth/2, screenHeight/4, 
+				 ALLEGRO_ALIGN_CENTRE, "Flappy Teeth");
+	
+	// instructions
+	int startY = screenHeight/2 - 100;
+	int lineSpacing = 30;
+	
+	startY += lineSpacing * 2;
+	
+	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth/2, startY, 
+				 ALLEGRO_ALIGN_CENTRE, "use arrow keys to move");
+	
+	startY += lineSpacing;
+	
+	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth/2, startY, 
+				 ALLEGRO_ALIGN_CENTRE, "food goes in your mouth");
+	
+	startY += lineSpacing;
+	
+	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth/2, startY, 
+				 ALLEGRO_ALIGN_CENTRE, "spiders dont");
+	
+	startY += lineSpacing;
+	
+	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth/2, startY, 
+				 ALLEGRO_ALIGN_CENTRE, "survive all 4 levels to win!");
+	
+	startY += lineSpacing * 2;
+	
+	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth/2, startY, 
+				 ALLEGRO_ALIGN_CENTRE, "press space to start");
 }
 
 // collision detection
