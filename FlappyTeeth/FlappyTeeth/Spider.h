@@ -11,7 +11,7 @@ public:
     void DrawSpider();
     void StartSpider(int WIDTH, int HEIGHT, Food foods[], int numFoods, Spider spiders[], int numSpiders);
     void UpdateSpider();
-    void CollideSpider(float playerX, float playerY, int playerWidth, int playerHeight);
+    bool CollideSpider(float playerX, float playerY, int playerWidth, int playerHeight);
     void SetSpeed(float newSpeed) { speed = newSpeed; }
     
     bool isLive() { return live; }

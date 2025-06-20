@@ -22,6 +22,9 @@ const float BASE_SCROLL_SPEED = 12.0f;  // starting with level 2 speed (was 4.0f
 const int MAX_FOODS = BASE_NUM_FOODS;  // max food decreases with level
 const int MAX_SPIDERS = BASE_NUM_SPIDERS * 4;  // allow for 4 levels of doubling
 const float LEVEL_DISPLAY_TIME = 2.0f;  // seconds to show level transition
+const int MAX_HEALTH = 20;  // player can take 20 hits before game over
+const int HEALTH_BAR_WIDTH = 200;  // width of health bar in pixels
+const int HEALTH_BAR_HEIGHT = 20;  // height of health bar in pixels
 
 // forward declarations
 int collided(int x, int y);
@@ -39,6 +42,7 @@ int main(void)
 	float currentScrollSpeed = BASE_SCROLL_SPEED;
 	float scrollX = 0;
 	float levelDisplayTimer = 0;  // timer for level transition display
+	int playerHealth = MAX_HEALTH;  // initialize player health
 	
 	bool keys[] = {false, false, false, false, false};
 	enum KEYS{UP, DOWN, LEFT, RIGHT, SPACE};
@@ -229,7 +233,12 @@ int main(void)
 				for(int i = 0; i < numSpiders; i++) {
 					spiders[i].StartSpider(WIDTH, HEIGHT, foods, numFoods, spiders, numSpiders);
 					spiders[i].UpdateSpider();
-					spiders[i].CollideSpider(player.getX(), player.getY(), player.getWidth(), player.getHeight());
+					if(spiders[i].CollideSpider(player.getX(), player.getY(), player.getWidth(), player.getHeight())) {
+						playerHealth--;  // reduce health on spider collision
+						if(playerHealth <= 0) {
+							showEndMessage = true;  // trigger game over
+						}
+					}
 				}
 
 				if(levelDisplayTimer > 0) {
@@ -325,9 +334,35 @@ int main(void)
 			sprintf(scoreText, "Score: %d", totalScore);
 			al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
 
+			// draw health bar
+			int healthBarX = 10;
+			int healthBarY = HEIGHT - 30;  // 30 pixels from bottom
+			
+			// draw health bar background (red)
+			al_draw_filled_rectangle(healthBarX, healthBarY, 
+				healthBarX + HEALTH_BAR_WIDTH, healthBarY + HEALTH_BAR_HEIGHT, 
+				al_map_rgb(255, 0, 0));
+			
+			// draw current health (green)
+			float healthPercentage = (float)playerHealth / MAX_HEALTH;
+			al_draw_filled_rectangle(healthBarX, healthBarY,
+				healthBarX + (HEALTH_BAR_WIDTH * healthPercentage), 
+				healthBarY + HEALTH_BAR_HEIGHT,
+				al_map_rgb(0, 255, 0));
+			
+			// draw health text
+			char healthText[32];
+			sprintf(healthText, "Health: %d/%d", playerHealth, MAX_HEALTH);
+			al_draw_text(font, al_map_rgb(255, 0, 0), healthBarX + HEALTH_BAR_WIDTH + 10,
+				healthBarY, ALLEGRO_ALIGN_LEFT, healthText);
+
 			if(showEndMessage) {
 				al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2, 
 					ALLEGRO_ALIGN_CENTRE, "Game Over!");
+				char finalScoreText[64];
+				sprintf(finalScoreText, "Final Score: %d", totalScore);
+				al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 + 40, 
+					ALLEGRO_ALIGN_CENTRE, finalScoreText);
 			}
 
 			al_flip_display();

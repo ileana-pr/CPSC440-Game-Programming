@@ -113,7 +113,7 @@ void Spider::UpdateSpider()
     }
 }
 
-void Spider::CollideSpider(float playerX, float playerY, int playerWidth, int playerHeight)
+bool Spider::CollideSpider(float playerX, float playerY, int playerWidth, int playerHeight)
 {
     if(live)
     {
@@ -123,7 +123,8 @@ void Spider::CollideSpider(float playerX, float playerY, int playerWidth, int pl
            y + boundy > playerY)
         {
             live = false;
-            
+            return true;  // collision occurred
         }
     }
+    return false;  // no collision
 } 
