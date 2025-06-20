@@ -82,10 +82,12 @@ void Spider::StartSpider(int WIDTH, int HEIGHT, Food foods[], int numFoods, Spid
             bool validPosition = false;
             int attempts = 0;
             const int MAX_ATTEMPTS = 10;
+            const int BORDER_SIZE = 32;  // size of border tiles
 
             while(!validPosition && attempts < MAX_ATTEMPTS)
             {
-                newY = rand() % (HEIGHT - boundy);
+                // Spawn between top and bottom borders
+                newY = BORDER_SIZE + (rand() % (HEIGHT - 2 * BORDER_SIZE - boundy));
                 if(!CheckCollision(foods, numFoods, spiders, numSpiders, newX, newY))
                 {
                     validPosition = true;

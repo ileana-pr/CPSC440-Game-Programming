@@ -60,16 +60,17 @@ void Food::StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods)
     {
         if(rand() % 100 == 0) 
         {
-            
             float newX = WIDTH;
             float newY;
             bool validPosition = false;
             int attempts = 0;
             const int MAX_ATTEMPTS = 10;
+            const int BORDER_SIZE = 32;  // size of border tiles
 
             while(!validPosition && attempts < MAX_ATTEMPTS)
             {
-                newY = rand() % (HEIGHT - boundy);
+                // Spawn between top and bottom borders
+                newY = BORDER_SIZE + (rand() % (HEIGHT - 2 * BORDER_SIZE - boundy));
                 if(!CheckSpawnCollision(foods, numFoods, newX, newY))
                 {
                     validPosition = true;

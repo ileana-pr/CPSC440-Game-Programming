@@ -11,6 +11,7 @@ public:
     void StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods);
     void UpdateFood();
     void CollideFood(float playerX, float playerY, int playerWidth, int playerHeight);
+    void SetSpeed(float newSpeed) { speed = newSpeed; }
     
     bool isLive() { return live; }
     int getScore() { return score; }
