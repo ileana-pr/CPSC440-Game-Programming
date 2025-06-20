@@ -1,66 +1,82 @@
-#include "Food.h"
+#include "Spider.h"
 #include <cstdlib>
 
-Food::Food()
+Spider::Spider()
 {
     image = NULL;
     live = false;
-    speed = 3;
-    score = 0;
-    boundx = 72;  
-    boundy = 72; 
-    type = rand() % (16 * 8);  
+    speed = 3;  
+    boundx = 32;  
+    boundy = 32; 
+    type = rand() % 4;  
 }
 
-Food::~Food()
+Spider::~Spider()
 {
+    // image is destroyed in main
 }
 
-void Food::Init(ALLEGRO_BITMAP* foodSprite)
+void Spider::Init(ALLEGRO_BITMAP* spriteSheet)
 {
-    image = foodSprite;
+    image = spriteSheet;
 }
 
-void Food::DrawFood()
+void Spider::DrawSpider()
 {
     if(live && image)
     {
-        int col = type % 16;  
-        int row = type / 16;  
+        const int SPIDER_ROW = 7;  
+        const int START_COL = 8;   
         
         al_draw_bitmap_region(image, 
-            col * boundx, row * boundy,  
+            (START_COL + type) * boundx, SPIDER_ROW * boundy,  
             boundx, boundy,              
             x, y,                        
             0);                         
     }
 }
 
-bool Food::CheckSpawnCollision(Food foods[], int numFoods, float newX, float newY)
+bool Spider::CheckCollision(Food foods[], int numFoods, Spider spiders[], int numSpiders, float newX, float newY)
 {
+    // Check collision with food
     for(int i = 0; i < numFoods; i++)
     {
-        if(foods[i].isLive() && &foods[i] != this)  
+        if(foods[i].isLive())
         {
             if(newX > (foods[i].getX() - foods[i].getBoundX()) &&
                newX < (foods[i].getX() + foods[i].getBoundX()) &&
                newY > (foods[i].getY() - foods[i].getBoundY()) &&
                newY < (foods[i].getY() + foods[i].getBoundY()))
             {
+                return true;
+            }
+        }
+    }
+
+    // Check collision with other spiders
+    for(int i = 0; i < numSpiders; i++)
+    {
+        if(spiders[i].isLive() && &spiders[i] != this)
+        {
+            if(newX > (spiders[i].getX() - spiders[i].getBoundX()) &&
+               newX < (spiders[i].getX() + spiders[i].getBoundX()) &&
+               newY > (spiders[i].getY() - spiders[i].getBoundY()) &&
+               newY < (spiders[i].getY() + spiders[i].getBoundY()))
+            {
                 return true;  
             }
         }
     }
-    return false; 
+    
+    return false;  // no collision
 }
 
-void Food::StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods)
+void Spider::StartSpider(int WIDTH, int HEIGHT, Food foods[], int numFoods, Spider spiders[], int numSpiders)
 {
     if(!live)
     {
-        if(rand() % 100 == 0) 
+        if(rand() % 150 == 0)  
         {
-            
             float newX = WIDTH;
             float newY;
             bool validPosition = false;
@@ -70,13 +86,13 @@ void Food::StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods)
             while(!validPosition && attempts < MAX_ATTEMPTS)
             {
                 newY = rand() % (HEIGHT - boundy);
-                if(!CheckSpawnCollision(foods, numFoods, newX, newY))
+                if(!CheckCollision(foods, numFoods, spiders, numSpiders, newX, newY))
                 {
                     validPosition = true;
                     live = true;
                     x = newX;
                     y = newY;
-                    type = rand() % (16 * 8);
+                    type = rand() % 4; 
                 }
                 attempts++;
             }
@@ -84,7 +100,7 @@ void Food::StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods)
     }
 }
 
-void Food::UpdateFood()
+void Spider::UpdateSpider()
 {
     if(live)
     {
@@ -95,7 +111,7 @@ void Food::UpdateFood()
     }
 }
 
-void Food::CollideFood(float playerX, float playerY, int playerWidth, int playerHeight)
+void Spider::CollideSpider(float playerX, float playerY, int playerWidth, int playerHeight)
 {
     if(live)
     {
@@ -104,8 +120,8 @@ void Food::CollideFood(float playerX, float playerY, int playerWidth, int player
            y < playerY + playerHeight &&
            y + boundy > playerY)
         {
-            score += 10;
             live = false;
+            
         }
     }
 } 

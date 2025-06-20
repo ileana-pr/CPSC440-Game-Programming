@@ -92,11 +92,13 @@
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="mappy_A5.c" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Spider.cpp" />
     <ClCompile Include="SpriteSheet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Food.h" />
     <ClInclude Include="mappy_A5.h" />
+    <ClInclude Include="Spider.h" />
     <ClInclude Include="SpriteSheet.h" />
   </ItemGroup>
   <ItemGroup>

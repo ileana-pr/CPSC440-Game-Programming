@@ -12,6 +12,7 @@
 #include "mappy_A5.h"
 #include <iostream>
 #include "Food.h"
+#include "Spider.h"
 using namespace std;
 
 // forward declarations
@@ -23,6 +24,7 @@ int main(void)
 	const int WIDTH = 900;
 	const int HEIGHT = 480;
 	const int NUM_FOODS = 5;  
+	const int NUM_SPIDERS = 3;  // fewer spiders than food
 	bool keys[] = {false, false, false, false, false};
 	enum KEYS{UP, DOWN, LEFT, RIGHT, SPACE};
 	bool done = false;
@@ -37,6 +39,7 @@ int main(void)
 	float endMessageTimer = 5.0f;
 	Sprite player;
 	Food foods[NUM_FOODS];  
+	Spider spiders[NUM_SPIDERS];  // array of spiders
 	
 	ALLEGRO_FONT* font = NULL;
 	ALLEGRO_DISPLAY *display = NULL;
@@ -91,6 +94,11 @@ int main(void)
 	// initialize each food item with the sprite sheet
 	for(int i = 0; i < NUM_FOODS; i++) {
 		foods[i].Init(foodSprite);
+	}
+
+	// initialize each spider with the player sprite sheet
+	for(int i = 0; i < NUM_SPIDERS; i++) {
+		spiders[i].Init(sprite);  // use player sprite sheet
 	}
 
 	char* mapPath = (char*)"level1.FMP";
@@ -195,6 +203,13 @@ int main(void)
 					foods[i].CollideFood(player.getX(), player.getY(), player.getWidth(), player.getHeight());
 				}
 
+				// update all spiders
+				for(int i = 0; i < NUM_SPIDERS; i++) {
+					spiders[i].StartSpider(WIDTH, HEIGHT, foods, NUM_FOODS, spiders, NUM_SPIDERS);
+					spiders[i].UpdateSpider();
+					spiders[i].CollideSpider(player.getX(), player.getY(), player.getWidth(), player.getHeight());
+				}
+
 			} else {
 				endMessageTimer -= 1.0f/60.0f;
 				if(endMessageTimer <= 0)
@@ -256,6 +271,10 @@ int main(void)
 			// draw all food items
 			for(int i = 0; i < NUM_FOODS; i++) {
 				foods[i].DrawFood();
+			}
+			// draw all spiders
+			for(int i = 0; i < NUM_SPIDERS; i++) {
+				spiders[i].DrawSpider();
 			}
 			player.DrawSprites(0, 0);
 
