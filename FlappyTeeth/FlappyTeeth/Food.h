@@ -10,7 +10,7 @@ public:
     void DrawFood();
     void StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods);
     void UpdateFood();
-    void CollideFood(float playerX, float playerY, int playerWidth, int playerHeight);
+    bool CollideFood(float playerX, float playerY, int playerWidth, int playerHeight);
     void SetSpeed(float newSpeed) { speed = newSpeed; }
     
     bool isLive() { return live; }
@@ -29,7 +29,7 @@ private:
     int boundy;
     int score;
     ALLEGRO_BITMAP* image;
-    int type;  // which food sprite to use
+    int type;  
 
     bool CheckSpawnCollision(Food foods[], int numFoods, float newX, float newY);
 }; 

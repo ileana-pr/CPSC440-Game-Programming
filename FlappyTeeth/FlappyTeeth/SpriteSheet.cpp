@@ -87,6 +87,34 @@ void Sprite::DrawSprites(int xoffset, int yoffset)
 	al_destroy_bitmap(temp);
 }
 
+// Draw sprites with rotation and scaling
+void Sprite::DrawSpritesWithTransform(int xoffset, int yoffset, float rotation, float scale)
+{
+	int fx = (startCol + curFrame) * frameWidth;  
+	int fy = startRow * frameHeight;  
+
+	ALLEGRO_BITMAP* temp = al_create_bitmap(frameWidth, frameHeight);
+	al_set_target_bitmap(temp);
+	al_clear_to_color(al_map_rgba(0, 0, 0, 0));  
+	al_draw_bitmap_region(spriteSheet, fx, fy, frameWidth, frameHeight, 0, 0, 0);
+	al_set_target_backbuffer(al_get_current_display());
+	
+	float scaledWidth = frameWidth * 1.4f * scale;
+	float scaledHeight = frameHeight * 1.4f * scale;
+	float centerX = x - xoffset + scaledWidth / 2;
+	float centerY = y - yoffset + scaledHeight / 2;
+	
+	al_draw_scaled_rotated_bitmap(temp,
+		frameWidth/2, frameHeight/2,  
+		centerX, centerY,  
+		scale * 1.4f, scale * 1.4f, 
+		rotation,  
+		0);  
+	
+	al_destroy_bitmap(temp);
+}
+
+// Check if sprite collides with any block
 bool Sprite::CollisionEndBlock()
 {
 	

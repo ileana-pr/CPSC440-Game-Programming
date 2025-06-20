@@ -65,7 +65,7 @@ void Food::StartFood(int WIDTH, int HEIGHT, Food foods[], int numFoods)
             bool validPosition = false;
             int attempts = 0;
             const int MAX_ATTEMPTS = 10;
-            const int BORDER_SIZE = 32;  // size of border tiles
+            const int BORDER_SIZE = 32; 
 
             while(!validPosition && attempts < MAX_ATTEMPTS)
             {
@@ -96,7 +96,7 @@ void Food::UpdateFood()
     }
 }
 
-void Food::CollideFood(float playerX, float playerY, int playerWidth, int playerHeight)
+bool Food::CollideFood(float playerX, float playerY, int playerWidth, int playerHeight)
 {
     if(live)
     {
@@ -107,6 +107,8 @@ void Food::CollideFood(float playerX, float playerY, int playerWidth, int player
         {
             score += 10;
             live = false;
+            return true;  
         }
     }
+    return false;  
 } 

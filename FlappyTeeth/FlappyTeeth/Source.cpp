@@ -1,5 +1,5 @@
-// Name: Ileana Perez 
-// CPSC 340 - Assignment 4
+// name: ileana perez 
+// cpsc 340 - assignment 5
 
 #define _CRT_SECURE_NO_WARNINGS  
 
@@ -8,6 +8,8 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 #include "SpriteSheet.h"
 #include "mappy_A5.h"
 #include <iostream>
@@ -15,35 +17,51 @@
 #include "Spider.h"
 using namespace std;
 
-// global constants for level progression
-const int BASE_NUM_FOODS = 5;  // starting number of food items
-const int BASE_NUM_SPIDERS = 3;  // starting number of spiders
-const float BASE_SCROLL_SPEED = 12.0f;  // starting with level 2 speed (was 4.0f)
-const int MAX_FOODS = BASE_NUM_FOODS;  // max food decreases with level
-const int MAX_SPIDERS = BASE_NUM_SPIDERS * 4;  // allow for 4 levels of doubling
-const float LEVEL_DISPLAY_TIME = 2.0f;  // seconds to show level transition
-const int MAX_HEALTH = 20;  // player can take 20 hits before game over
-const int HEALTH_BAR_WIDTH = 200;  // width of health bar in pixels
-const int HEALTH_BAR_HEIGHT = 20;  // height of health bar in pixels
-
-// forward declarations
 int collided(int x, int y);
 bool endValue(int x, int y);
-void resetLevel(int level, Food foods[], Spider spiders[], int &numFoods, int &numSpiders, float &scrollSpeed);
+void resetLevel(int level, Food foods[], Spider spiders[], int &numFoods, int &numSpiders, float &scrollSpeed, 
+               int baseNumFoods, int baseNumSpiders, float baseScrollSpeed, int maxSpiders);
+void initializeGame(int &numFoods, int &numSpiders, float &scrollSpeed, 
+                   int baseNumFoods, int baseNumSpiders, float baseScrollSpeed);
+void updateHealthBar(ALLEGRO_FONT* font, int health, int maxHealth, int barWidth, int barHeight, int screenHeight);
+void handleDeathAnimation(bool &isDeathSequenceStarted, float &deathAnimationTimer, float &deathRotation, float &deathScale,
+                         float deathDuration, float rotationSpeed, ALLEGRO_SAMPLE* gameOverSound, bool &gameOverSoundPlayed,
+                         bool &showEndMessage);
+void drawGameUI(ALLEGRO_FONT* font, ALLEGRO_FONT* bigFont, int currentLevel, float levelDisplayTimer,
+                int totalScore, int screenWidth, int screenHeight);
 
 int main(void)
 {
-	const int WIDTH = 900;
-	const int HEIGHT = 480;
-	
+	const int GAME_WIDTH = 900;
+	const int GAME_HEIGHT = 480;
+	const int BASE_NUM_FOODS = 5;
+	const int BASE_NUM_SPIDERS = 3;
+	const float BASE_SCROLL_SPEED = 12.0f;
+	const int MAX_FOODS = BASE_NUM_FOODS;
+	const int MAX_SPIDERS = BASE_NUM_SPIDERS * 4;
+	const float LEVEL_DISPLAY_TIME = 2.0f;
+	const int MAX_HEALTH = 20;
+	const int HEALTH_BAR_WIDTH = 200;
+	const int HEALTH_BAR_HEIGHT = 20;
+	const float DEATH_ANIMATION_DURATION = 2.0f;
+	const float DEATH_ROTATION_SPEED = 3.0f;
+
 	int currentLevel = 1;
-	int numFoods = BASE_NUM_FOODS;
-	int numSpiders = BASE_NUM_SPIDERS;
-	float currentScrollSpeed = BASE_SCROLL_SPEED;
-	float scrollX = 0;
-	float levelDisplayTimer = 0;  // timer for level transition display
-	int playerHealth = MAX_HEALTH;  // initialize player health
+	int numFoods, numSpiders;
+	float currentScrollSpeed;
 	
+	initializeGame(numFoods, numSpiders, currentScrollSpeed, 
+				  BASE_NUM_FOODS, BASE_NUM_SPIDERS, BASE_SCROLL_SPEED);
+
+	float scrollX = 0;
+	float levelDisplayTimer = 0;
+	int playerHealth = MAX_HEALTH;
+	bool gameOverSoundPlayed = false;
+	float deathAnimationTimer = 0;
+	float deathRotation = 0;
+	float deathScale = 1.0f;
+	bool isDeathSequenceStarted = false;
+
 	bool keys[] = {false, false, false, false, false};
 	enum KEYS{UP, DOWN, LEFT, RIGHT, SPACE};
 	bool done = false;
@@ -52,20 +70,23 @@ int main(void)
 	float endMessageTimer = 5.0f;
 	Sprite player;
 	
-	// Create arrays with maximum possible size
 	Food foods[MAX_FOODS];  
 	Spider spiders[MAX_SPIDERS];  
 
 	ALLEGRO_FONT* font = NULL;
-	ALLEGRO_FONT* bigFont = NULL;  // larger font for level display
+	ALLEGRO_FONT* bigFont = NULL;
 	ALLEGRO_DISPLAY *display = NULL;
 	ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 	ALLEGRO_TIMER *timer;
-
+	ALLEGRO_SAMPLE *gameOverSound = NULL;
+	ALLEGRO_SAMPLE *spiderMunchSound = NULL;
+	ALLEGRO_SAMPLE *foodSound = NULL;
+	ALLEGRO_AUDIO_STREAM *backgroundMusic = NULL;
+	
 	if(!al_init())										
 		return -1;
 
-	display = al_create_display(WIDTH, HEIGHT);			
+	display = al_create_display(GAME_WIDTH, GAME_HEIGHT);			
 
 	if(!display)										
 		return -1;
@@ -75,22 +96,52 @@ int main(void)
 	al_init_primitives_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();
-
-	event_queue = al_create_event_queue();
+	al_install_audio();
+	al_init_acodec_addon();
 	
+	if (!al_reserve_samples(3)) {
+		return -1;
+	}
+	
+	gameOverSound = al_load_sample("game-over-2-sound-effect-230463.mp3");
+	if (!gameOverSound) {
+		fprintf(stderr, "failed to load game over sound\n");
+	}
+	
+	spiderMunchSound = al_load_sample("spidermunch.mp3");
+	if (!spiderMunchSound) {
+		fprintf(stderr, "failed to load spider munch sound\n");
+	}
+	
+	foodSound = al_load_sample("food.mp3");
+	if (!foodSound) {
+		fprintf(stderr, "failed to load food sound\n");
+	}
+	
+	backgroundMusic = al_load_audio_stream("game-music-loop-7-145285.mp3", 2, 2048);
+	if (!backgroundMusic) {
+		fprintf(stderr, "failed to load background music\n");
+	} else {
+		al_set_audio_stream_playmode(backgroundMusic, ALLEGRO_PLAYMODE_LOOP);
+		al_attach_audio_stream_to_mixer(backgroundMusic, al_get_default_mixer());
+		al_set_audio_stream_gain(backgroundMusic, 0.5f);
+	}
+	
+	event_queue = al_create_event_queue();
 	
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	
 	al_clear_to_color(al_map_rgb(135, 206, 235));
 	al_flip_display();
 	
-	font = al_load_font("GROBOLD.ttf", 24, 0);
-	bigFont = al_load_font("GROBOLD.ttf", 48, 0);  // larger size for level display
+	font = al_load_font("LilitaOne-Regular.ttf", 24, 0);
+	bigFont = al_load_font("LilitaOne-Regular.ttf", 48, 0); 
 	
-	if(!font || !bigFont)
+	if(!font || !bigFont) {
+		fprintf(stderr, "failed to load font\n");
 		return -1;
+	}
 
-	// load sprites
 	ALLEGRO_BITMAP *sprite = al_load_bitmap("1432472502_chips2.png");
 	if(!sprite)
 		return -1;
@@ -99,7 +150,6 @@ int main(void)
 	if(!foodSprite)
 		return -1;
 
-	// initialize sprites
 	al_lock_bitmap(sprite, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
 	ALLEGRO_COLOR color = al_get_pixel(sprite, 0, 0);
 	unsigned char r, g, b;
@@ -110,10 +160,9 @@ int main(void)
 	player.InitSprites(sprite);
 	player.SetSpriteParameters(32, 32, 3, 1, 11, 3);
 	
-	// Initialize first level
-	resetLevel(currentLevel, foods, spiders, numFoods, numSpiders, currentScrollSpeed);
+	resetLevel(currentLevel, foods, spiders, numFoods, numSpiders, currentScrollSpeed,
+			 BASE_NUM_FOODS, BASE_NUM_SPIDERS, BASE_SCROLL_SPEED, MAX_SPIDERS);
 
-	// Initialize sprites
 	for(int i = 0; i < MAX_FOODS; i++) {
 		foods[i].Init(foodSprite);
 	}
@@ -125,15 +174,13 @@ int main(void)
 	if(MapLoad(mapPath, 1))
 		return -1;
 
-	// total map size in pixels
 	const int TOTAL_MAP_WIDTH = mapwidth * mapblockwidth;
 	const int TOTAL_MAP_HEIGHT = mapheight * mapblockheight;
 	
-	if(TOTAL_MAP_WIDTH < WIDTH || TOTAL_MAP_HEIGHT < HEIGHT)
+	if(TOTAL_MAP_WIDTH < GAME_WIDTH || TOTAL_MAP_HEIGHT < GAME_HEIGHT)
 		return -1;
 
-	// near left side
-	player.SetPosition(WIDTH/4, HEIGHT/2);
+	player.SetPosition(GAME_WIDTH/4, GAME_HEIGHT/2);
 
 	int xOff = 0;
 	int yOff = 0;
@@ -159,26 +206,24 @@ int main(void)
 			if(!showEndMessage) {
 				MapUpdateAnims();
 				
-				// check if scrolling would cause collision
+				// check collision
 				float nextScrollX = scrollX + currentScrollSpeed;
 				bool willCollide = collided(player.getX() + (int)nextScrollX, player.getY()) ||
 								 collided(player.getX() + player.getWidth() + (int)nextScrollX, player.getY()) ||
 								 collided(player.getX() + (int)nextScrollX, player.getY() + player.getHeight()) ||
 								 collided(player.getX() + player.getWidth() + (int)nextScrollX, player.getY() + player.getHeight());
 				
-				// only scroll if no collision
-				if (!willCollide) {
+				if (!willCollide && !isDeathSequenceStarted) {
 					scrollX = nextScrollX;
-					if(scrollX >= TOTAL_MAP_WIDTH - WIDTH) {
-						if(currentLevel < 4) {  // max 4 levels
+					if(scrollX >= TOTAL_MAP_WIDTH - GAME_WIDTH) {
+						if(currentLevel < 4) {
 							currentLevel++;
 							scrollX = 0;
-							player.SetPosition(WIDTH/4, player.getY());
+							player.SetPosition(GAME_WIDTH/4, player.getY());
 							
-							// Reset level with new difficulty
-							resetLevel(currentLevel, foods, spiders, numFoods, numSpiders, currentScrollSpeed);
+							resetLevel(currentLevel, foods, spiders, numFoods, numSpiders, currentScrollSpeed,
+									 BASE_NUM_FOODS, BASE_NUM_SPIDERS, BASE_SCROLL_SPEED, MAX_SPIDERS);
 							
-							// Start level display timer
 							levelDisplayTimer = LEVEL_DISPLAY_TIME;
 						} else {
 							showEndMessage = true;
@@ -186,65 +231,80 @@ int main(void)
 					}
 				}
 
-				// handle player movement
-				if(keys[UP] && player.getY() > 0) {
-					player.UpdateSprites(WIDTH, HEIGHT, 0);
-					if(!collided(player.getX() + xOff, player.getY() - 4) && 
-					   !collided(player.getX() + player.getWidth() + xOff, player.getY() - 4))
-						player.SetPosition(player.getX(), player.getY() - 4);
-				}
-				else if(keys[DOWN] && player.getY() < HEIGHT - player.getHeight()) {
-					player.UpdateSprites(WIDTH, HEIGHT, 1);
-					if(!collided(player.getX() + xOff, player.getY() + player.getHeight() + 4) &&
-					   !collided(player.getX() + player.getWidth() + xOff, player.getY() + player.getHeight() + 4))
-						player.SetPosition(player.getX(), player.getY() + 4);
-				}
-				
-				float currentY = player.getY();  
-				const int LEFT_BOUNDARY = 0;
-				const int RIGHT_BOUNDARY = WIDTH / 3;  // restrict to left third
-
-				if(keys[LEFT] && player.getX() > LEFT_BOUNDARY) {
-					player.UpdateSprites(WIDTH, HEIGHT, 0);  
-					if(!collided(player.getX() - 4 + xOff, currentY) &&
-					   !collided(player.getX() - 4 + xOff, currentY + player.getHeight())) {
-						player.SetPosition(player.getX() - 4, currentY);  
+				// handle movement - only if not dying
+				if (!isDeathSequenceStarted) {
+					if(keys[UP] && player.getY() > 0) {
+						player.UpdateSprites(GAME_WIDTH, GAME_HEIGHT, 0);
+						if(!collided(player.getX() + xOff, player.getY() - 4) && 
+						   !collided(player.getX() + player.getWidth() + xOff, player.getY() - 4))
+							player.SetPosition(player.getX(), player.getY() - 4);
 					}
-				}
-				else if(keys[RIGHT] && player.getX() < RIGHT_BOUNDARY - player.getWidth()) {
-					player.UpdateSprites(WIDTH, HEIGHT, 1);  
-					if(!collided(player.getX() + player.getWidth() + 4 + xOff, currentY) &&
-					   !collided(player.getX() + player.getWidth() + 4 + xOff, currentY + player.getHeight())) {
-						player.SetPosition(player.getX() + 4, currentY); 
+					else if(keys[DOWN] && player.getY() < GAME_HEIGHT - player.getHeight()) {
+						player.UpdateSprites(GAME_WIDTH, GAME_HEIGHT, 1);
+						if(!collided(player.getX() + xOff, player.getY() + player.getHeight() + 4) &&
+						   !collided(player.getX() + player.getWidth() + xOff, player.getY() + player.getHeight() + 4))
+							player.SetPosition(player.getX(), player.getY() + 4);
+					}
+					
+					float currentY = player.getY();  
+					const int LEFT_BOUNDARY = 0;
+					const int RIGHT_BOUNDARY = GAME_WIDTH / 3;
+
+					if(keys[LEFT] && player.getX() > LEFT_BOUNDARY) {
+						player.UpdateSprites(GAME_WIDTH, GAME_HEIGHT, 0);  
+						if(!collided(player.getX() - 4 + xOff, currentY) &&
+						   !collided(player.getX() - 4 + xOff, currentY + player.getHeight())) {
+							player.SetPosition(player.getX() - 4, currentY);  
+						}
+					}
+					else if(keys[RIGHT] && player.getX() < RIGHT_BOUNDARY - player.getWidth()) {
+						player.UpdateSprites(GAME_WIDTH, GAME_HEIGHT, 1);  
+						if(!collided(player.getX() + player.getWidth() + 4 + xOff, currentY) &&
+						   !collided(player.getX() + player.getWidth() + 4 + xOff, currentY + player.getHeight())) {
+							player.SetPosition(player.getX() + 4, currentY); 
+						}
 					}
 				}
 
 				xOff = (int)scrollX;
 				yOff = 0;
 
-				// update all active food items
-				for(int i = 0; i < numFoods; i++) {
-					foods[i].StartFood(WIDTH, HEIGHT, foods, numFoods);
-					foods[i].UpdateFood();
-					foods[i].CollideFood(player.getX(), player.getY(), player.getWidth(), player.getHeight());
-				}
+				// update food and spiders only if not dying
+				if (!isDeathSequenceStarted) {
+					// update food
+					for(int i = 0; i < numFoods; i++) {
+						foods[i].StartFood(GAME_WIDTH, GAME_HEIGHT, foods, numFoods);
+						foods[i].UpdateFood();
+						if(foods[i].CollideFood(player.getX(), player.getY(), player.getWidth(), player.getHeight())) {
+							if (foodSound) {
+								al_play_sample(foodSound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+							}
+						}
+					}
 
-				// update all active spiders
-				for(int i = 0; i < numSpiders; i++) {
-					spiders[i].StartSpider(WIDTH, HEIGHT, foods, numFoods, spiders, numSpiders);
-					spiders[i].UpdateSpider();
-					if(spiders[i].CollideSpider(player.getX(), player.getY(), player.getWidth(), player.getHeight())) {
-						playerHealth--;  // reduce health on spider collision
-						if(playerHealth <= 0) {
-							showEndMessage = true;  // trigger game over
+					// update spiders
+					for(int i = 0; i < numSpiders; i++) {
+						spiders[i].StartSpider(GAME_WIDTH, GAME_HEIGHT, foods, numFoods, spiders, numSpiders);
+						spiders[i].UpdateSpider();
+						if(spiders[i].CollideSpider(player.getX(), player.getY(), player.getWidth(), player.getHeight())) {
+							playerHealth--;
+							if (spiderMunchSound) {
+								al_play_sample(spiderMunchSound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+							}
 						}
 					}
 				}
 
 				if(levelDisplayTimer > 0) {
-					levelDisplayTimer -= 1.0f/60.0f;  // decrease timer (assuming 60 FPS)
+					levelDisplayTimer -= 1.0f/60.0f;
 				}
 
+				// handle death animation and sound
+				if(playerHealth <= 0) {
+					handleDeathAnimation(isDeathSequenceStarted, deathAnimationTimer, deathRotation, deathScale,
+									  DEATH_ANIMATION_DURATION, DEATH_ROTATION_SPEED, 
+									  gameOverSound, gameOverSoundPlayed, showEndMessage);
+				}
 			} else {
 				endMessageTimer -= 1.0f/60.0f;
 				if(endMessageTimer <= 0)
@@ -300,68 +360,71 @@ int main(void)
 			render = false;
 			al_clear_to_color(al_map_rgb(135, 206, 235));
 
-			MapDrawBG(xOff, yOff, 0, 0, WIDTH, HEIGHT);
-			MapDrawFG(xOff, yOff, 0, 0, WIDTH, HEIGHT, 0);
+			MapDrawBG(xOff, yOff, 0, 0, GAME_WIDTH, GAME_HEIGHT);
+			MapDrawFG(xOff, yOff, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0);
 			
-			// draw all active food items
+			// draw food
 			for(int i = 0; i < numFoods; i++) {
 				foods[i].DrawFood();
 			}
-			// draw all active spiders
+			// draw spiders
 			for(int i = 0; i < numSpiders; i++) {
 				spiders[i].DrawSpider();
 			}
-			player.DrawSprites(0, 0);
+			
+			// draw player with death animation
+			if (isDeathSequenceStarted && deathAnimationTimer > 0) {
+				player.DrawSpritesWithTransform(0, 0, deathRotation, deathScale);
+			} else if (!showEndMessage) {
+				player.DrawSprites(0, 0);
+			}
 
-			// draw UI
+			// draw ui
 			char levelText[32];
 			sprintf(levelText, "Level %d", currentLevel);
 			al_draw_text(font, al_map_rgb(255, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, levelText);
 
-			// Big level transition display (center screen)
+			// level transition display
 			if(levelDisplayTimer > 0) {
 				sprintf(levelText, "Level %d", currentLevel);
-				al_draw_text(bigFont, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 - 24, 
+				al_draw_text(bigFont, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2 - 24, 
 					ALLEGRO_ALIGN_CENTRE, levelText);
 			}
 
-			// calculate total score from all food items
+			// calculate score
 			int totalScore = 0;
 			for(int i = 0; i < numFoods; i++) {
 				totalScore += foods[i].getScore();
 			}
 			char scoreText[32];
 			sprintf(scoreText, "Score: %d", totalScore);
-			al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
+			al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
 
 			// draw health bar
 			int healthBarX = 10;
-			int healthBarY = HEIGHT - 30;  // 30 pixels from bottom
+			int healthBarY = GAME_HEIGHT - 30;
 			
-			// draw health bar background (red)
 			al_draw_filled_rectangle(healthBarX, healthBarY, 
 				healthBarX + HEALTH_BAR_WIDTH, healthBarY + HEALTH_BAR_HEIGHT, 
 				al_map_rgb(255, 0, 0));
 			
-			// draw current health (green)
 			float healthPercentage = (float)playerHealth / MAX_HEALTH;
 			al_draw_filled_rectangle(healthBarX, healthBarY,
 				healthBarX + (HEALTH_BAR_WIDTH * healthPercentage), 
 				healthBarY + HEALTH_BAR_HEIGHT,
 				al_map_rgb(0, 255, 0));
 			
-			// draw health text
 			char healthText[32];
 			sprintf(healthText, "Health: %d/%d", playerHealth, MAX_HEALTH);
 			al_draw_text(font, al_map_rgb(255, 0, 0), healthBarX + HEALTH_BAR_WIDTH + 10,
 				healthBarY, ALLEGRO_ALIGN_LEFT, healthText);
 
 			if(showEndMessage) {
-				al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2, 
+				al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2, 
 					ALLEGRO_ALIGN_CENTRE, "Game Over!");
 				char finalScoreText[64];
 				sprintf(finalScoreText, "Final Score: %d", totalScore);
-				al_draw_text(font, al_map_rgb(255, 0, 0), WIDTH/2, HEIGHT/2 + 40, 
+				al_draw_text(font, al_map_rgb(255, 0, 0), GAME_WIDTH/2, GAME_HEIGHT/2 + 40, 
 					ALLEGRO_ALIGN_CENTRE, finalScoreText);
 			}
 
@@ -377,51 +440,120 @@ int main(void)
 	al_destroy_timer(timer);
 	al_destroy_bitmap(sprite);
 	al_destroy_bitmap(foodSprite);
+	if (gameOverSound) al_destroy_sample(gameOverSound);
+	if (spiderMunchSound) al_destroy_sample(spiderMunchSound);
+	if (foodSound) al_destroy_sample(foodSound);
+	if (backgroundMusic) {
+		al_set_audio_stream_playing(backgroundMusic, false);
+		al_destroy_audio_stream(backgroundMusic);
+	}
 
 	return 0;
 }
 
-// collision detection for teeth vs obstacles/candies
+void initializeGame(int &numFoods, int &numSpiders, float &scrollSpeed, 
+				   int baseNumFoods, int baseNumSpiders, float baseScrollSpeed) {
+	numFoods = baseNumFoods;
+	numSpiders = baseNumSpiders;
+	scrollSpeed = baseScrollSpeed;
+}
+
+void resetLevel(int level, Food foods[], Spider spiders[], int &numFoods, int &numSpiders, float &scrollSpeed,
+			   int baseNumFoods, int baseNumSpiders, float baseScrollSpeed, int maxSpiders) {
+	numFoods = baseNumFoods / level;
+	if(numFoods < 1) numFoods = 1;
+	
+	numSpiders = baseNumSpiders * (1 << (level - 1));
+	if(numSpiders > maxSpiders) numSpiders = maxSpiders;
+	
+	scrollSpeed = baseScrollSpeed * (level / 2.0f);
+	
+	for(int i = 0; i < numFoods; i++) {
+		foods[i].SetSpeed(scrollSpeed);
+	}
+	
+	for(int i = 0; i < numSpiders; i++) {
+		spiders[i].SetSpeed(scrollSpeed + 1.0f);
+	}
+}
+
+void handleDeathAnimation(bool &isDeathSequenceStarted, float &deathAnimationTimer, float &deathRotation, float &deathScale,
+						 float deathDuration, float rotationSpeed, ALLEGRO_SAMPLE* gameOverSound, bool &gameOverSoundPlayed,
+						 bool &showEndMessage) {
+	if (!isDeathSequenceStarted) {
+		isDeathSequenceStarted = true;
+		deathAnimationTimer = deathDuration;
+		if (gameOverSound && !gameOverSoundPlayed) {
+			al_play_sample(gameOverSound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+			gameOverSoundPlayed = true;
+		}
+	}
+	
+	if (deathAnimationTimer > 0) {
+		deathAnimationTimer -= 1.0f/60.0f;
+		deathRotation += rotationSpeed * ALLEGRO_PI * 2 / 60.0f;
+		deathScale = deathAnimationTimer / deathDuration;
+		
+		if (deathAnimationTimer <= 0) {
+			showEndMessage = true;
+		}
+	}
+}
+
+void updateHealthBar(ALLEGRO_FONT* font, int health, int maxHealth, int barWidth, int barHeight, int screenHeight) {
+	int healthBarX = 10;
+	int healthBarY = screenHeight - 30;
+	
+	al_draw_filled_rectangle(healthBarX, healthBarY, 
+		healthBarX + barWidth, healthBarY + barHeight, 
+		al_map_rgb(255, 0, 0));
+	
+	float healthPercentage = (float)health / maxHealth;
+	al_draw_filled_rectangle(healthBarX, healthBarY,
+		healthBarX + (barWidth * healthPercentage), 
+		healthBarY + barHeight,
+		al_map_rgb(0, 255, 0));
+	
+	char healthText[32];
+	sprintf(healthText, "Health: %d/%d", health, maxHealth);
+	al_draw_text(font, al_map_rgb(255, 0, 0), healthBarX + barWidth + 10,
+		healthBarY, ALLEGRO_ALIGN_LEFT, healthText);
+}
+
+void drawGameUI(ALLEGRO_FONT* font, ALLEGRO_FONT* bigFont, int currentLevel, float levelDisplayTimer,
+				int totalScore, int screenWidth, int screenHeight) {
+	// draw level
+	char levelText[32];
+	sprintf(levelText, "Level %d", currentLevel);
+	al_draw_text(font, al_map_rgb(255, 0, 0), 10, 10, ALLEGRO_ALIGN_LEFT, levelText);
+
+	// level transition display
+	if(levelDisplayTimer > 0) {
+		al_draw_text(bigFont, al_map_rgb(255, 0, 0), screenWidth/2, screenHeight/2 - 24, 
+			ALLEGRO_ALIGN_CENTRE, levelText);
+	}
+
+	// draw score
+	char scoreText[32];
+	sprintf(scoreText, "Score: %d", totalScore);
+	al_draw_text(font, al_map_rgb(255, 0, 0), screenWidth - 10, 10, ALLEGRO_ALIGN_RIGHT, scoreText);
+}
+
+// collision detection
 int collided(int x, int y)
 {
 	BLKSTR *blockdata;
 	blockdata = MapGetBlock(x/mapblockwidth, y/mapblockheight);
 	if (!blockdata) return 0;
 	
-	// check if any corner has collision enabled
 	return (blockdata->tl || blockdata->tr || blockdata->bl || blockdata->br);
 }
 
-// check for end of level condition
+// check for end of level
 bool endValue(int x, int y)
 {
 	BLKSTR* data;
 	data = MapGetBlock(x/mapblockwidth, y/mapblockheight);
 	if (!data) return false;
 	return data->user1 == 9;  
-}
-
-void resetLevel(int level, Food foods[], Spider spiders[], int &numFoods, int &numSpiders, float &scrollSpeed) {
-	// Calculate new quantities
-	numFoods = BASE_NUM_FOODS / level;
-	if(numFoods < 1) numFoods = 1;  // ensure at least 1 food
-	
-	numSpiders = BASE_NUM_SPIDERS * (1 << (level - 1));  // double spiders each level
-	if(numSpiders > MAX_SPIDERS) numSpiders = MAX_SPIDERS;
-	
-	scrollSpeed = BASE_SCROLL_SPEED * (level / 2.0f);  // adjusted formula to account for higher base speed
-	
-	// Reset all food items
-	for(int i = 0; i < MAX_FOODS; i++) {
-		if(i < numFoods) {
-			foods[i].SetSpeed(scrollSpeed);
-		}
-	}
-	
-	// Reset all spiders
-	for(int i = 0; i < MAX_SPIDERS; i++) {
-		if(i < numSpiders) {
-			spiders[i].SetSpeed(scrollSpeed + 1.0f);
-		}
-	}
 }

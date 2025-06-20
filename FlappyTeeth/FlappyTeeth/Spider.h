@@ -28,7 +28,7 @@ private:
     int boundx;
     int boundy;
     ALLEGRO_BITMAP* image;
-    int type;  // which spider sprite to use from row 8
+    int type; 
 
     bool CheckCollision(Food foods[], int numFoods, Spider spiders[], int numSpiders, float newX, float newY);
 }; 

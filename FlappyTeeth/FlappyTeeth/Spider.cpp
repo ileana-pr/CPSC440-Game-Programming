@@ -13,7 +13,6 @@ Spider::Spider()
 
 Spider::~Spider()
 {
-    // image is destroyed in main
 }
 
 void Spider::Init(ALLEGRO_BITMAP* spriteSheet)
@@ -82,7 +81,7 @@ void Spider::StartSpider(int WIDTH, int HEIGHT, Food foods[], int numFoods, Spid
             bool validPosition = false;
             int attempts = 0;
             const int MAX_ATTEMPTS = 10;
-            const int BORDER_SIZE = 32;  // size of border tiles
+            const int BORDER_SIZE = 32;  
 
             while(!validPosition && attempts < MAX_ATTEMPTS)
             {
@@ -123,8 +122,8 @@ bool Spider::CollideSpider(float playerX, float playerY, int playerWidth, int pl
            y + boundy > playerY)
         {
             live = false;
-            return true;  // collision occurred
+            return true;  
         }
     }
-    return false;  // no collision
+    return false;  
 } 

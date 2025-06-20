@@ -18,6 +18,7 @@ public:
 	bool InitSprites(ALLEGRO_BITMAP *image);
 	void UpdateSprites(int width, int height, int dir);
 	void DrawSprites(int xoffset, int yoffset);
+	void DrawSpritesWithTransform(int xoffset, int yoffset, float rotation, float scale);
 	void SetPosition(int newX, int newY);
 	bool CollisionEndBlock();
 	float getX() {return x;}
